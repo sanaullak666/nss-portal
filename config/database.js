@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const pool = mysql.createPool({
+const dbConfig = {
   host: process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
   port: parseInt(process.env.DB_PORT, 10) || 4000,
   user: process.env.DB_USER || '31C3t8dhjKFJoEL.root',
@@ -16,6 +16,8 @@ const pool = mysql.createPool({
     minVersion: 'TLSv1.2',
     rejectUnauthorized: false
   }
-});
+};
+
+const pool = mysql.createPool(dbConfig);
 
 module.exports = pool;

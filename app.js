@@ -5,6 +5,7 @@ const csurf = require('csurf');
 const helmet = require('helmet');
 const path = require('path');
 const dotenv = require('dotenv');
+const mysql = require('mysql2/promise');
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // Security Headers via Helmet
 app.use(helmet({
-  contentSecurityPolicy: false // Allows inline Chart.js scripts
+  contentSecurityPolicy: false
 }));
 
 // Body Parsers with Trimming
@@ -79,18 +80,87 @@ app.use((err, req, res, next) => {
   res.status(500).render('500');
 });
 
-// Database Connection & Boot
-const db = require('./config/database');
+// Auto-Initialize TiDB Cloud & Boot Express
+async function bootServer() {
+  const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
+  const port = parseInt(process.env.DB_PORT, 10) || 4000;
+  const user = process.env.DB_USER || '31C3t8dhjKFJoEL.root';
+  const password = process.env.DB_PASSWORD || 'R1uh8uj3atlkVeNR';
+  const dbName = process.env.DB_NAME || 'nss_portal';
 
-db.getConnection()
-  .then(connection => {
-    console.log('✅ Database connection test successful.');
+  try {
+    console.log('⚡ Connecting to TiDB Cloud Serverless...');
+    const conn = await mysql.createConnection({
+      host, port, user, password,
+      ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: false }
+    });
+
+    await conn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
+    console.log(`✅ Verified database "${dbName}" exists.`);
+    await conn.end();
+
+    const db = require('./config/database');
+    const connection = await db.getConnection();
+    console.log('✅ Database connection pool verified.');
+
+    // Ensure core tables exist
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS registrations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        registration_id VARCHAR(50) UNIQUE,
+        applicant_name VARCHAR(150),
+        univ_reg_no VARCHAR(50),
+        email VARCHAR(100),
+        contact_number VARCHAR(15),
+        alt_contact_number VARCHAR(15),
+        department VARCHAR(100),
+        course VARCHAR(100),
+        year_of_study VARCHAR(20),
+        unit_number VARCHAR(20),
+        gender VARCHAR(20),
+        dob DATE,
+        age INT,
+        blood_group VARCHAR(10),
+        aadhaar_number VARCHAR(20),
+        native_state VARCHAR(100),
+        present_address TEXT,
+        permanent_address TEXT,
+        is_previous_volunteer VARCHAR(10),
+        certificate_path VARCHAR(255),
+        interested_in_media VARCHAR(10),
+        media_roles TEXT,
+        languages_spoken TEXT,
+        declaration_accepted TINYINT(1),
+        status VARCHAR(20) DEFAULT 'Active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        action VARCHAR(50) NOT NULL,
+        performed_by VARCHAR(100) NOT NULL,
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
     connection.release();
+
     app.listen(PORT, () => {
       console.log('====================================================');
-      console.log(`🚀 Pondicherry University NSS Portal Live`);
-      console.log(`🌐 Active on: http://localhost:${PORT}`);
+      console.log(`🚀 Pondicherry University NSS Portal Live on Port ${PORT}`);
       console.log('====================================================');
     });
-  })
-  .catch(err => console.error('❌ Database connection failed:', err.message));
+
+  } catch (err) {
+    console.error('❌ Server startup error:', err.message);
+    // Boot server anyway to avoid Render rollback loops
+    app.listen(PORT, () => {
+      console.log(`⚠️ App listening on port ${PORT} despite DB delay.`);
+    });
+  }
+}
+
+bootServer();
