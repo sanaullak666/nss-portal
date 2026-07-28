@@ -53,15 +53,6 @@ app.use(session({
   }
 }));
 
-// CSRF Protection Middleware Generator
-const csrfProtection = csurf({ 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
-  }
-});
-
 // Static Folders
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -69,12 +60,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Pass csrfProtection generator to routes
-app.use((req, res, next) => {
-  req.csrfProtection = csrfProtection;
-  next();
-});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -92,15 +77,14 @@ app.use((req, res) => {
 
 // 500 Error Handler
 app.use((err, req, res, next) => {
+  console.error('SERVER ERROR LOG:', err);
   if (err.code === 'EBADCSRFTOKEN') {
-    console.error('CSRF Token Error on URL:', req.originalUrl);
-    return res.status(403).send('Invalid or expired CSRF token. Please refresh the page and try submitting again.');
+    return res.status(403).send('Invalid or expired CSRF token. Please refresh and try again.');
   }
-  console.error('Unhandled Server Error:', err);
   res.status(500).render('500');
 });
 
-// Boot logic
+// Auto-Initialize TiDB Cloud Schema & Boot
 async function bootServer() {
   const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
   const port = parseInt(process.env.DB_PORT, 10) || 4000;
@@ -141,16 +125,27 @@ async function bootServer() {
         native_state VARCHAR(100),
         present_address TEXT,
         permanent_address TEXT,
+        languages_spoken TEXT,
+        media_roles TEXT,
         is_previous_volunteer VARCHAR(10),
         certificate_path VARCHAR(255),
-        interested_in_media VARCHAR(10),
-        media_roles TEXT,
-        languages_spoken TEXT,
         declaration_accepted TINYINT(1),
         status VARCHAR(20) DEFAULT 'Active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+
+    // Dynamically add missing columns if table existed prior
+    const safeAddColumn = async (col, type) => {
+      try {
+        await connection.query(`ALTER TABLE registrations ADD COLUMN ${col} ${type};`);
+      } catch (e) {
+        // Ignore duplicate column error
+      }
+    };
+
+    await safeAddColumn('languages_spoken', 'TEXT');
+    await safeAddColumn('media_roles', 'TEXT');
 
     connection.release();
 

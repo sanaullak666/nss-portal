@@ -26,22 +26,21 @@
         </div>
       <% } %>
 
-      <!-- 1. Single <form> element containing all fields and closing after submit button -->
+      <!-- 1. Single <form> opening tag encompassing ALL form sections -->
       <form id="registrationForm" action="/register?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 18px; color: var(--color-navy);">Personal Information</h3>
+        <!-- SECTION: Personal Details -->
+        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 18px; color: var(--color-navy);">Personal Details</h3>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
           <div class="form-group">
             <label class="form-label">Full Name *</label>
             <input type="text" name="applicant_name" class="form-control" placeholder="Full name" required value="<%= typeof formData !== 'undefined' && formData.applicant_name ? formData.applicant_name : '' %>">
           </div>
-
-          <!-- 8. Registration/Application Number with client-side pattern validation -->
           <div class="form-group">
             <label class="form-label">University Reg No. *</label>
-            <input type="text" name="univ_reg_no" class="form-control" placeholder="e.g. 23352001" required pattern="[A-Za-z0-9]{5,20}" title="Enter a valid University Registration Number (5-20 alphanumeric characters)" value="<%= typeof formData !== 'undefined' && formData.univ_reg_no ? formData.univ_reg_no : '' %>">
+            <input type="text" name="univ_reg_no" class="form-control" placeholder="e.g. 23352001" required pattern="[A-Za-z0-9]{5,20}" title="Enter a valid University Registration Number" value="<%= typeof formData !== 'undefined' && formData.univ_reg_no ? formData.univ_reg_no : '' %>">
           </div>
         </div>
 
@@ -51,18 +50,18 @@
             <input type="email" name="email" class="form-control" placeholder="Email" required value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
           </div>
 
-          <!-- 7. Contact Number Validation -->
+          <!-- 5. Contact Number Validation -->
           <div class="form-group">
             <label class="form-label">Contact Number *</label>
-            <input type="tel" name="contact_number" class="form-control" placeholder="10-digit mobile number" required inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9" value="<%= typeof formData !== 'undefined' && formData.contact_number ? formData.contact_number : '' %>">
+            <input type="tel" name="contact_number" class="form-control" placeholder="10-digit mobile number" required inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9" value="<%= typeof formData !== 'undefined' && formData.contact_number ? formData.contact_number : '' %>">
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-          <!-- 7. Alternative Contact Number Validation -->
+          <!-- 5. Alternative Contact Number Validation -->
           <div class="form-group">
             <label class="form-label">Alternate Contact Number</label>
-            <input type="tel" name="alt_contact_number" class="form-control" placeholder="10-digit mobile number" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9" value="<%= typeof formData !== 'undefined' && formData.alt_contact_number ? formData.alt_contact_number : '' %>">
+            <input type="tel" name="alt_contact_number" class="form-control" placeholder="10-digit mobile number" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9" value="<%= typeof formData !== 'undefined' && formData.alt_contact_number ? formData.alt_contact_number : '' %>">
           </div>
           <div class="form-group">
             <label class="form-label">Gender *</label>
@@ -101,7 +100,7 @@
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-          <!-- 6. Aadhaar Validation -->
+          <!-- 5. Aadhaar Number Validation -->
           <div class="form-group">
             <label class="form-label">Aadhaar Number *</label>
             <input type="text" name="aadhaar_number" class="form-control" placeholder="12-digit Aadhaar Number" required inputmode="numeric" pattern="[0-9]{12}" maxlength="12" autocomplete="off" title="Aadhaar number must contain exactly 12 numeric digits" value="<%= typeof formData !== 'undefined' && formData.aadhaar_number ? formData.aadhaar_number : '' %>">
@@ -112,10 +111,10 @@
           </div>
         </div>
 
-        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">Academic Information</h3>
+        <!-- SECTION: Academic Details -->
+        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">Academic Details</h3>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-          <!-- Department Selection -->
           <div class="form-group">
             <label class="form-label">Department *</label>
             <select name="department" id="department" class="form-control" required>
@@ -154,7 +153,7 @@
             </select>
           </div>
 
-          <!-- 2. Submit NSS Unit Number (Read-only Display + Hidden Input) -->
+          <!-- 2. NSS Unit Number (Read-only Display Field + Hidden Input) -->
           <div class="form-group">
             <label class="form-label">NSS Unit Number *</label>
             <input type="text" id="unit_number_display" class="form-control" placeholder="Assigned Unit" readonly style="background-color: #e9ecef; cursor: not-allowed;" value="<%= typeof formData !== 'undefined' && formData.unit_number ? formData.unit_number : '' %>">
@@ -162,7 +161,8 @@
           </div>
         </div>
 
-        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">Address, Languages & Media Roles</h3>
+        <!-- SECTION: Address Details -->
+        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">Address Details</h3>
 
         <div class="form-group" style="margin-bottom: 15px;">
           <label class="form-label">Present Address *</label>
@@ -174,11 +174,12 @@
           <textarea name="permanent_address" class="form-control" rows="2" required><%= typeof formData !== 'undefined' && formData.permanent_address ? formData.permanent_address : '' %></textarea>
         </div>
 
-        <!-- 4. Language Checkboxes using array notation languages_spoken[] -->
+        <!-- SECTION: Language Proficiency -->
+        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">Language Proficiency</h3>
         <div class="form-group" style="margin-bottom: 15px;">
-          <label class="form-label">Languages Spoken</label>
           <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 5px;">
             <% const currentLangs = typeof formData !== 'undefined' && formData.languages_spoken ? (Array.isArray(formData.languages_spoken) ? formData.languages_spoken : formData.languages_spoken.split(',')) : []; %>
+            <!-- 4. languages_spoken[] array notation -->
             <label style="font-weight: normal;"><input type="checkbox" name="languages_spoken[]" value="English" <%= currentLangs.includes('English') ? 'checked' : '' %>> English</label>
             <label style="font-weight: normal;"><input type="checkbox" name="languages_spoken[]" value="Tamil" <%= currentLangs.includes('Tamil') ? 'checked' : '' %>> Tamil</label>
             <label style="font-weight: normal;"><input type="checkbox" name="languages_spoken[]" value="Hindi" <%= currentLangs.includes('Hindi') ? 'checked' : '' %>> Hindi</label>
@@ -188,18 +189,8 @@
           </div>
         </div>
 
-        <!-- 5. Media Role Checkboxes using array notation media_roles[] -->
-        <div class="form-group" style="margin-bottom: 15px;">
-          <label class="form-label">Interested in Media / PR Roles?</label>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px;">
-            <% const currentRoles = typeof formData !== 'undefined' && formData.media_roles ? (Array.isArray(formData.media_roles) ? formData.media_roles : formData.media_roles.split(',')) : []; %>
-            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Photography" <%= currentRoles.includes('Photography') ? 'checked' : '' %>> Photography</label>
-            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Videography / Editing" <%= currentRoles.includes('Videography / Editing') ? 'checked' : '' %>> Videography / Editing</label>
-            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Content Writing" <%= currentRoles.includes('Content Writing') ? 'checked' : '' %>> Content Writing</label>
-            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Graphic Design" <%= currentRoles.includes('Graphic Design') ? 'checked' : '' %>> Graphic Design</label>
-            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Social Media Handler" <%= currentRoles.includes('Social Media Handler') ? 'checked' : '' %>> Social Media Handler</label>
-          </div>
-        </div>
+        <!-- SECTION: NSS Information & Media Team -->
+        <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 25px; margin-bottom: 18px; color: var(--color-navy);">NSS Information & Media Team</h3>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
           <div class="form-group">
@@ -210,7 +201,7 @@
             </select>
           </div>
 
-          <!-- 3. Certificate Upload (PDF, JPG, JPEG, PNG - Max 250 KB) -->
+          <!-- 3. Certificate Upload (PDF, JPG, JPEG, PNG | Max 250 KB) -->
           <div class="form-group">
             <label class="form-label">Upload Certificate / ID (PDF, JPG, JPEG, PNG - Max 250 KB)</label>
             <input type="file" id="certificate" name="certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
@@ -218,6 +209,20 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Interested in Media / PR Roles?</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px;">
+            <% const currentRoles = typeof formData !== 'undefined' && formData.media_roles ? (Array.isArray(formData.media_roles) ? formData.media_roles : formData.media_roles.split(',')) : []; %>
+            <!-- 4. media_roles[] array notation -->
+            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Photography" <%= currentRoles.includes('Photography') ? 'checked' : '' %>> Photography</label>
+            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Videography / Editing" <%= currentRoles.includes('Videography / Editing') ? 'checked' : '' %>> Videography / Editing</label>
+            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Content Writing" <%= currentRoles.includes('Content Writing') ? 'checked' : '' %>> Content Writing</label>
+            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Graphic Design" <%= currentRoles.includes('Graphic Design') ? 'checked' : '' %>> Graphic Design</label>
+            <label style="font-weight: normal;"><input type="checkbox" name="media_roles[]" value="Social Media Handler" <%= currentRoles.includes('Social Media Handler') ? 'checked' : '' %>> Social Media Handler</label>
+          </div>
+        </div>
+
+        <!-- SECTION: Declaration & Submit -->
         <div class="form-group" style="margin-bottom: 25px;">
           <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer;">
             <input type="checkbox" name="declaration_accepted" value="1" required>
@@ -226,7 +231,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1.05rem; justify-content: center;">Submit Registration</button>
-      </form> <!-- Closing </form> tag encompasses ALL form inputs -->
+      </form> <!-- 1. Moving closing </form> tag after submit buttons -->
     </div>
   </main>
 
@@ -238,8 +243,9 @@
       const certInput = document.getElementById('certificate');
       const fileError = document.getElementById('file-error');
 
-      // 2. Dynamic NSS Unit Number Sync (Display + Hidden Input)
+      // 2. NSS Unit Number Dynamic Sync
       function updateUnitNumber() {
+        if (!deptSelect) return;
         const selectedOption = deptSelect.options[deptSelect.selectedIndex];
         const unit = selectedOption ? selectedOption.getAttribute('data-unit') : '';
         if (unit) {
@@ -250,16 +256,16 @@
 
       if (deptSelect) {
         deptSelect.addEventListener('change', updateUnitNumber);
-        updateUnitNumber(); // Run on load
+        updateUnitNumber(); // Sync on load
       }
 
-      // 3. Client-side File Size Validation (Max 250 KB)
+      // 3. 250 KB File Size Guard
       if (certInput) {
         certInput.addEventListener('change', function() {
           const file = this.files[0];
-          if (file && file.size > 250 * 1024) { // 250 KB in bytes
+          if (file && file.size > 250 * 1024) {
             fileError.style.display = 'block';
-            this.value = ''; // Reset file input
+            this.value = '';
           } else {
             fileError.style.display = 'none';
           }

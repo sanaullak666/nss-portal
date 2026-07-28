@@ -42,7 +42,7 @@ const storage = multer.diskStorage({
   }
 });
 
-// 3. Allowed formats: PDF, JPG, JPEG, PNG | Max size: 250 KB
+// 3. Allowed Formats: PDF, JPG, JPEG, PNG | Max Size: 250 KB
 const upload = multer({ 
   storage: storage,
   limits: { fileSize: 250 * 1024 }, // 250 KB limit
@@ -79,7 +79,7 @@ router.post('/register', (req, res, next) => {
         csrfToken: req.csrfToken ? req.csrfToken() : '',
         constants: constants,
         formData: req.body || {},
-        error: err.message || 'File upload error. Ensure file size is within 250 KB and format is PDF, JPG, JPEG, or PNG.',
+        error: err.message || 'File upload failed. Ensure file size is within 250 KB (PDF, JPG, JPEG, PNG).',
         errors: [],
         success: null
       });
@@ -99,7 +99,7 @@ router.post('/register', (req, res, next) => {
       languages_spoken, media_roles, is_previous_volunteer, declaration_accepted
     } = req.body;
 
-    // 4 & 5. Process languages_spoken[] and media_roles[] arrays into strings
+    // 4. Convert languages_spoken[] and media_roles[] arrays to strings for database storage
     const langsString = Array.isArray(languages_spoken) ? languages_spoken.join(', ') : (languages_spoken || '');
     const rolesString = Array.isArray(media_roles) ? media_roles.join(', ') : (media_roles || '');
 
@@ -115,8 +115,9 @@ router.post('/register', (req, res, next) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
+    // 2. unit_number is submitted and inserted into the database
     await db.query(query, [
-      regId, applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
+      regId, applicant_name, univ_reg_no, email, contact_number, alt_contact_number || null,
       department, course, year_of_study, unit_number, gender, dob, age,
       blood_group, aadhaar_number, native_state, present_address, permanent_address,
       langsString, rolesString, is_previous_volunteer, certPath, declaration_accepted ? 1 : 0
@@ -139,14 +140,14 @@ router.post('/register', (req, res, next) => {
     });
 
   } catch (err) {
-    console.error('Registration Error:', err.message);
+    console.error('Registration Database Insert Error:', err);
     res.render('index', {
       title: 'Pondicherry University NSS Volunteer Registration 2026',
       csrfToken: req.csrfToken(),
       constants: constants,
       formData: req.body || {},
-      error: 'An error occurred during registration. Please check your inputs and try again.',
-      errors: [{ msg: 'An error occurred during registration.' }],
+      error: 'Registration failed due to invalid data input. Please check all fields and try again.',
+      errors: [],
       success: null
     });
   }
