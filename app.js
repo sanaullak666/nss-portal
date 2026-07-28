@@ -61,14 +61,20 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Routes
+// Import Routes
 const authRoutes = require('./routes/authRoutes');
-const registrationRoutes = require('./routes/registrationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const registrationRoutes = require('./routes/registrationRoutes');
 
-app.use('/admin', authRoutes);
-app.use('/admin', adminRoutes);
+// Direct Route Mounts
+app.use('/', authRoutes);
+app.use('/', adminRoutes);
 app.use('/', registrationRoutes);
+
+// Direct Redirect from /admin to /admin/login
+app.get('/admin', (req, res) => {
+  res.redirect('/admin/login');
+});
 
 // 404 Handler
 app.use((req, res) => {
@@ -84,7 +90,7 @@ app.use((err, req, res, next) => {
   res.status(500).render('500');
 });
 
-// Auto-Initialize TiDB Cloud Schema & Boot
+// Auto-Initialize Database Schema & Boot Server
 async function bootServer() {
   const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
   const port = parseInt(process.env.DB_PORT, 10) || 4000;
@@ -135,17 +141,34 @@ async function bootServer() {
       ) ENGINE=InnoDB;
     `);
 
-    // Dynamically add missing columns if table existed prior
-    const safeAddColumn = async (col, type) => {
-      try {
-        await connection.query(`ALTER TABLE registrations ADD COLUMN ${col} ${type};`);
-      } catch (e) {
-        // Ignore duplicate column error
-      }
-    };
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        action VARCHAR(50) NOT NULL,
+        performed_by VARCHAR(100) NOT NULL,
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
 
-    await safeAddColumn('languages_spoken', 'TEXT');
-    await safeAddColumn('media_roles', 'TEXT');
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        email VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
+    // Seed default admin user
+    const hash = await bcrypt.hash('Admin@NSS2026', 10);
+    await connection.query(
+      `INSERT INTO admins (username, password_hash, email) 
+       VALUES ('admin', ?, 'admin@pondiuni.edu.in') 
+       ON DUPLICATE KEY UPDATE password_hash = ?`,
+      [hash, hash]
+    );
 
     connection.release();
 

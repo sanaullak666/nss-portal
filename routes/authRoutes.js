@@ -2,24 +2,35 @@
 const router = express.Router();
 const db = require('../config/database');
 const bcrypt = require('bcryptjs');
+const csurf = require('csurf');
 const { logAudit } = require('../utils/auditLogger');
 
-router.get('/login', (req, res) => {
+const csrfProtection = csurf({ 
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  }
+});
+
+router.get('/admin/login', csrfProtection, (req, res) => {
   if (req.session && req.session.admin) {
     return res.redirect('/admin/dashboard');
   }
   res.render('admin/login', {
     title: 'Admin Login - PU NSS Portal',
+    csrfToken: req.csrfToken(),
     error: null
   });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/admin/login', csrfProtection, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.render('admin/login', {
       title: 'Admin Login - PU NSS Portal',
+      csrfToken: req.csrfToken(),
       error: 'Please enter both username and password.'
     });
   }
@@ -30,6 +41,7 @@ router.post('/login', async (req, res) => {
     if (rows.length === 0) {
       return res.render('admin/login', {
         title: 'Admin Login - PU NSS Portal',
+        csrfToken: req.csrfToken(),
         error: 'Invalid username or password.'
       });
     }
@@ -40,33 +52,30 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.render('admin/login', {
         title: 'Admin Login - PU NSS Portal',
+        csrfToken: req.csrfToken(),
         error: 'Invalid username or password.'
       });
     }
 
-    // Assign session data
     req.session.admin = {
       id: admin.id,
       username: admin.username,
       email: admin.email
     };
 
-    // Save session explicitly before redirecting
     req.session.save(async (err) => {
       if (err) {
-        console.error('Session Save Error:', err);
         return res.render('admin/login', {
           title: 'Admin Login - PU NSS Portal',
-          error: 'Session error. Please try again.'
+          csrfToken: req.csrfToken(),
+          error: 'Session initialization failed. Please try again.'
         });
       }
       
       try {
         await logAudit('LOGIN', admin.username, 'Admin logged in successfully');
-      } catch (aErr) {
-        console.error('Audit log error:', aErr.message);
-      }
-      
+      } catch (aErr) {}
+
       res.redirect('/admin/dashboard');
     });
 
@@ -74,12 +83,13 @@ router.post('/login', async (req, res) => {
     console.error('Login Error:', err.message);
     res.render('admin/login', {
       title: 'Admin Login - PU NSS Portal',
-      error: 'Server error during authentication.'
+      csrfToken: req.csrfToken(),
+      error: 'Server error during login. Please try again.'
     });
   }
 });
 
-router.get('/logout', (req, res) => {
+router.get('/admin/logout', (req, res) => {
   if (req.session) {
     req.session.destroy(() => {
       res.redirect('/admin/login');
