@@ -59,9 +59,10 @@ router.get('/', csrfProtection, (req, res) => {
   });
 });
 
-// Process Registration (Multer runs FIRST, then CSRF middleware)
+// Process Volunteer Registration:
+// Multer parses multipart file and form fields FIRST, then CSURF validates req.body / req.query
 router.post('/register', upload.single('certificate'), (req, res, next) => {
-  // Pass query parameter token to body if missing from body
+  if (!req.body) req.body = {};
   if (!req.body._csrf && req.query._csrf) {
     req.body._csrf = req.query._csrf;
   }
@@ -118,7 +119,7 @@ router.post('/register', upload.single('certificate'), (req, res, next) => {
       constants: constants,
       formData: req.body || {},
       error: 'An error occurred during registration. Please check your inputs and try again.',
-      errors: [{ msg: 'An error occurred during registration. Please check your inputs.' }],
+      errors: [{ msg: 'An error occurred during registration.' }],
       success: null
     });
   }
