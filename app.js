@@ -6,16 +6,15 @@ const helmet = require('helmet');
 const path = require('path');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security Headers via Helmet
-app.use(helmet({
-  contentSecurityPolicy: false
-}));
+// Security Headers
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // Body Parsers with Trimming
 app.use(express.json());
@@ -80,7 +79,7 @@ app.use((err, req, res, next) => {
   res.status(500).render('500');
 });
 
-// Auto-Initialize TiDB Cloud & Boot Express
+// Auto-Initialize TiDB Cloud & Seed Admin User
 async function bootServer() {
   const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
   const port = parseInt(process.env.DB_PORT, 10) || 4000;
@@ -103,7 +102,7 @@ async function bootServer() {
     const connection = await db.getConnection();
     console.log('✅ Database connection pool verified.');
 
-    // Ensure core tables exist
+    // 1. Ensure Registrations Table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS registrations (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -136,6 +135,7 @@ async function bootServer() {
       ) ENGINE=InnoDB;
     `);
 
+    // 2. Ensure Audit Logs Table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,6 +145,24 @@ async function bootServer() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+
+    // 3. Ensure Admins Table & Seed Initial Admin Account
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        email VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
+    const [existingAdmins] = await connection.query('SELECT id FROM admins WHERE username = "admin"');
+    if (existingAdmins.length === 0) {
+      const hash = await bcrypt.hash('Admin@NSS2026', 10);
+      await connection.query('INSERT INTO admins (username, password_hash, email) VALUES (?, ?, ?)', ['admin', hash, 'admin@pondiuni.edu.in']);
+      console.log('🔑 Default admin user seeded successfully (admin / Admin@NSS2026).');
+    }
 
     connection.release();
 
@@ -156,9 +174,8 @@ async function bootServer() {
 
   } catch (err) {
     console.error('❌ Server startup error:', err.message);
-    // Boot server anyway to avoid Render rollback loops
     app.listen(PORT, () => {
-      console.log(`⚠️ App listening on port ${PORT} despite DB delay.`);
+      console.log(`⚠️ App listening on port ${PORT} despite DB startup issues.`);
     });
   }
 }
