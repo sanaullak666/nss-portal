@@ -6,6 +6,25 @@ const path = require('path');
 const csurf = require('csurf');
 const { logAudit } = require('../utils/auditLogger');
 
+// Try requiring constants from utils or config if present
+let constants = {};
+try {
+  constants = require('../utils/constants');
+} catch (e) {
+  try {
+    constants = require('../config/constants');
+  } catch (err) {
+    // Default fallback if constants file is missing
+    constants = {
+      DEPARTMENT_UNIT_MAP: {
+        'Unit I': ['Computer Science', 'Information Technology'],
+        'Unit II': ['Chemistry', 'Physics'],
+        'Unit III': ['Commerce', 'Management']
+      }
+    };
+  }
+}
+
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
@@ -35,6 +54,8 @@ router.get('/', csrfProtection, (req, res) => {
   res.render('index', {
     title: 'Pondicherry University NSS Volunteer Registration 2026',
     csrfToken: req.csrfToken(),
+    constants: constants,
+    formData: {},
     error: null,
     errors: [],
     success: null
@@ -79,6 +100,8 @@ router.post('/register', upload.single('certificate'), csrfProtection, async (re
     res.render('index', {
       title: 'Pondicherry University NSS Volunteer Registration 2026',
       csrfToken: req.csrfToken(),
+      constants: constants,
+      formData: {},
       error: null,
       errors: [],
       success: `Registration successful! Your Application ID is ${regId}.`
@@ -89,6 +112,8 @@ router.post('/register', upload.single('certificate'), csrfProtection, async (re
     res.render('index', {
       title: 'Pondicherry University NSS Volunteer Registration 2026',
       csrfToken: req.csrfToken(),
+      constants: constants,
+      formData: req.body || {},
       error: 'An error occurred during registration. Please check your inputs and try again.',
       errors: [{ msg: 'An error occurred during registration. Please check your inputs.' }],
       success: null

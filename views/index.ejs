@@ -1,4 +1,6 @@
-﻿<% const safeErrors = (typeof errors !== 'undefined' && errors) ? errors : []; %>
+﻿<% const safeConstants = (typeof constants !== 'undefined' && constants) ? constants : { DEPARTMENT_UNIT_MAP: {} }; %>
+<% const safeFormData = (typeof formData !== 'undefined' && formData) ? formData : {}; %>
+<% const safeErrors = (typeof errors !== 'undefined' && errors) ? errors : []; %>
 <% const safeError = (typeof error !== 'undefined' && error) ? error : null; %>
 <!DOCTYPE html>
 <html lang="en">
