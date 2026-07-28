@@ -6,7 +6,6 @@ const path = require('path');
 const csurf = require('csurf');
 const { logAudit } = require('../utils/auditLogger');
 
-// Try requiring constants from utils or config if present
 let constants = {};
 try {
   constants = require('../utils/constants');
@@ -14,7 +13,6 @@ try {
   try {
     constants = require('../config/constants');
   } catch (err) {
-    // Default fallback if constants file is missing
     constants = {
       DEPARTMENT_UNIT_MAP: {
         'Unit I': ['Computer Science', 'Information Technology'],
@@ -33,7 +31,6 @@ const csrfProtection = csurf({
   }
 });
 
-// Configure Multer Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -62,8 +59,14 @@ router.get('/', csrfProtection, (req, res) => {
   });
 });
 
-// Process Volunteer Registration
-router.post('/register', upload.single('certificate'), csrfProtection, async (req, res) => {
+// Process Registration (Multer runs FIRST, then CSRF middleware)
+router.post('/register', upload.single('certificate'), (req, res, next) => {
+  // Pass query parameter token to body if missing from body
+  if (!req.body._csrf && req.query._csrf) {
+    req.body._csrf = req.query._csrf;
+  }
+  csrfProtection(req, res, next);
+}, async (req, res) => {
   try {
     const {
       applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
