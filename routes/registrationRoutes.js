@@ -30,17 +30,18 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Render Registration Form (Generates CSRF Token)
+// Render Registration Form
 router.get('/', csrfProtection, (req, res) => {
   res.render('index', {
     title: 'Pondicherry University NSS Volunteer Registration 2026',
     csrfToken: req.csrfToken(),
     error: null,
+    errors: [],
     success: null
   });
 });
 
-// Process Registration: Multer parses multipart fields FIRST, then CSRF validates
+// Process Volunteer Registration
 router.post('/register', upload.single('certificate'), csrfProtection, async (req, res) => {
   try {
     const {
@@ -79,6 +80,7 @@ router.post('/register', upload.single('certificate'), csrfProtection, async (re
       title: 'Pondicherry University NSS Volunteer Registration 2026',
       csrfToken: req.csrfToken(),
       error: null,
+      errors: [],
       success: `Registration successful! Your Application ID is ${regId}.`
     });
 
@@ -88,6 +90,7 @@ router.post('/register', upload.single('certificate'), csrfProtection, async (re
       title: 'Pondicherry University NSS Volunteer Registration 2026',
       csrfToken: req.csrfToken(),
       error: 'An error occurred during registration. Please check your inputs and try again.',
+      errors: [{ msg: 'An error occurred during registration. Please check your inputs.' }],
       success: null
     });
   }
@@ -95,7 +98,7 @@ router.post('/register', upload.single('certificate'), csrfProtection, async (re
 
 // Track Registration Routes
 router.get('/track-registration', csrfProtection, (req, res) => {
-  res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: null });
+  res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: null, errors: [] });
 });
 
 router.post('/track-registration', csrfProtection, async (req, res) => {
@@ -103,11 +106,11 @@ router.post('/track-registration', csrfProtection, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM registrations WHERE registration_id = ?', [registration_id.trim()]);
     if (rows.length === 0) {
-      return res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'No application found with that ID.' });
+      return res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'No application found with that ID.', errors: [] });
     }
-    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: rows[0], error: null });
+    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: rows[0], error: null, errors: [] });
   } catch (err) {
-    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'Error retrieving status.' });
+    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'Error retrieving status.', errors: [] });
   }
 });
 
