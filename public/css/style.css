@@ -1290,3 +1290,41 @@ a:hover {
     font-size: 9px;
   }
 }
+/* Append Clickability & Pointer Event Fixes */
+.site-header {
+  pointer-events: auto !important;
+  z-index: 1000 !important;
+}
+
+.site-header * {
+  pointer-events: auto !important;
+}
+
+.main-nav {
+  pointer-events: auto !important;
+  z-index: 1001 !important;
+}
+
+.main-nav a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  display: inline-block;
+  position: relative;
+  z-index: 1002 !important;
+}
+
+.btn, button, a.btn, input[type="submit"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 10 !important;
+}
+
+.modal-overlay {
+  pointer-events: auto !important;
+}
+
+.form-card, .card {
+  position: relative;
+  z-index: 1;
+}
