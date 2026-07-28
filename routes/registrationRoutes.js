@@ -31,6 +31,7 @@ const csrfProtection = csurf({
   }
 });
 
+// Configure Multer Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -41,9 +42,19 @@ const storage = multer.diskStorage({
   }
 });
 
+// 3. Allowed formats: PDF, JPG, JPEG, PNG | Max size: 250 KB
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }
+  limits: { fileSize: 250 * 1024 }, // 250 KB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|pdf/;
+    const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimeType = allowedTypes.test(file.mimetype);
+    if (extName && mimeType) {
+      return cb(null, true);
+    }
+    cb(new Error('Only .pdf, .jpg, .jpeg, and .png files under 250 KB are allowed!'));
+  }
 });
 
 // Render Registration Form
@@ -59,22 +70,38 @@ router.get('/', csrfProtection, (req, res) => {
   });
 });
 
-// Process Volunteer Registration:
-// Multer parses multipart file and form fields FIRST, then CSURF validates req.body / req.query
-router.post('/register', upload.single('certificate'), (req, res, next) => {
-  if (!req.body) req.body = {};
-  if (!req.body._csrf && req.query._csrf) {
-    req.body._csrf = req.query._csrf;
-  }
-  csrfProtection(req, res, next);
+// Process Registration
+router.post('/register', (req, res, next) => {
+  upload.single('certificate')(req, res, (err) => {
+    if (err) {
+      return res.render('index', {
+        title: 'Pondicherry University NSS Volunteer Registration 2026',
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        constants: constants,
+        formData: req.body || {},
+        error: err.message || 'File upload error. Ensure file size is within 250 KB and format is PDF, JPG, JPEG, or PNG.',
+        errors: [],
+        success: null
+      });
+    }
+    if (!req.body) req.body = {};
+    if (!req.body._csrf && req.query._csrf) {
+      req.body._csrf = req.query._csrf;
+    }
+    csrfProtection(req, res, next);
+  });
 }, async (req, res) => {
   try {
     const {
       applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
       department, course, year_of_study, unit_number, gender, dob, age,
       blood_group, aadhaar_number, native_state, present_address, permanent_address,
-      is_previous_volunteer, interested_in_media, declaration_accepted
+      languages_spoken, media_roles, is_previous_volunteer, declaration_accepted
     } = req.body;
+
+    // 4 & 5. Process languages_spoken[] and media_roles[] arrays into strings
+    const langsString = Array.isArray(languages_spoken) ? languages_spoken.join(', ') : (languages_spoken || '');
+    const rolesString = Array.isArray(media_roles) ? media_roles.join(', ') : (media_roles || '');
 
     const regId = 'PU-NSS-' + Date.now().toString().slice(-6);
     const certPath = req.file ? '/uploads/' + req.file.filename : null;
@@ -84,15 +111,15 @@ router.post('/register', upload.single('certificate'), (req, res, next) => {
         registration_id, applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
         department, course, year_of_study, unit_number, gender, dob, age,
         blood_group, aadhaar_number, native_state, present_address, permanent_address,
-        is_previous_volunteer, certificate_path, interested_in_media, declaration_accepted
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        languages_spoken, media_roles, is_previous_volunteer, certificate_path, declaration_accepted
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await db.query(query, [
       regId, applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
       department, course, year_of_study, unit_number, gender, dob, age,
       blood_group, aadhaar_number, native_state, present_address, permanent_address,
-      is_previous_volunteer, certPath, interested_in_media, declaration_accepted ? 1 : 0
+      langsString, rolesString, is_previous_volunteer, certPath, declaration_accepted ? 1 : 0
     ]);
 
     try {
