@@ -1,0 +1,46 @@
+{
+  "name": "nss-registration-portal",
+  "version": "1.0.0",
+  "description": "Production-ready National Service Scheme (NSS) Registration Portal for Pondicherry University",
+  "main": "server.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "nss",
+    "pondicherry-university",
+    "registration",
+    "express",
+    "mysql",
+    "ejs"
+  ],
+  "author": "Pondicherry University",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csurf": "^1.2.2",
+    "dotenv": "^16.4.5",
+    "ejs": "^6.0.1",
+    "exceljs": "^3.4.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.6.1",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.1.0",
+    "helmet": "^7.2.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.10.1",
+    "pdfkit": "^0.19.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "allowScripts": {
+    "bcrypt@5.1.1": true
+  }
+}

@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--gray-200); padding-bottom: 15px; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin:0; color: var(--nss-navy);"><%= registration.applicant_name %></h2>
+          <p style="margin: 5px 0 0; color: var(--gray-600);">Registration ID: <strong style="color: var(--nss-red);"><%= registration.registration_id %></strong> | Unit: <strong><%= registration.unit_number %></strong></p>
+        </div>
+        <div class="no-print">
+          <button onclick="window.print()" class="btn btn-secondary">Print Profile</button>
+          <a href="/admin/registrations/<%= registration.id %>/pdf" class="btn btn-primary">PDF Slip</a>
+          <a href="/admin/registrations" class="btn btn-secondary" style="background: var(--gray-500);">Back</a>
+        </div>
+      </div>
+
+      <h3 style="color: var(--nss-navy);">Academic & Personal Info</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+        <div><strong>Univ Reg No:</strong> <%= registration.univ_reg_no %></div>
+        <div><strong>Department:</strong> <%= registration.department %></div>
+        <div><strong>Course:</strong> <%= registration.course %></div>
+        <div><strong>Year:</strong> <%= registration.year_of_study %></div>
+        <div><strong>Email:</strong> <%= registration.email %></div>
+        <div><strong>Mobile:</strong> <%= registration.contact_number %></div>
+        <div><strong>Alt Mobile:</strong> <%= registration.alt_contact_number || 'N/A' %></div>
+        <div><strong>Aadhaar:</strong> <%= registration.aadhaar_number %></div>
+        <div><strong>Blood Group:</strong> <%= registration.blood_group %></div>
+        <div><strong>Native State:</strong> <%= registration.native_state %></div>
+      </div>
+
+      <h3 style="color: var(--nss-navy);">Address</h3>
+      <div style="margin-bottom: 25px;">
+        <p><strong>Present:</strong> <%= registration.present_address %></p>
+        <p><strong>Permanent:</strong> <%= registration.permanent_address %></p>
+      </div>
+
+      <h3 style="color: var(--nss-navy);">NSS Details</h3>
+      <div>
+        <p><strong>Previous Volunteer:</strong> <%= registration.is_previous_volunteer %></p>
+        <% if (registration.certificate_path) { %>
+          <p><strong>Certificate:</strong> <a href="/uploads/<%= registration.certificate_path %>" target="_blank" style="color: var(--nss-red); font-weight: bold;">View / Download Certificate</a></p>
+        <% } %>
+        <p><strong>Media Team Interest:</strong> <%= registration.interested_in_media %></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

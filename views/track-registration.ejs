@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <div>Track Registration Status</div>
+      </div>
+      <a href="/" class="btn btn-primary" style="padding: 6px 18px; font-size: 0.85rem;">Home</a>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding-top: 40px; padding-bottom: 60px; max-width: 700px;">
+    <div class="card">
+      <h2 style="color: var(--nss-navy); text-align: center; margin-bottom: 5px;">Track Volunteer Application</h2>
+      <p style="text-align: center; color: var(--gray-600); margin-bottom: 25px;">Enter your Registration ID or Register Number</p>
+
+      <form action="/track-registration" method="POST" style="margin-bottom: 30px;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div style="display: flex; gap: 10px;">
+          <input type="text" name="query" class="form-control" placeholder="e.g. NSS-2026-UNIT1-000001 or 24351001" required style="flex: 1;">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <% if (registration) { %>
+        <div style="border: 2px solid var(--gray-200); border-radius: var(--radius-md); padding: 25px; background: var(--gray-50);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-300); padding-bottom: 12px; margin-bottom: 15px;">
+            <div>
+              <h3 style="margin:0; color: var(--nss-navy);"><%= registration.applicant_name %></h3>
+              <span style="font-size: 0.85rem; color: var(--gray-600);">Registration ID: <strong><%= registration.registration_id %></strong></span>
+            </div>
+            <span style="background: #16A34A; color: white; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: bold;">Submitted</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; margin-bottom: 20px;">
+            <div><strong>NSS Unit:</strong> <%= registration.unit_number %></div>
+            <div><strong>Course:</strong> <%= registration.course %></div>
+            <div><strong>Department:</strong> <%= registration.department %></div>
+            <div><strong>Submitted Date:</strong> <%= new Date(registration.created_at).toLocaleDateString('en-IN') %></div>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <a href="/track-registration/pdf/<%= registration.registration_id %>" class="btn btn-primary" style="flex: 1; text-align: center;">Download Official Receipt (PDF)</a>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

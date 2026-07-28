@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .filter-bar { background: white; padding: 15px; border-radius: var(--radius-md); margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; box-shadow: var(--shadow-sm); }
+    .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.85rem; }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo"><div>All Student Registrations</div></div>
+      <div>
+        <a href="/admin/dashboard" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; margin-right: 10px;">← Dashboard</a>
+        <a href="/admin/logout" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <form method="GET" action="/admin/registrations" class="filter-bar">
+      <input type="text" name="search" placeholder="Search Name, Reg ID, Mobile, Aadhaar..." value="<%= filters.search %>" style="flex: 2; min-width: 220px;">
+      
+      <!-- Filter by Unit -->
+      <select name="unit">
+        <option value="">All Units</option>
+        <% UNITS.forEach(function(u) { %>
+          <option value="<%= u %>" <%= filters.unit === u ? 'selected' : '' %>><%= u %></option>
+        <% }); %>
+      </select>
+
+      <!-- Filter by Course -->
+      <select name="course">
+        <option value="">All Courses</option>
+        <% COURSES.forEach(function(c) { %>
+          <option value="<%= c %>" <%= filters.course === c ? 'selected' : '' %>><%= c %></option>
+        <% }); %>
+      </select>
+
+      <!-- Filter by Year of Study -->
+      <select name="year_of_study">
+        <option value="">All Years</option>
+        <% YEAR_OF_STUDY.forEach(function(y) { %>
+          <option value="<%= y %>" <%= filters.year_of_study === y ? 'selected' : '' %>><%= y %></option>
+        <% }); %>
+      </select>
+
+      <!-- Filter by Previous Volunteer Status -->
+      <select name="is_previous_volunteer">
+        <option value="">Prev Volunteer?</option>
+        <option value="Yes" <%= filters.is_previous_volunteer === 'Yes' ? 'selected' : '' %>>Yes</option>
+        <option value="No" <%= filters.is_previous_volunteer === 'No' ? 'selected' : '' %>>No</option>
+      </select>
+
+      <!-- Filter by Media Team Interest -->
+      <select name="interested_in_media">
+        <option value="">Media Interest?</option>
+        <option value="Yes" <%= filters.interested_in_media === 'Yes' ? 'selected' : '' %>>Yes</option>
+        <option value="No" <%= filters.interested_in_media === 'No' ? 'selected' : '' %>>No</option>
+      </select>
+
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="/admin/registrations" class="btn btn-secondary btn-sm">Reset</a>
+    </form>
+
+    <div class="card" style="padding: 0; overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Reg ID</th>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Mobile</th>
+            <th>Unit</th>
+            <th>Certificate</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (registrations.length === 0) { %>
+            <tr><td colspan="7" style="text-align:center; padding: 20px;">No matching records.</td></tr>
+          <% } else { %>
+            <% registrations.forEach(function(reg) { %>
+              <tr>
+                <td><strong><%= reg.registration_id %></strong></td>
+                <td><%= reg.applicant_name %></td>
+                <td><%= reg.course %></td>
+                <td><%= reg.contact_number %></td>
+                <td><span style="background: var(--gray-100); padding: 3px 8px; border-radius: 4px; font-weight: 600; color: var(--nss-navy);"><%= reg.unit_number %></span></td>
+                <td>
+                  <% if (reg.certificate_path) { %>
+                    <a href="/uploads/<%= reg.certificate_path %>" target="_blank" class="btn btn-secondary btn-sm" style="background: #276749;">View</a>
+                  <% } else { %>
+                    <span style="color: var(--gray-400); font-size: 0.8rem;">N/A</span>
+                  <% } %>
+                </td>
+                <td>
+                  <a href="/admin/registrations/<%= reg.id %>" class="btn btn-secondary btn-sm">Profile</a>
+                  <a href="/admin/registrations/<%= reg.id %>/pdf" class="btn btn-primary btn-sm">PDF</a>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

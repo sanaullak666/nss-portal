@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <div>PU NSS Admin Analytics Portal</div>
+      </div>
+      <div>
+        <span style="color: white; margin-right: 15px;">Welcome, <strong><%= admin.fullName %></strong></span>
+        <a href="/admin/logout" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <!-- Stat Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
+      <div class="card" style="text-align: center; padding: 20px;">
+        <h3 style="font-size: 2.2rem; color: var(--nss-red); margin: 0;"><%= stats.totalRegistrations %></h3>
+        <p style="margin: 0; font-weight: 500; font-size: 0.85rem;">Total Registrations</p>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <h3 style="font-size: 2.2rem; color: #16A34A; margin: 0;"><%= stats.todayRegistrations %></h3>
+        <p style="margin: 0; font-weight: 500; font-size: 0.85rem;">Today's Registrations</p>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <h3 style="font-size: 2.2rem; color: var(--nss-navy); margin: 0;"><%= stats.totalUnits %></h3>
+        <p style="margin: 0; font-weight: 500; font-size: 0.85rem;">Active Units</p>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <h3 style="font-size: 2.2rem; color: var(--nss-red); margin: 0;"><%= stats.totalMediaInterested %></h3>
+        <p style="margin: 0; font-weight: 500; font-size: 0.85rem;">Media Applicants</p>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <h3 style="font-size: 2.2rem; color: var(--nss-navy); margin: 0;"><%= stats.totalPreviousVolunteers %></h3>
+        <p style="margin: 0; font-weight: 500; font-size: 0.85rem;">Previous Volunteers</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="margin-bottom: 25px; display: flex; gap: 15px;">
+      <a href="/admin/registrations" class="btn btn-secondary">📋 View & Filter Registrations</a>
+      <a href="/admin/registrations/export/excel" class="btn btn-primary">📥 Export Complete Excel (.xlsx)</a>
+    </div>
+
+    <!-- Graphical Charts Row -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+      <div class="card">
+        <h4 style="color: var(--nss-navy); text-align: center; margin-bottom: 15px;">Unit-wise Distribution</h4>
+        <canvas id="unitChart"></canvas>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--nss-navy); text-align: center; margin-bottom: 15px;">Gender Demographic</h4>
+        <canvas id="genderChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Submissions Table -->
+    <div class="card">
+      <h3 style="color: var(--nss-navy); margin-bottom: 20px;">Recent Submissions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Reg ID</th>
+            <th>Name</th>
+            <th>Unit</th>
+            <th>Department</th>
+            <th>Course</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (recentRegistrations.length === 0) { %>
+            <tr><td colspan="6" style="text-align:center;">No submissions recorded yet.</td></tr>
+          <% } else { %>
+            <% recentRegistrations.forEach(function(reg) { %>
+              <tr>
+                <td><strong><%= reg.registration_id %></strong></td>
+                <td><%= reg.applicant_name %></td>
+                <td><%= reg.unit_number %></td>
+                <td><%= reg.department %></td>
+                <td><%= reg.course %></td>
+                <td><a href="/admin/registrations/<%= reg.id %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">View Profile</a></td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    // Unit Distribution Chart
+    const unitData = <%- JSON.stringify(chartData.unitCounts) %>;
+    new Chart(document.getElementById('unitChart'), {
+      type: 'bar',
+      data: {
+        labels: unitData.map(u => u.unit_number),
+        datasets: [{
+          label: 'Volunteers',
+          data: unitData.map(u => u.count),
+          backgroundColor: '#0F2042'
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Gender Pie Chart
+    const genderData = <%- JSON.stringify(chartData.genderCounts) %>;
+    new Chart(document.getElementById('genderChart'), {
+      type: 'pie',
+      data: {
+        labels: genderData.map(g => g.gender),
+        datasets: [{
+          data: genderData.map(g => g.count),
+          backgroundColor: ['#0F2042', '#D32F2F', '#16A34A', '#F59E0B']
+        }]
+      },
+      options: { responsive: true }
+    });
+  </script>
+</body>
+</html>

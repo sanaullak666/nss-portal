@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .asterisk { color: var(--nss-red); font-weight: bold; }
+    .helper-text { font-size: 0.78rem; color: var(--gray-500); margin-top: 2px; }
+    .field-error { color: var(--nss-red); font-size: 0.82rem; margin-top: 4px; display: none; font-weight: 500; }
+    .is-invalid { border-color: var(--nss-red) !important; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1) !important; }
+
+    .step-tracker { display: flex; justify-content: space-between; margin-bottom: 30px; position: relative; background: var(--gray-100); padding: 15px; border-radius: var(--radius-md); overflow-x: auto; }
+    .step-item { flex: 1; text-align: center; font-size: 0.82rem; font-weight: 600; color: var(--gray-500); white-space: nowrap; padding: 0 5px; }
+    .step-item.active { color: var(--nss-navy); border-bottom: 3px solid var(--nss-red); padding-bottom: 5px; }
+
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
+    .toast { background: var(--nss-navy); color: white; padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); margin-bottom: 10px; animation: slideIn 0.3s forwards; }
+    .toast.error { background: var(--nss-red); }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 22, 46, 0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-backdrop.active { display: flex; }
+    .modal-box { background: white; border-radius: var(--radius-lg); padding: 30px; max-width: 500px; width: 90%; box-shadow: var(--shadow-xl); text-align: center; }
+    .spinner-btn { display: inline-block; width: 18px; height: 18px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+  <div class="toast-container" id="toastContainer"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <div>
+          <div style="font-size: 1.2rem; letter-spacing: 1px;">NATIONAL SERVICE SCHEME (NSS)</div>
+          <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">PONDICHERRY UNIVERSITY</div>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/login" class="btn btn-primary" style="padding: 6px 18px; font-size: 0.85rem;">Admin Login</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px;">
+    <div class="card">
+      <h2 style="color: var(--nss-navy); text-align: center; margin-bottom: 5px;">NSS Volunteer Registration 2026</h2>
+      <p style="text-align: center; margin-bottom: 25px;">Not Me But You — Join Pondicherry University NSS Wing</p>
+
+      <div class="step-tracker">
+        <div class="step-item active">1. Academic Details</div>
+        <div class="step-item active">2. Personal Details</div>
+        <div class="step-item active">3. Address Details</div>
+        <div class="step-item active">4. NSS Information</div>
+        <div class="step-item active">5. Declaration</div>
+      </div>
+
+      <% if (errors && errors.length > 0) { %>
+        <div class="alert alert-error">
+          <% errors.forEach(function(error) { %>
+            <p style="margin: 0;">⚠️ <%= error.msg %></p>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <form id="registrationForm" action="/register" method="POST" enctype="multipart/form-data" novalidate>
+        
+        <!-- Academic Details -->
+        <h3 style="color: var(--nss-red); border-bottom: 2px solid var(--gray-200); padding-bottom: 8px; margin-bottom: 20px;">Academic Details</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="department">Department / Programme <span class="asterisk">*</span></label>
+            <select name="department" id="department" class="form-control" required>
+              <option value="">-- Select Department --</option>
+              <% Object.keys(constants.DEPARTMENT_UNIT_MAP).forEach(function(unit) { %>
+                <optgroup label="<%= unit %>">
+                  <% constants.DEPARTMENT_UNIT_MAP[unit].forEach(function(dept) { %>
+                    <option value="<%= dept %>" data-unit="<%= unit %>" <%= formData.department === dept ? 'selected' : '' %>><%= dept %></option>
+                  <% }); %>
+                </optgroup>
+              <% }); %>
+            </select>
+            <div class="field-error" id="err-department">Please select your department.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="unit_number">NSS Unit Number (Auto-assigned)</label>
+            <input type="text" name="unit_number" id="unit_number" class="form-control" readonly style="background: var(--gray-100); font-weight: 600; color: var(--nss-navy);" placeholder="Select Department First">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="course">Course <span class="asterisk">*</span></label>
+            <select name="course" id="course" class="form-control" required>
+              <option value="">Select Course</option>
+              <% constants.COURSES.forEach(function(c) { %>
+                <option value="<%= c %>" <%= formData.course === c ? 'selected' : '' %>><%= c %></option>
+              <% }); %>
+            </select>
+            <div class="field-error" id="err-course">Please select your course.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="year_of_study">Year of Study <span class="asterisk">*</span></label>
+            <select name="year_of_study" id="year_of_study" class="form-control" required>
+              <option value="">-- Select Year --</option>
+              <% constants.YEAR_OF_STUDY.forEach(function(y) { %>
+                <option value="<%= y %>" <%= formData.year_of_study === y ? 'selected' : '' %>><%= y %></option>
+              <% }); %>
+            </select>
+            <div class="field-error" id="err-year_of_study">Please select year of study.</div>
+          </div>
+        </div>
+
+        <!-- Personal Details -->
+        <h3 style="color: var(--nss-red); border-bottom: 2px solid var(--gray-200); padding-bottom: 8px; margin-top: 30px; margin-bottom: 20px;">Personal Details</h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="applicant_name">Name of Applicant <span class="asterisk">*</span></label>
+            <input type="text" name="applicant_name" id="applicant_name" class="form-control" placeholder="Full Name" value="<%= formData.applicant_name || '' %>" style="text-transform: uppercase;" required>
+            <div class="helper-text">Name as per 10th Certificate</div>
+            <div class="field-error" id="err-applicant_name">Please enter full name.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="univ_reg_no">Registration / Application Number <span class="asterisk">*</span></label>
+            <input type="text" name="univ_reg_no" id="univ_reg_no" class="form-control" placeholder="e.g. 24351001" value="<%= formData.univ_reg_no || '' %>" required>
+            <div class="field-error" id="err-univ_reg_no">Please enter registration number.</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="email">Email Address <span class="asterisk">*</span></label>
+            <input type="email" name="email" id="email" class="form-control" placeholder="student@pondiuni.ac.in" value="<%= formData.email || '' %>" required>
+            <div class="field-error" id="err-email">Please enter a valid email address.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="contact_number">Contact Number (10 digits) <span class="asterisk">*</span></label>
+            <input type="tel" name="contact_number" id="contact_number" class="form-control" placeholder="9876543210" maxlength="10" value="<%= formData.contact_number || '' %>" required>
+            <div class="field-error" id="err-contact_number">Enter a 10-digit mobile number.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="alt_contact_number">Alternative Phone Number</label>
+            <input type="tel" name="alt_contact_number" id="alt_contact_number" class="form-control" placeholder="Secondary Phone" maxlength="10" value="<%= formData.alt_contact_number || '' %>">
+            <div class="field-error" id="err-alt_contact_number">Alt contact must be 10 digits.</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="gender">Gender <span class="asterisk">*</span></label>
+            <select name="gender" id="gender" class="form-control" required>
+              <option value="">-- Select Gender --</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Transgender">Transgender</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+            <div class="field-error" id="err-gender">Please select gender.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of Birth <span class="asterisk">*</span></label>
+            <input type="date" name="dob" id="dob" class="form-control" value="<%= formData.dob || '' %>" required>
+            <div class="field-error" id="err-dob">Select date of birth.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="age">Auto-calculated Age</label>
+            <input type="number" name="age" id="age" class="form-control" readonly style="background: var(--gray-100);" placeholder="Calculated from DOB" value="<%= formData.age || '' %>">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+          <div class="form-group">
+            <label for="blood_group">Blood Group <span class="asterisk">*</span></label>
+            <select name="blood_group" id="blood_group" class="form-control" required>
+              <option value="">-- Select Blood Group --</option>
+              <% constants.BLOOD_GROUPS.forEach(function(bg) { %>
+                <option value="<%= bg %>"><%= bg %></option>
+              <% }); %>
+            </select>
+            <div class="field-error" id="err-blood_group">Select blood group.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="aadhaar_number">Aadhaar Number (12 Digits) <span class="asterisk">*</span></label>
+            <!-- Disable Autofill for sensitive Aadhaar field -->
+            <input type="text" name="aadhaar_number" id="aadhaar_number" class="form-control" placeholder="12 Digit Aadhaar No" maxlength="12" autocomplete="off" value="<%= formData.aadhaar_number || '' %>" required>
+            <div class="field-error" id="err-aadhaar_number">Aadhaar number must be 12 digits.</div>
+          </div>
+        </div>
+
+        <!-- Address Details -->
+        <h3 style="color: var(--nss-red); border-bottom: 2px solid var(--gray-200); padding-bottom: 8px; margin-top: 30px; margin-bottom: 20px;">Address Details</h3>
+
+        <div class="form-group">
+          <label for="native_state">Native State / Union Territory <span class="asterisk">*</span></label>
+          <select name="native_state" id="native_state" class="form-control" required>
+            <option value="">-- Select State / UT --</option>
+            <% constants.NATIVE_STATES.forEach(function(state) { %>
+              <option value="<%= state %>"><%= state %></option>
+            <% }); %>
+          </select>
+          <div class="field-error" id="err-native_state">Select native state or UT.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="present_address">Present Address <span class="asterisk">*</span></label>
+          <textarea name="present_address" id="present_address" class="form-control" rows="2" placeholder="Hostel / Local Address in Puducherry" required><%= formData.present_address || '' %></textarea>
+          <div class="field-error" id="err-present_address">Present address is required.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label style="font-weight: 600; color: var(--nss-navy); cursor: pointer;">
+            <input type="checkbox" id="same_address_cb" name="is_same_address" value="1">
+            Same as Present Address
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="permanent_address">Permanent Address <span class="asterisk">*</span></label>
+          <textarea name="permanent_address" id="permanent_address" class="form-control" rows="2" placeholder="Home / Native Address" required><%= formData.permanent_address || '' %></textarea>
+          <div class="field-error" id="err-permanent_address">Permanent address is required.</div>
+        </div>
+
+        <!-- NSS Information -->
+        <h3 style="color: var(--nss-red); border-bottom: 2px solid var(--gray-200); padding-bottom: 8px; margin-top: 30px; margin-bottom: 20px;">NSS Information</h3>
+
+        <div class="form-group">
+          <label for="is_previous_volunteer">Previous NSS Volunteer? <span class="asterisk">*</span></label>
+          <select name="is_previous_volunteer" id="is_previous_volunteer" class="form-control" required>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="cert_wrapper" style="display: none;">
+          <label for="certificate">Upload NSS Certificate (PDF, JPG, JPEG, PNG | Max 250 KB) <span class="asterisk">*</span></label>
+          <input type="file" name="certificate" id="certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+          <div class="field-error" id="err-certificate">Certificate required (Max 250 KB).</div>
+        </div>
+
+        <div class="form-group">
+          <label for="interested_in_media">Interested in joining NSS PU Media Team? <span class="asterisk">*</span></label>
+          <select name="interested_in_media" id="interested_in_media" class="form-control" required>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- Declaration -->
+        <h3 style="color: var(--nss-red); border-bottom: 2px solid var(--gray-200); padding-bottom: 8px; margin-top: 30px; margin-bottom: 20px;">Declaration</h3>
+
+        <div class="form-group">
+          <label style="display: flex; gap: 10px; cursor: pointer; align-items: flex-start;">
+            <input type="checkbox" name="declaration_accepted" id="declaration_accepted" value="1" required style="margin-top: 3px;">
+            <span>I hereby declare that all data, details and information provided in this application are accurate, complete and true to the best of my knowledge. <span class="asterisk">*</span></span>
+          </label>
+          <div class="field-error" id="err-declaration_accepted">Declaration acceptance is required.</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+          <button type="button" id="submitBtn" class="btn btn-primary" style="width: 100%; max-width: 320px;" disabled>
+            <span id="btnText">Submit Application</span>
+            <span id="btnSpinner" class="spinner-btn" style="display: none;"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal-box">
+      <h3 style="color: var(--nss-navy); margin-bottom: 15px;">Confirm Application Submission</h3>
+      <p style="color: var(--gray-600); line-height: 1.6;">Please confirm that all the information provided is correct. Once submitted, the application cannot be edited.</p>
+      <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+        <button type="button" class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="modalConfirmBtn">Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registrationForm');
+      const deptSelect = document.getElementById('department');
+      const unitInput = document.getElementById('unit_number');
+      const applicantNameInput = document.getElementById('applicant_name');
+      const dobInput = document.getElementById('dob');
+      const ageInput = document.getElementById('age');
+      const presentAddress = document.getElementById('present_address');
+      const permanentAddress = document.getElementById('permanent_address');
+      const sameAddressCb = document.getElementById('same_address_cb');
+      const prevVolSelect = document.getElementById('is_previous_volunteer');
+      const certWrapper = document.getElementById('cert_wrapper');
+      const certInput = document.getElementById('certificate');
+      const declCheckbox = document.getElementById('declaration_accepted');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const confirmModal = document.getElementById('confirmModal');
+
+      function showToast(msg, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${isError ? 'error' : ''}`;
+        toast.textContent = msg;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      deptSelect.addEventListener('change', () => {
+        const selected = deptSelect.options[deptSelect.selectedIndex];
+        unitInput.value = selected ? selected.getAttribute('data-unit') || '' : '';
+      });
+
+      applicantNameInput.addEventListener('input', (e) => e.target.value = e.target.value.toUpperCase());
+
+      dobInput.addEventListener('change', () => {
+        if (!dobInput.value) return;
+        const dob = new Date(dobInput.value);
+        const diff = Date.now() - dob.getTime();
+        const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+        ageInput.value = age > 0 ? age : '';
+      });
+
+      sameAddressCb.addEventListener('change', () => {
+        if (sameAddressCb.checked) {
+          permanentAddress.value = presentAddress.value;
+          permanentAddress.readOnly = true;
+        } else {
+          permanentAddress.readOnly = false;
+        }
+      });
+
+      prevVolSelect.addEventListener('change', () => {
+        certWrapper.style.display = prevVolSelect.value === 'Yes' ? 'block' : 'none';
+      });
+
+      declCheckbox.addEventListener('change', () => {
+        submitBtn.disabled = !declCheckbox.checked;
+      });
+
+      function validateForm() {
+        let isValid = true;
+        let firstInvalid = null;
+
+        document.querySelectorAll('.field-error').forEach(e => e.style.display = 'none');
+        document.querySelectorAll('.form-control').forEach(e => e.classList.remove('is-invalid'));
+
+        function markInvalid(id, msg) {
+          const el = document.getElementById(id);
+          const err = document.getElementById(`err-${id}`);
+          if (el) el.classList.add('is-invalid');
+          if (err) { err.textContent = msg; err.style.display = 'block'; }
+          if (!firstInvalid && el) firstInvalid = el;
+          isValid = false;
+        }
+
+        if (!deptSelect.value) markInvalid('department', 'Department is required.');
+        if (!document.getElementById('course').value) markInvalid('course', 'Course is required.');
+        if (!document.getElementById('year_of_study').value) markInvalid('year_of_study', 'Year of study is required.');
+        if (!applicantNameInput.value.trim()) markInvalid('applicant_name', 'Name is required.');
+        if (!document.getElementById('univ_reg_no').value.trim()) markInvalid('univ_reg_no', 'Registration Number is required.');
+        if (!document.getElementById('email').value.trim()) markInvalid('email', 'Valid email required.');
+        if (!/^\d{10}$/.test(document.getElementById('contact_number').value.trim())) markInvalid('contact_number', 'Must be 10 digits.');
+        if (!document.getElementById('gender').value) markInvalid('gender', 'Gender is required.');
+        if (!dobInput.value) markInvalid('dob', 'DOB is required.');
+        if (!document.getElementById('blood_group').value) markInvalid('blood_group', 'Blood group is required.');
+        if (!/^\d{12}$/.test(document.getElementById('aadhaar_number').value.trim())) markInvalid('aadhaar_number', 'Must be 12 digits.');
+        if (!document.getElementById('native_state').value) markInvalid('native_state', 'Native State required.');
+        if (!presentAddress.value.trim()) markInvalid('present_address', 'Present Address required.');
+        if (!permanentAddress.value.trim()) markInvalid('permanent_address', 'Permanent Address required.');
+
+        if (prevVolSelect.value === 'Yes' && (!certInput.files || certInput.files.length === 0)) {
+          markInvalid('certificate', 'Certificate required for previous volunteers.');
+        }
+
+        if (certInput.files && certInput.files[0] && certInput.files[0].size > 250 * 1024) {
+          markInvalid('certificate', 'File size exceeds 250 KB limit.');
+        }
+
+        if (!isValid && firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstInvalid.focus();
+          showToast('Please fix errors in highlighted fields.', true);
+        }
+
+        return isValid;
+      }
+
+      submitBtn.addEventListener('click', () => {
+        if (validateForm()) confirmModal.classList.add('active');
+      });
+
+      document.getElementById('modalCancelBtn').addEventListener('click', () => {
+        confirmModal.classList.remove('active');
+      });
+
+      document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+        confirmModal.classList.remove('active');
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+        form.submit();
+      });
+    });
+  </script>
+</body>
+</html>
