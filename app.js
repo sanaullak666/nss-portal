@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
 const helmet = require('helmet');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -13,13 +14,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Trust Render Reverse Proxy
+// Ensure uploads directory exists
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+}
+
+// Trust Render Reverse Proxy
 app.set('trust proxy', 1);
 
-// 2. Security Headers
+// Security Headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// 3. Body Parsers
+// Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -33,10 +39,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// 4. Cookie Parser MUST be placed before CSRF
+// Cookie Parser & Session Config
 app.use(cookieParser());
-
-// 5. Session Configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'nss_pu_secure_secret_key_2026',
   resave: false,
@@ -49,21 +53,13 @@ app.use(session({
   }
 }));
 
-// 6. CSRF Protection Middleware
+// CSRF Protection Middleware Generator
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax'
   }
-});
-
-app.use(csrfProtection);
-
-// Inject CSRF Token into all views
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken ? req.csrfToken() : '';
-  next();
 });
 
 // Static Folders
@@ -73,6 +69,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Pass csrfProtection generator to routes
+app.use((req, res, next) => {
+  req.csrfProtection = csrfProtection;
+  next();
+});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -88,10 +90,10 @@ app.use((req, res) => {
   res.status(404).render('404');
 });
 
-// 500 & CSRF Error Handler
+// 500 Error Handler
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
-    console.error('CSRF Error on URL:', req.originalUrl);
+    console.error('CSRF Token Error on URL:', req.originalUrl);
     return res.status(403).send('Invalid or expired CSRF token. Please refresh the page and try submitting again.');
   }
   console.error('Unhandled Server Error:', err);
@@ -163,7 +165,3 @@ async function bootServer() {
 }
 
 bootServer();
-const fs = require('fs');
-if (!fs.existsSync('./uploads')) {
-  fs.mkdirSync('./uploads');
-}

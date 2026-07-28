@@ -3,7 +3,16 @@ const router = express.Router();
 const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
+const csurf = require('csurf');
 const { logAudit } = require('../utils/auditLogger');
+
+const csrfProtection = csurf({ 
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  }
+});
 
 // Configure Multer Storage
 const storage = multer.diskStorage({
@@ -18,21 +27,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Render Registration Form
-router.get('/', (req, res) => {
+// Render Registration Form (Generates CSRF Token)
+router.get('/', csrfProtection, (req, res) => {
   res.render('index', {
     title: 'Pondicherry University NSS Volunteer Registration 2026',
+    csrfToken: req.csrfToken(),
     error: null,
     success: null
   });
 });
 
-// Process Volunteer Registration
-// Order: upload.single -> CSURF handles req.body parsed by Multer
-router.post('/register', upload.single('certificate'), async (req, res) => {
+// Process Registration: Multer parses multipart fields FIRST, then CSRF validates
+router.post('/register', upload.single('certificate'), csrfProtection, async (req, res) => {
   try {
     const {
       applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
@@ -41,7 +50,6 @@ router.post('/register', upload.single('certificate'), async (req, res) => {
       is_previous_volunteer, interested_in_media, declaration_accepted
     } = req.body;
 
-    // Generate unique Registration ID
     const regId = 'PU-NSS-' + Date.now().toString().slice(-6);
     const certPath = req.file ? '/uploads/' + req.file.filename : null;
 
@@ -69,6 +77,7 @@ router.post('/register', upload.single('certificate'), async (req, res) => {
 
     res.render('index', {
       title: 'Pondicherry University NSS Volunteer Registration 2026',
+      csrfToken: req.csrfToken(),
       error: null,
       success: `Registration successful! Your Application ID is ${regId}.`
     });
@@ -77,27 +86,28 @@ router.post('/register', upload.single('certificate'), async (req, res) => {
     console.error('Registration Error:', err.message);
     res.render('index', {
       title: 'Pondicherry University NSS Volunteer Registration 2026',
+      csrfToken: req.csrfToken(),
       error: 'An error occurred during registration. Please check your inputs and try again.',
       success: null
     });
   }
 });
 
-// Track Registration Route
-router.get('/track-registration', (req, res) => {
-  res.render('track', { title: 'Track Application Status', result: null, error: null });
+// Track Registration Routes
+router.get('/track-registration', csrfProtection, (req, res) => {
+  res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: null });
 });
 
-router.post('/track-registration', async (req, res) => {
+router.post('/track-registration', csrfProtection, async (req, res) => {
   const { registration_id } = req.body;
   try {
     const [rows] = await db.query('SELECT * FROM registrations WHERE registration_id = ?', [registration_id.trim()]);
     if (rows.length === 0) {
-      return res.render('track', { title: 'Track Application Status', result: null, error: 'No application found with that ID.' });
+      return res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'No application found with that ID.' });
     }
-    res.render('track', { title: 'Track Application Status', result: rows[0], error: null });
+    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: rows[0], error: null });
   } catch (err) {
-    res.render('track', { title: 'Track Application Status', result: null, error: 'Error retrieving status.' });
+    res.render('track', { title: 'Track Application Status', csrfToken: req.csrfToken(), result: null, error: 'Error retrieving status.' });
   }
 });
 
