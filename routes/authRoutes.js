@@ -44,31 +44,49 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Set session
+    // Assign session data
     req.session.admin = {
       id: admin.id,
       username: admin.username,
       email: admin.email
     };
 
-    await logAudit('LOGIN', admin.username, 'Admin logged in successfully');
-    res.redirect('/admin/dashboard');
+    // Save session explicitly before redirecting
+    req.session.save(async (err) => {
+      if (err) {
+        console.error('Session Save Error:', err);
+        return res.render('admin/login', {
+          title: 'Admin Login - PU NSS Portal',
+          error: 'Session error. Please try again.'
+        });
+      }
+      
+      try {
+        await logAudit('LOGIN', admin.username, 'Admin logged in successfully');
+      } catch (aErr) {
+        console.error('Audit log error:', aErr.message);
+      }
+      
+      res.redirect('/admin/dashboard');
+    });
 
   } catch (err) {
     console.error('Login Error:', err.message);
     res.render('admin/login', {
       title: 'Admin Login - PU NSS Portal',
-      error: 'A server error occurred during login. Please try again.'
+      error: 'Server error during authentication.'
     });
   }
 });
 
-router.get('/logout', async (req, res) => {
-  if (req.session && req.session.admin) {
-    await logAudit('LOGOUT', req.session.admin.username, 'Admin logged out');
-    req.session.destroy();
+router.get('/logout', (req, res) => {
+  if (req.session) {
+    req.session.destroy(() => {
+      res.redirect('/admin/login');
+    });
+  } else {
+    res.redirect('/admin/login');
   }
-  res.redirect('/admin/login');
 });
 
 module.exports = router;

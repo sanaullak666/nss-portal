@@ -13,6 +13,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// IMPORTANT: Trust Render's reverse proxy for HTTPS cookies
+app.set('trust proxy', 1);
+
 // Security Headers
 app.use(helmet({ contentSecurityPolicy: false }));
 
@@ -32,15 +35,7 @@ app.use((req, res, next) => {
 
 app.use(cookieParser());
 
-// Static Folder Mappings
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// View Engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// Secure Session Config
+// Session Config (Works smoothly on Render HTTPS)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'nss_pu_secure_secret_key_2026',
   resave: false,
@@ -48,18 +43,29 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
-// CSRF Protection Middleware
+// CSRF Protection
 const csrfProtection = csurf({ cookie: true });
+app.use(csrfProtection);
+
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken ? req.csrfToken() : '';
   next();
 });
 
-// App Routes
+// Static Folders
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// View Engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -75,11 +81,18 @@ app.use((req, res) => {
 
 // 500 Error Handler
 app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    console.error('CSRF Token Mismatch Error');
+    return res.status(403).render('admin/login', {
+      title: 'Admin Login - PU NSS Portal',
+      error: 'Session expired or invalid token. Please try logging in again.'
+    });
+  }
   console.error('Unhandled Application Error:', err);
   res.status(500).render('500');
 });
 
-// Auto-Initialize TiDB Cloud & Seed Admin User
+// Boot logic
 async function bootServer() {
   const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
   const port = parseInt(process.env.DB_PORT, 10) || 4000;
@@ -88,21 +101,17 @@ async function bootServer() {
   const dbName = process.env.DB_NAME || 'nss_portal';
 
   try {
-    console.log('⚡ Connecting to TiDB Cloud Serverless...');
     const conn = await mysql.createConnection({
       host, port, user, password,
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: false }
     });
 
     await conn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-    console.log(`✅ Verified database "${dbName}" exists.`);
     await conn.end();
 
     const db = require('./config/database');
     const connection = await db.getConnection();
-    console.log('✅ Database connection pool verified.');
 
-    // 1. Ensure Registrations Table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS registrations (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -135,7 +144,6 @@ async function bootServer() {
       ) ENGINE=InnoDB;
     `);
 
-    // 2. Ensure Audit Logs Table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -146,7 +154,6 @@ async function bootServer() {
       ) ENGINE=InnoDB;
     `);
 
-    // 3. Ensure Admins Table & Seed Initial Admin Account
     await connection.query(`
       CREATE TABLE IF NOT EXISTS admins (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -157,26 +164,24 @@ async function bootServer() {
       ) ENGINE=InnoDB;
     `);
 
-    const [existingAdmins] = await connection.query('SELECT id FROM admins WHERE username = "admin"');
-    if (existingAdmins.length === 0) {
-      const hash = await bcrypt.hash('Admin@NSS2026', 10);
-      await connection.query('INSERT INTO admins (username, password_hash, email) VALUES (?, ?, ?)', ['admin', hash, 'admin@pondiuni.edu.in']);
-      console.log('🔑 Default admin user seeded successfully (admin / Admin@NSS2026).');
-    }
+    // Reset password hash to ensure exact match for Admin@NSS2026
+    const hash = await bcrypt.hash('Admin@NSS2026', 10);
+    await connection.query(
+      `INSERT INTO admins (username, password_hash, email) 
+       VALUES ('admin', ?, 'admin@pondiuni.edu.in') 
+       ON DUPLICATE KEY UPDATE password_hash = ?`,
+      [hash, hash]
+    );
 
     connection.release();
 
     app.listen(PORT, () => {
-      console.log('====================================================');
-      console.log(`🚀 Pondicherry University NSS Portal Live on Port ${PORT}`);
-      console.log('====================================================');
+      console.log(`🚀 PU NSS Portal Live on Port ${PORT}`);
     });
 
   } catch (err) {
-    console.error('❌ Server startup error:', err.message);
-    app.listen(PORT, () => {
-      console.log(`⚠️ App listening on port ${PORT} despite DB startup issues.`);
-    });
+    console.error('❌ Boot Error:', err.message);
+    app.listen(PORT);
   }
 }
 
