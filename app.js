@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const path = require('path');
@@ -13,13 +14,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, 'uploads');
+// Database Connection Pool
+const db = require('./config/database');
+
+// Ensure uploads directory exists (use /tmp fallback for Vercel read-only filesystem)
+const uploadDir = process.env.VERCEL === '1' ? '/tmp' : path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
 }
 
-// Trust Reverse Proxy for production deployment
+// Trust Reverse Proxy for Vercel / Production deployment
 app.set('trust proxy', 1);
 
 // Security Headers (Helmet with CSP for Chart.js & Google Fonts)
@@ -52,13 +56,30 @@ app.use((req, res, next) => {
   next();
 });
 
-// Cookie Parser & Session Configuration
+// Cookie Parser & MySQL Serverless Session Store
 app.use(cookieParser());
+
+const sessionStore = new MySQLStore({
+  expiration: 24 * 60 * 60 * 1000,
+  createDatabaseTable: true,
+  schema: {
+    tableName: 'sessions',
+    columnNames: {
+      session_id: 'session_id',
+      expires: 'expires',
+      data: 'data'
+    }
+  }
+}, db);
+
 app.use(
   session({
+    key: 'nss_session_id',
     secret: process.env.SESSION_SECRET || 'nss_pu_secure_secret_key_2026',
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -68,9 +89,12 @@ app.use(
   })
 );
 
-// Static Asset Directories
+// Static Asset Directories (support serving uploads from /tmp if on Vercel)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (process.env.VERCEL === '1') {
+  app.use('/uploads', express.static('/tmp'));
+}
 
 // View Engine Setup
 app.set('view engine', 'ejs');
@@ -235,7 +259,6 @@ let migrationDone = false;
 async function initDb() {
   if (migrationDone) return;
   try {
-    const db = require('./config/database');
     const connection = await db.getConnection();
     await autoMigrate(connection);
     connection.release();
