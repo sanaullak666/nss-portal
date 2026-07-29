@@ -13,7 +13,8 @@ const csrfProtection = csurf({
     httpOnly: true,
     secure: false,
     sameSite: 'lax'
-  }
+  },
+  ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
 });
 
 // Render Registration Form

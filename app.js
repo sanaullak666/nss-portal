@@ -153,10 +153,13 @@ app.use((req, res) => {
   res.status(404).render('404', { title: '404 - Page Not Found | PU NSS Portal' });
 });
 
-// 500 Server Error Handler
+// 500 & CSRF Server Error Handler
 app.use((err, req, res, next) => {
   console.error('SERVER ERROR LOG:', err);
   if (err.code === 'EBADCSRFTOKEN') {
+    if (req.path && req.path.startsWith('/admin')) {
+      return res.redirect('/admin/login?error=Session+expired.+Please+log+in+again.');
+    }
     return res.status(403).render('403', { title: '403 - Invalid Token | PU NSS Portal' });
   }
   res.status(500).render('500', { title: '500 - Server Error | PU NSS Portal' });

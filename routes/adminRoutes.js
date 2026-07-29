@@ -9,12 +9,14 @@ const csrfProtection = csurf({
     httpOnly: true,
     secure: false,
     sameSite: 'lax'
-  }
+  },
+  ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
 });
 
-// Protect only /admin routes
+// Protect all /admin routes with authentication middleware
 router.use('/admin', isAuthenticated);
 
+// Admin Dashboard & Registrations Management Routes
 router.get('/admin/dashboard', adminController.renderDashboard);
 router.get('/admin/registrations', csrfProtection, adminController.renderRegistrationsList);
 router.get('/admin/registrations/export/excel', adminController.exportExcel);

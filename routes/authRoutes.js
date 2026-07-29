@@ -9,7 +9,8 @@ const csrfProtection = csurf({
     httpOnly: true,
     secure: false,
     sameSite: 'lax'
-  }
+  },
+  ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
 });
 
 router.get('/admin/login', csrfProtection, authController.renderLogin);
