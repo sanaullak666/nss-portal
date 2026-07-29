@@ -1,7 +1,8 @@
-﻿/* public/css/style.css */
+/* public/css/style.css */
 /* ============================================================
    Pondicherry University NSS Volunteer Registration Portal 2026
-   Modern UI Enhancement Suite
+   Modern UI Enhancement Suite with Advanced Animations
+   Theme: National Service Scheme - "NOT ME BUT YOU"
    Color Scheme: Navy #0F2042, NSS Red #D32F2F
    Glassmorphism, Micro-interactions, Responsive
    ============================================================ */
@@ -42,6 +43,7 @@
   --shadow-lg: 0 12px 40px rgba(15, 32, 66, 0.12);
   --shadow-xl: 0 20px 60px rgba(15, 32, 66, 0.18);
   --shadow-glow-red: 0 0 20px rgba(211, 47, 47, 0.25);
+  --shadow-glow-gold: 0 0 30px rgba(245, 158, 11, 0.15);
 
   /* ----- Typography ----- */
   --font-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -82,6 +84,7 @@
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ----- Z-Index ----- */
   --z-dropdown: 100;
@@ -118,8 +121,33 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: radial-gradient(circle at 10% 20%, rgba(211, 47, 47, 0.03) 0%, transparent 50%),
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(211, 47, 47, 0.03) 0%, transparent 50%),
     radial-gradient(circle at 90% 80%, rgba(15, 32, 66, 0.04) 0%, transparent 50%);
+  position: relative;
+}
+
+/* Animated Background Overlay for NSS Theme */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(211, 47, 47, 0.02) 0%, transparent 30%),
+    radial-gradient(circle at 70% 60%, rgba(15, 32, 66, 0.02) 0%, transparent 30%);
+  animation: bgFloat 20s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes bgFloat {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(2%, -2%) rotate(1deg); }
+  66% { transform: translate(-1%, 1%) rotate(-0.5deg); }
+  100% { transform: translate(1%, -1%) rotate(0.5deg); }
 }
 
 a {
@@ -139,30 +167,14 @@ a:hover {
 }
 
 /* ---------- Typography Utilities ---------- */
-.text-navy {
-  color: var(--color-navy);
-}
-.text-red {
-  color: var(--color-nss-red);
-}
-.text-emerald {
-  color: var(--color-emerald);
-}
-.text-gold {
-  color: var(--color-gold);
-}
-.text-muted {
-  color: var(--color-text-muted);
-}
-.text-center {
-  text-align: center;
-}
-.text-sm {
-  font-size: var(--font-size-sm);
-}
-.text-lg {
-  font-size: var(--font-size-lg);
-}
+.text-navy { color: var(--color-navy); }
+.text-red { color: var(--color-nss-red); }
+.text-emerald { color: var(--color-emerald); }
+.text-gold { color: var(--color-gold); }
+.text-muted { color: var(--color-text-muted); }
+.text-center { text-align: center; }
+.text-sm { font-size: var(--font-size-sm); }
+.text-lg { font-size: var(--font-size-lg); }
 
 /* ---------- Container ---------- */
 .container {
@@ -173,7 +185,7 @@ a:hover {
 }
 
 /* ============================================================
-   1. STICKY GLASS HEADER
+   1. STICKY GLASS HEADER WITH NSS THEME
    ============================================================ */
 .site-header {
   position: sticky;
@@ -187,11 +199,12 @@ a:hover {
   height: var(--header-height);
   display: flex;
   align-items: center;
-  transition: box-shadow var(--transition-base);
+  transition: all var(--transition-base);
 }
 
 .site-header.scrolled {
   box-shadow: var(--shadow-lg);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .header-inner {
@@ -221,6 +234,26 @@ a:hover {
   font-weight: 700;
   font-size: var(--font-size-lg);
   box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-bounce);
+  position: relative;
+}
+
+.logo-icon:hover {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-nss-red-light);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.logo-icon:hover::after {
+  opacity: 0.3;
 }
 
 .logo-text {
@@ -236,6 +269,19 @@ a:hover {
   font-weight: 400;
   color: var(--color-text-muted);
   letter-spacing: 0.3px;
+}
+
+/* NSS Tagline in Header */
+.nss-tagline-header {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 /* Navigation */
@@ -285,7 +331,7 @@ a:hover {
   transform: translateX(-50%) scaleX(1);
 }
 
-/* Mobile nav toggle (hidden on desktop) */
+/* Mobile nav toggle */
 .nav-toggle {
   display: none;
   background: none;
@@ -302,7 +348,7 @@ a:hover {
 }
 
 /* ============================================================
-   2. FORM CARD & STEP TRACKER
+   2. FORM CARD & STEP TRACKER WITH NSS THEME
    ============================================================ */
 .form-card {
   background: var(--glass-bg);
@@ -313,11 +359,31 @@ a:hover {
   box-shadow: var(--glass-shadow);
   padding: var(--space-8);
   margin: var(--space-6) 0 var(--space-10);
-  transition: box-shadow var(--transition-base);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-nss-red), var(--color-gold), var(--color-nss-red));
+  background-size: 200% 100%;
+  animation: shimmerBorder 3s linear infinite;
+}
+
+@keyframes shimmerBorder {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .form-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-red);
+  transform: translateY(-2px);
 }
 
 /* Step Tracker */
@@ -347,11 +413,18 @@ a:hover {
   top: 24px;
   left: 40px;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-nss-red), var(--color-nss-red-light));
+  background: linear-gradient(90deg, var(--color-nss-red), var(--color-nss-red-light), var(--color-gold));
+  background-size: 200% 100%;
   border-radius: var(--radius-full);
   z-index: 1;
   transition: width var(--transition-slow);
   width: 0%;
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .step-item {
@@ -387,12 +460,30 @@ a:hover {
   color: white;
   box-shadow: var(--shadow-glow-red);
   transform: scale(1.05);
+  animation: stepPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
 }
 
 .step-item.completed .step-number {
   background: var(--color-emerald);
   border-color: var(--color-emerald);
   color: white;
+  animation: completionPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes completionPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.step-item.completed .step-number::after {
+  content: '✓';
+  font-size: var(--font-size-sm);
 }
 
 .step-label {
@@ -410,7 +501,7 @@ a:hover {
 }
 
 /* ============================================================
-   3. INPUTS, SELECTS, TEXTAREAS
+   3. INPUTS, SELECTS, TEXTAREAS WITH NSS STYLING
    ============================================================ */
 .form-group {
   margin-bottom: var(--space-5);
@@ -446,6 +537,7 @@ a:hover {
   outline: none;
   border-color: var(--color-nss-red);
   box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.12), var(--shadow-sm);
+  transform: scale(1.002);
 }
 
 .form-control:hover {
@@ -455,6 +547,13 @@ a:hover {
 .form-control.is-invalid {
   border-color: var(--color-nss-red);
   box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.08);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 
 .form-control.is-valid {
@@ -467,7 +566,7 @@ a:hover {
   cursor: not-allowed;
 }
 
-/* Floating label helper (used with .form-floating) */
+/* Floating label helper */
 .form-floating {
   position: relative;
 }
@@ -494,7 +593,7 @@ a:hover {
   color: var(--color-nss-red);
 }
 
-/* Custom Checkbox & Radio */
+/* Custom Checkbox & Radio with NSS Theme */
 .custom-check {
   display: flex;
   align-items: center;
@@ -502,6 +601,11 @@ a:hover {
   cursor: pointer;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.custom-check:hover {
+  color: var(--color-navy);
 }
 
 .custom-check input[type="checkbox"],
@@ -522,7 +626,15 @@ a:hover {
 .custom-check input[type="radio"]:checked {
   background: var(--color-nss-red);
   border-color: var(--color-nss-red);
+  animation: checkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+@keyframes checkPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
 .custom-check input[type="checkbox"]:checked::after {
   content: '✓';
   position: absolute;
@@ -548,8 +660,18 @@ a:hover {
   border-radius: var(--radius-full);
 }
 
+/* Card General Styling */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
 /* ============================================================
-   4. ADMIN DASHBOARD
+   4. ADMIN DASHBOARD WITH NSS THEME
    ============================================================ */
 .stats-grid {
   display: grid;
@@ -565,12 +687,33 @@ a:hover {
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-base);
+  transition: all var(--transition-bounce);
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-nss-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-base);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-red);
+  border-color: var(--color-nss-red-light);
 }
 
 .stat-number {
@@ -622,16 +765,17 @@ a:hover {
 }
 
 .data-table tbody tr {
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 .data-table tbody tr:hover {
   background: rgba(211, 47, 47, 0.04);
+  transform: scale(1.002);
 }
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* Status Badges */
+/* Status Badges with NSS Theme */
 .badge {
   display: inline-block;
   padding: var(--space-1) var(--space-3);
@@ -641,6 +785,11 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.badge:hover {
+  transform: scale(1.05);
 }
 
 .badge-active {
@@ -660,7 +809,7 @@ a:hover {
   color: var(--color-gold);
 }
 
-/* Chart container */
+/* Chart container with NSS styling */
 .chart-container {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -669,14 +818,21 @@ a:hover {
   box-shadow: var(--shadow-sm);
   margin: var(--space-6) 0;
   position: relative;
+  transition: all var(--transition-base);
 }
+
+.chart-container:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
 .chart-container canvas {
   max-width: 100%;
   height: auto !important;
 }
 
 /* ============================================================
-   5. BUTTONS & MICRO-INTERACTIONS
+   5. BUTTONS WITH NSS THEME & MICRO-INTERACTIONS
    ============================================================ */
 .btn {
   display: inline-flex;
@@ -690,7 +846,7 @@ a:hover {
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-bounce);
   position: relative;
   overflow: hidden;
   text-decoration: none;
@@ -705,11 +861,11 @@ a:hover {
 }
 .btn-primary:hover {
   background: var(--color-nss-red-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-md), var(--shadow-glow-red);
 }
 .btn-primary:active {
-  transform: translateY(0px);
+  transform: translateY(0px) scale(0.98);
   box-shadow: var(--shadow-sm);
 }
 
@@ -719,8 +875,11 @@ a:hover {
 }
 .btn-secondary:hover {
   background: var(--color-navy-light);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: var(--shadow-md);
+}
+.btn-secondary:active {
+  transform: translateY(0px) scale(0.98);
 }
 
 .btn-outline {
@@ -731,7 +890,8 @@ a:hover {
 .btn-outline:hover {
   background: var(--color-nss-red);
   color: white;
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-success {
@@ -740,7 +900,7 @@ a:hover {
 }
 .btn-success:hover {
   background: #15803d;
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
 }
 
 .btn-ghost {
@@ -753,7 +913,7 @@ a:hover {
   transform: translateY(-2px);
 }
 
-/* Ripple effect (JS) */
+/* Ripple effect */
 .btn .ripple {
   position: absolute;
   border-radius: 50%;
@@ -787,22 +947,17 @@ a:hover {
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 /* ============================================================
-   6. ANIMATIONS (Entrance, Slide, Scale)
+   6. ANIMATIONS - NSS THEMED
    ============================================================ */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -813,6 +968,7 @@ a:hover {
     transform: translateY(0);
   }
 }
+
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -823,6 +979,7 @@ a:hover {
     transform: scale(1);
   }
 }
+
 @keyframes popIn {
   0% {
     opacity: 0;
@@ -837,6 +994,22 @@ a:hover {
   }
 }
 
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(211, 47, 47, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(211, 47, 47, 0.2); }
+}
+
 .fade-in {
   animation: fadeIn var(--transition-slow) forwards;
 }
@@ -849,33 +1022,29 @@ a:hover {
 .pop-in {
   animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+.float-in {
+  animation: floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
 
 /* Stagger children */
 .stagger > * {
   opacity: 0;
   animation: slideUp var(--transition-slow) forwards;
 }
-.stagger > *:nth-child(1) {
-  animation-delay: 0.05s;
-}
-.stagger > *:nth-child(2) {
-  animation-delay: 0.10s;
-}
-.stagger > *:nth-child(3) {
-  animation-delay: 0.15s;
-}
-.stagger > *:nth-child(4) {
-  animation-delay: 0.20s;
-}
-.stagger > *:nth-child(5) {
-  animation-delay: 0.25s;
-}
-.stagger > *:nth-child(6) {
-  animation-delay: 0.30s;
-}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.30s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.40s; }
 
 /* ============================================================
-   7. TOAST NOTIFICATIONS
+   7. TOAST NOTIFICATIONS WITH NSS THEME
    ============================================================ */
 .toast-container {
   position: fixed;
@@ -908,9 +1077,7 @@ a:hover {
 }
 
 @keyframes slideInToast {
-  to {
-    transform: translateX(0);
-  }
+  to { transform: translateX(0); }
 }
 @keyframes slideOutToast {
   to {
@@ -949,21 +1116,13 @@ a:hover {
   background: rgba(15, 32, 66, 0.06);
 }
 
-.toast-error .toast-icon {
-  color: var(--color-nss-red);
-}
-.toast-success .toast-icon {
-  color: var(--color-emerald);
-}
-.toast-info .toast-icon {
-  color: var(--color-navy);
-}
-.toast-warning .toast-icon {
-  color: var(--color-gold);
-}
+.toast-error .toast-icon { color: var(--color-nss-red); }
+.toast-success .toast-icon { color: var(--color-emerald); }
+.toast-info .toast-icon { color: var(--color-navy); }
+.toast-warning .toast-icon { color: var(--color-gold); }
 
 /* ============================================================
-   8. MODAL OVERLAY
+   8. MODAL OVERLAY WITH NSS THEME
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -988,6 +1147,20 @@ a:hover {
   box-shadow: var(--shadow-xl);
   animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-nss-red), var(--color-gold), var(--color-nss-red));
+  background-size: 200% 100%;
+  animation: shimmerBorder 3s linear infinite;
 }
 
 .modal-box .modal-title {
@@ -1008,7 +1181,7 @@ a:hover {
 }
 
 /* ============================================================
-   9. FOOTER (Brand, Navy)
+   9. FOOTER WITH NSS THEME
    ============================================================ */
 .site-footer {
   background: var(--color-navy);
@@ -1016,12 +1189,33 @@ a:hover {
   padding: var(--space-8) 0 var(--space-4);
   margin-top: auto;
   border-top: 3px solid var(--color-nss-red);
+  position: relative;
+  overflow: hidden;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(211, 47, 47, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: footerGlow 10s ease-in-out infinite alternate;
+}
+
+@keyframes footerGlow {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-100px, 100px) scale(1.5); }
 }
 
 .footer-inner {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: relative;
+  z-index: 1;
 }
 
 .footer-brand {
@@ -1040,6 +1234,12 @@ a:hover {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: white;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .footer-text {
@@ -1149,6 +1349,10 @@ a:hover {
     border-radius: var(--radius-md);
   }
   .main-nav a::after {
+    display: none;
+  }
+
+  .nss-tagline-header {
     display: none;
   }
 
@@ -1290,41 +1494,80 @@ a:hover {
     font-size: 9px;
   }
 }
-/* Append Clickability & Pointer Event Fixes */
-.site-header {
-  pointer-events: auto !important;
-  z-index: 1000 !important;
+
+/* ============================================================
+   ADDITIONAL NSS THEME ENHANCEMENTS
+   ============================================================ */
+
+/* NSS Motto Banner */
+.nss-motto-banner {
+  background: var(--color-navy);
+  color: var(--color-gold-light);
+  padding: var(--space-2) 0;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: var(--font-size-sm);
+  border-bottom: 2px solid var(--color-nss-red);
 }
 
-.site-header * {
-  pointer-events: auto !important;
-}
-
-.main-nav {
-  pointer-events: auto !important;
-  z-index: 1001 !important;
-}
-
-.main-nav a {
-  pointer-events: auto !important;
-  cursor: pointer !important;
+.nss-motto-banner span {
   display: inline-block;
-  position: relative;
-  z-index: 1002 !important;
+  animation: mottoGlow 2s ease-in-out infinite;
 }
 
-.btn, button, a.btn, input[type="submit"] {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  position: relative;
-  z-index: 10 !important;
+@keyframes mottoGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(245, 158, 11, 0.1); }
+  50% { text-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
 }
 
-.modal-overlay {
-  pointer-events: auto !important;
+/* Card hover effects for NSS theme */
+.card-nss {
+  border-left: 4px solid var(--color-nss-red);
+  transition: all var(--transition-bounce);
 }
 
-.form-card, .card {
-  position: relative;
-  z-index: 1;
+.card-nss:hover {
+  border-left-width: 6px;
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Loading shimmer for content */
+.shimmer-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmerLoading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmerLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Scrollbar styling for NSS theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-nss-red);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-nss-red-dark);
+}
+
+/* Selection color */
+::selection {
+  background: var(--color-nss-red);
+  color: white;
 }

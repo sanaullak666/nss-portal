@@ -1,33 +1,115 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    .filter-bar { background: white; padding: 15px; border-radius: var(--radius-md); margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; box-shadow: var(--shadow-sm); }
-    .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.85rem; }
-    .btn-sm { padding: 4px 10px; font-size: 0.8rem; border-radius: 4px; }
+    .filter-bar-custom {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      padding: 20px;
+      border-radius: var(--radius-xl);
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-md);
+    }
+    .filter-bar-custom input, .filter-bar-custom select {
+      padding: 10px 14px;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      background: var(--color-surface);
+      color: var(--color-navy);
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+    .filter-bar-custom input:focus, .filter-bar-custom select:focus {
+      border-color: var(--color-nss-red);
+    }
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 0.84rem;
+      border-radius: var(--radius-md);
+      min-height: 36px;
+    }
+    .pagination-custom {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .pagination-custom a, .pagination-custom span {
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--color-navy);
+      background: var(--color-surface);
+      transition: all var(--transition-fast);
+    }
+    .pagination-custom a:hover {
+      border-color: var(--color-nss-red);
+      color: var(--color-nss-red);
+    }
+    .pagination-custom .active {
+      background: var(--color-nss-red);
+      color: white;
+      border-color: var(--color-nss-red);
+    }
   </style>
 </head>
-<body>
+<body class="dashboard-body" style="display: flex; flex-direction: column; min-height: 100vh;">
+
+  <!-- Floating Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
   <header class="site-header">
-    <div class="header-inner">
-      <div class="header-logo"><div>All Student Registrations</div></div>
+    <div class="header-inner container">
+      <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
+        <div class="header-logo-group" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.9); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+          <img src="/images/pondilogo.png" alt="Pondicherry University Logo" style="height: 40px; width: auto; object-fit: contain;" title="Pondicherry University">
+          <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" style="height: 40px; width: auto; object-fit: contain; border-radius: 4px;" title="40 Years of Excellence">
+          <img src="/images/nsslogo.jpg" alt="NSS Logo" style="height: 40px; width: auto; object-fit: contain; border-radius: 50%;" title="National Service Scheme">
+        </div>
+        <div class="logo-text">
+          Student Registrations
+          <small style="display: block;">Pondicherry University</small>
+        </div>
+      </div>
       <div>
-        <a href="/admin/dashboard" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; margin-right: 10px;">← Dashboard</a>
-        <a href="/admin/logout" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+        <a href="/admin/dashboard" class="btn btn-secondary btn-sm" style="margin-right: 8px;">← Dashboard</a>
+        <a href="/admin/registrations/export/excel" class="btn btn-primary btn-sm" style="margin-right: 8px;">📥 Export Excel</a>
+        <a href="/admin/logout" class="btn btn-outline btn-sm">Logout</a>
       </div>
     </div>
   </header>
 
-  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
-    <form method="GET" action="/admin/registrations" class="filter-bar">
-      <input type="text" name="search" placeholder="Search Name, Reg ID, Mobile, Aadhaar..." value="<%= filters.search %>" style="flex: 2; min-width: 220px;">
+  <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px;">
+    
+    <!-- Search & Filter Form -->
+    <form method="GET" action="/admin/registrations" class="filter-bar-custom">
+      <input type="text" name="search" placeholder="Search Name, Reg ID, Mobile, Aadhaar, Dept..." value="<%= filters.search %>" style="flex: 2; min-width: 240px;">
       
       <!-- Filter by Unit -->
       <select name="unit">
-        <option value="">All Units</option>
+        <option value="">All NSS Units</option>
         <% UNITS.forEach(function(u) { %>
           <option value="<%= u %>" <%= filters.unit === u ? 'selected' : '' %>><%= u %></option>
         <% }); %>
@@ -63,51 +145,85 @@
         <option value="No" <%= filters.interested_in_media === 'No' ? 'selected' : '' %>>No</option>
       </select>
 
-      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-      <a href="/admin/registrations" class="btn btn-secondary btn-sm">Reset</a>
+      <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+      <a href="/admin/registrations" class="btn btn-ghost btn-sm">Reset</a>
     </form>
 
-    <div class="card" style="padding: 0; overflow-x: auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Reg ID</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Mobile</th>
-            <th>Unit</th>
-            <th>Certificate</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (registrations.length === 0) { %>
-            <tr><td colspan="7" style="text-align:center; padding: 20px;">No matching records.</td></tr>
-          <% } else { %>
-            <% registrations.forEach(function(reg) { %>
-              <tr>
-                <td><strong><%= reg.registration_id %></strong></td>
-                <td><%= reg.applicant_name %></td>
-                <td><%= reg.course %></td>
-                <td><%= reg.contact_number %></td>
-                <td><span style="background: var(--gray-100); padding: 3px 8px; border-radius: 4px; font-weight: 600; color: var(--nss-navy);"><%= reg.unit_number %></span></td>
-                <td>
-                  <% if (reg.certificate_path) { %>
-                    <a href="/uploads/<%= reg.certificate_path %>" target="_blank" class="btn btn-secondary btn-sm" style="background: #276749;">View</a>
-                  <% } else { %>
-                    <span style="color: var(--gray-400); font-size: 0.8rem;">N/A</span>
-                  <% } %>
-                </td>
-                <td>
-                  <a href="/admin/registrations/<%= reg.id %>" class="btn btn-secondary btn-sm">Profile</a>
-                  <a href="/admin/registrations/<%= reg.id %>/pdf" class="btn btn-primary btn-sm">PDF</a>
-                </td>
-              </tr>
-            <% }); %>
-          <% } %>
-        </tbody>
-      </table>
+    <!-- Table Card -->
+    <div class="dash-table-card" style="padding: 0; overflow: hidden;">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Reg ID</th>
+              <th>Applicant Name</th>
+              <th>Univ Reg No</th>
+              <th>Course</th>
+              <th>Unit</th>
+              <th>Mobile</th>
+              <th>Certificate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!registrations || registrations.length === 0) { %>
+              <tr><td colspan="8" style="text-align:center; padding: 35px; color: var(--color-text-muted);">No student registrations found matching your query criteria.</td></tr>
+            <% } else { %>
+              <% registrations.forEach(function(reg) { %>
+                <tr>
+                  <td><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
+                  <td><strong><%= reg.applicant_name %></strong></td>
+                  <td><%= reg.univ_reg_no %></td>
+                  <td><%= reg.course %></td>
+                  <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
+                  <td><%= reg.contact_number %></td>
+                  <td>
+                    <% if (reg.certificate_path) { %>
+                      <a href="/uploads/<%= reg.certificate_path %>" target="_blank" class="btn btn-success btn-sm" style="padding: 3px 10px; font-size: 0.78rem;">View Cert</a>
+                    <% } else { %>
+                      <span style="color: var(--color-text-muted); font-size: 0.8rem;">None</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                      <a href="/admin/registrations/<%= reg.id %>" class="btn btn-secondary btn-sm" title="View Profile">Profile</a>
+                      <a href="/admin/registrations/<%= reg.id %>/edit" class="btn btn-outline btn-sm" title="Edit Registration">Edit</a>
+                      <a href="/admin/registrations/<%= reg.id %>/pdf" class="btn btn-primary btn-sm" title="Download PDF Slip">PDF</a>
+                      
+                      <!-- Delete Form with CSRF Token -->
+                      <form action="/admin/registrations/<%= reg.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete registration <%= reg.registration_id %> (<%= reg.applicant_name %>)?');" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #b71c1c; padding: 5px 10px;" title="Delete Registration">🗑️</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
     </div>
+
+    <!-- Pagination Bar -->
+    <% if (pagination.totalPages > 1) { %>
+      <div class="pagination-custom">
+        <% if (pagination.currentPage > 1) { %>
+          <a href="/admin/registrations?page=<%= pagination.currentPage - 1 %>&unit=<%= filters.unit %>&course=<%= filters.course %>&year_of_study=<%= filters.year_of_study %>&search=<%= filters.search %>">« Prev</a>
+        <% } %>
+
+        <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+          <a href="/admin/registrations?page=<%= i %>&unit=<%= filters.unit %>&course=<%= filters.course %>&year_of_study=<%= filters.year_of_study %>&search=<%= filters.search %>" class="<%= pagination.currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+
+        <% if (pagination.currentPage < pagination.totalPages) { %>
+          <a href="/admin/registrations?page=<%= pagination.currentPage + 1 %>&unit=<%= filters.unit %>&course=<%= filters.course %>&year_of_study=<%= filters.year_of_study %>&search=<%= filters.search %>">Next »</a>
+        <% } %>
+      </div>
+    <% } %>
+
   </main>
+
+  <%- include('../partials/footer') %>
 </body>
 </html>

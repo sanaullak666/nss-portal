@@ -1,7 +1,6 @@
-﻿const express = require('express');
+const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const csurf = require('csurf');
 const helmet = require('helmet');
 const path = require('path');
 const fs = require('fs');
@@ -15,17 +14,31 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Ensure uploads directory exists
-if (!fs.existsSync('./uploads')) {
-  fs.mkdirSync('./uploads');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Trust Render Reverse Proxy
+// Trust Reverse Proxy for production deployment
 app.set('trust proxy', 1);
 
-// Security Headers
-app.use(helmet({ contentSecurityPolicy: false }));
+// Security Headers (Helmet with CSP for Chart.js & Google Fonts)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"],
+        styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+        fontSrc: ["'self'", "fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'"]
+      }
+    }
+  })
+);
 
-// Body Parsers
+// Body Parsers & String Trimming Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -39,147 +52,208 @@ app.use((req, res, next) => {
   next();
 });
 
-// Cookie Parser & Session Config
+// Cookie Parser & Session Configuration
 app.use(cookieParser());
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'nss_pu_secure_secret_key_2026',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'nss_pu_secure_secret_key_2026',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 Hours
+    }
+  })
+);
 
-// Static Folders
+// Static Asset Directories
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// View Engine
+// View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Import Routes
+const registrationRoutes = require('./routes/registrationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const registrationRoutes = require('./routes/registrationRoutes');
 
-// Direct Route Mounts
+// Mount Routes
+app.use('/', registrationRoutes);
 app.use('/', authRoutes);
 app.use('/', adminRoutes);
-app.use('/', registrationRoutes);
 
-// Direct Redirect from /admin to /admin/login
+// Direct Redirect from /admin to /admin/dashboard or /admin/login
 app.get('/admin', (req, res) => {
+  if (req.session && req.session.admin) {
+    return res.redirect('/admin/dashboard');
+  }
   res.redirect('/admin/login');
 });
 
-// 404 Handler
+// 404 Page Not Found Handler
 app.use((req, res) => {
-  res.status(404).render('404');
+  res.status(404).render('404', { title: '404 - Page Not Found | PU NSS Portal' });
 });
 
-// 500 Error Handler
+// 500 Server Error Handler
 app.use((err, req, res, next) => {
   console.error('SERVER ERROR LOG:', err);
   if (err.code === 'EBADCSRFTOKEN') {
-    return res.status(403).send('Invalid or expired CSRF token. Please refresh and try again.');
+    return res.status(403).render('403', { title: '403 - Invalid Token | PU NSS Portal' });
   }
-  res.status(500).render('500');
+  res.status(500).render('500', { title: '500 - Server Error | PU NSS Portal' });
 });
 
-// Auto-Initialize Database Schema & Boot Server
-async function bootServer() {
-  const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
-  const port = parseInt(process.env.DB_PORT, 10) || 4000;
-  const user = process.env.DB_USER || '31C3t8dhjKFJoEL.root';
-  const password = process.env.DB_PASSWORD || 'R1uh8uj3atlkVeNR';
-  const dbName = process.env.DB_NAME || 'nss_portal';
+// Auto-Migrate Database Schema Safely
+async function autoMigrate(connection) {
+  // 1. Ensure registrations table & columns
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS registrations (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      registration_id VARCHAR(50) UNIQUE NOT NULL,
+      unit_number VARCHAR(20) NOT NULL,
+      department VARCHAR(150) NOT NULL,
+      course VARCHAR(100) NOT NULL,
+      year_of_study VARCHAR(30) NOT NULL,
+      applicant_name VARCHAR(150) NOT NULL,
+      univ_reg_no VARCHAR(50) UNIQUE NOT NULL,
+      email VARCHAR(150) UNIQUE NOT NULL,
+      contact_number VARCHAR(15) NOT NULL,
+      alt_contact_number VARCHAR(15) DEFAULT NULL,
+      gender VARCHAR(30) NOT NULL,
+      dob DATE NOT NULL,
+      age INT NOT NULL,
+      blood_group VARCHAR(30) NOT NULL,
+      aadhaar_number VARCHAR(20) UNIQUE NOT NULL,
+      native_state VARCHAR(100) NOT NULL,
+      present_address TEXT NOT NULL,
+      permanent_address TEXT NOT NULL,
+      is_same_address TINYINT(1) DEFAULT 0,
+      languages_spoken TEXT NOT NULL,
+      is_previous_volunteer VARCHAR(10) NOT NULL,
+      certificate_path VARCHAR(255) DEFAULT NULL,
+      interested_in_media VARCHAR(10) NOT NULL DEFAULT 'No',
+      media_roles TEXT DEFAULT NULL,
+      extra_curricular_skills TEXT DEFAULT NULL,
+      interested_in_leadership VARCHAR(10) NOT NULL DEFAULT 'No',
+      declaration_accepted TINYINT(1) NOT NULL DEFAULT 1,
+      status VARCHAR(20) NOT NULL DEFAULT 'Active',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
 
   try {
-    const conn = await mysql.createConnection({
-      host, port, user, password,
-      ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: false }
-    });
+    const [extraSkillsCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'extra_curricular_skills'`);
+    if (extraSkillsCol.length === 0) {
+      await connection.query(`ALTER TABLE registrations ADD COLUMN extra_curricular_skills TEXT DEFAULT NULL AFTER media_roles`);
+    }
 
-    await conn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-    await conn.end();
+    const [leadershipCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'interested_in_leadership'`);
+    if (leadershipCol.length === 0) {
+      await connection.query(`ALTER TABLE registrations ADD COLUMN interested_in_leadership VARCHAR(10) NOT NULL DEFAULT 'No' AFTER extra_curricular_skills`);
+    }
 
+    const [statusCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'status'`);
+    if (statusCol.length === 0) {
+      await connection.query(`ALTER TABLE registrations ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Active' AFTER declaration_accepted`);
+    }
+
+    await connection.query("DELETE FROM registrations WHERE status = 'Deleted'");
+  } catch (e) {}
+
+  // 2. Ensure audit_logs table
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      action VARCHAR(50) NOT NULL,
+      performed_by VARCHAR(100) NOT NULL,
+      details TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+
+  // 3. Ensure admins table
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS admins (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      full_name VARCHAR(100) NOT NULL DEFAULT 'PU NSS Super Administrator',
+      email VARCHAR(150) UNIQUE NOT NULL,
+      role VARCHAR(30) NOT NULL DEFAULT 'superadmin',
+      last_login DATETIME DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+
+  try {
+    const [passHashCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'password_hash'`);
+    if (passHashCol.length === 0) {
+      const [oldPassCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'password'`);
+      if (oldPassCol.length > 0) {
+        await connection.query(`ALTER TABLE admins CHANGE COLUMN \`password\` \`password_hash\` VARCHAR(255) NOT NULL`);
+      } else {
+        await connection.query(`ALTER TABLE admins ADD COLUMN \`password_hash\` VARCHAR(255) NOT NULL`);
+      }
+    }
+
+    const [fullNameCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'full_name'`);
+    if (fullNameCol.length === 0) {
+      await connection.query(`ALTER TABLE admins ADD COLUMN \`full_name\` VARCHAR(100) NOT NULL DEFAULT 'PU NSS Super Administrator'`);
+    }
+
+    const [roleCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'role'`);
+    if (roleCol.length === 0) {
+      await connection.query(`ALTER TABLE admins ADD COLUMN \`role\` VARCHAR(30) NOT NULL DEFAULT 'superadmin'`);
+    }
+
+    const [lastLoginCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'last_login'`);
+    if (lastLoginCol.length === 0) {
+      await connection.query(`ALTER TABLE admins ADD COLUMN \`last_login\` DATETIME DEFAULT NULL`);
+    }
+  } catch (mErr) {
+    console.error('Admin table migration notice:', mErr.message);
+  }
+
+  // Seed default admin user
+  const adminHash = await bcrypt.hash('Admin@NSS2026', 10);
+  await connection.query(
+    `INSERT INTO admins (username, password_hash, full_name, email, role) 
+     VALUES ('admin', ?, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin') 
+     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)`,
+    [adminHash]
+  );
+}
+
+// Database Auto-Initialization
+let migrationDone = false;
+async function initDb() {
+  if (migrationDone) return;
+  try {
     const db = require('./config/database');
     const connection = await db.getConnection();
-
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS registrations (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        registration_id VARCHAR(50) UNIQUE,
-        applicant_name VARCHAR(150),
-        univ_reg_no VARCHAR(50),
-        email VARCHAR(100),
-        contact_number VARCHAR(15),
-        alt_contact_number VARCHAR(15),
-        department VARCHAR(100),
-        course VARCHAR(100),
-        year_of_study VARCHAR(20),
-        unit_number VARCHAR(20),
-        gender VARCHAR(20),
-        dob DATE,
-        age INT,
-        blood_group VARCHAR(10),
-        aadhaar_number VARCHAR(20),
-        native_state VARCHAR(100),
-        present_address TEXT,
-        permanent_address TEXT,
-        languages_spoken TEXT,
-        media_roles TEXT,
-        is_previous_volunteer VARCHAR(10),
-        certificate_path VARCHAR(255),
-        declaration_accepted TINYINT(1),
-        status VARCHAR(20) DEFAULT 'Active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB;
-    `);
-
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS audit_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        action VARCHAR(50) NOT NULL,
-        performed_by VARCHAR(100) NOT NULL,
-        details TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB;
-    `);
-
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS admins (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        email VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB;
-    `);
-
-    // Seed default admin user
-    const hash = await bcrypt.hash('Admin@NSS2026', 10);
-    await connection.query(
-      `INSERT INTO admins (username, password_hash, email) 
-       VALUES ('admin', ?, 'admin@pondiuni.edu.in') 
-       ON DUPLICATE KEY UPDATE password_hash = ?`,
-      [hash, hash]
-    );
-
+    await autoMigrate(connection);
     connection.release();
-
-    app.listen(PORT, () => {
-      console.log(`🚀 PU NSS Portal running on port ${PORT}`);
-    });
-
+    migrationDone = true;
+    console.log('✅ Database schema verified and migrated successfully.');
   } catch (err) {
-    console.error('Boot Error:', err.message);
-    app.listen(PORT);
+    console.error('⚠️ Database connection/migration warning:', err.message);
   }
 }
 
-bootServer();
+// Ensure database is initialized
+initDb();
+
+// Start HTTP Server when running locally
+if (require.main === module || process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 PU NSS Volunteer Registration Portal running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -1,62 +1,106 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/track.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body style="display: flex; flex-direction: column; min-height: 100vh;">
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="header-logo">
-        <div>Track Registration Status</div>
-      </div>
-      <a href="/" class="btn btn-primary" style="padding: 6px 18px; font-size: 0.85rem;">Home</a>
-    </div>
-  </header>
+<body class="track-page-body" style="display: flex; flex-direction: column; min-height: 100vh;">
 
-  <main class="container" style="flex: 1; padding-top: 40px; padding-bottom: 60px; max-width: 700px;">
-    <div class="card">
-      <h2 style="color: var(--nss-navy); text-align: center; margin-bottom: 5px;">Track Volunteer Application</h2>
-      <p style="text-align: center; color: var(--gray-600); margin-bottom: 25px;">Enter your Registration ID or Register Number</p>
+  <!-- Background Floating Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
 
-      <form action="/track-registration" method="POST" style="margin-bottom: 30px;">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div style="display: flex; gap: 10px;">
-          <input type="text" name="query" class="form-control" placeholder="e.g. NSS-2026-UNIT1-000001 or 24351001" required style="flex: 1;">
-          <button type="submit" class="btn btn-primary">Search</button>
+  <%- include('partials/header') %>
+
+  <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px;">
+    <div class="track-wrapper">
+      <div class="track-card">
+
+        <!-- Header Section -->
+        <div class="track-header">
+          <div class="track-logo-group">
+            <img src="/images/pondilogo.png" alt="Pondicherry University Logo" style="height: 48px; width: auto; object-fit: contain;" title="Pondicherry University">
+            <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" style="height: 48px; width: auto; object-fit: contain; border-radius: 4px;" title="40 Years of Excellence">
+            <img src="/images/nsslogo.jpg" alt="NSS Logo" style="height: 48px; width: auto; object-fit: contain; border-radius: 50%;" title="National Service Scheme">
+          </div>
+          <h1>Track Volunteer Application Status</h1>
+          <p>Enter your Registration ID, University Register Number, Email, Mobile, or Aadhaar Number</p>
         </div>
-      </form>
 
-      <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
-      <% } %>
+        <!-- Search Form -->
+        <form action="/track-registration" method="POST" style="margin-bottom: 20px;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="search-box-group">
+            <input type="text" name="query" class="search-input" placeholder="e.g. PU-NSS-2026-UNIT1-000001 or 25MCA00PY0085" required oninput="this.value = this.value.toUpperCase()">
+            <button type="submit" class="search-btn">🔍 Search Application</button>
+          </div>
+        </form>
 
-      <% if (registration) { %>
-        <div style="border: 2px solid var(--gray-200); border-radius: var(--radius-md); padding: 25px; background: var(--gray-50);">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-300); padding-bottom: 12px; margin-bottom: 15px;">
-            <div>
-              <h3 style="margin:0; color: var(--nss-navy);"><%= registration.applicant_name %></h3>
-              <span style="font-size: 0.85rem; color: var(--gray-600);">Registration ID: <strong><%= registration.registration_id %></strong></span>
+        <% if (error) { %>
+          <div class="alert alert-error" style="background: #fee2e2; color: #b71c1c; padding: 14px 18px; border-radius: var(--radius-md); text-align: center; margin-bottom: 20px; border-left: 4px solid var(--color-nss-red); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>⚠️</span>
+            <div><strong>Status Check Notice:</strong> <%= error %></div>
+          </div>
+        <% } %>
+
+        <% if (registration) { %>
+          <div class="result-card">
+            <div class="result-header">
+              <div>
+                <h3 class="applicant-title"><%= registration.applicant_name %></h3>
+                <div class="reg-id-badge">Registration ID: <strong><%= registration.registration_id %></strong></div>
+              </div>
+              <span class="status-tag">Status: Active</span>
             </div>
-            <span style="background: #16A34A; color: white; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: bold;">Submitted</span>
-          </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; margin-bottom: 20px;">
-            <div><strong>NSS Unit:</strong> <%= registration.unit_number %></div>
-            <div><strong>Course:</strong> <%= registration.course %></div>
-            <div><strong>Department:</strong> <%= registration.department %></div>
-            <div><strong>Submitted Date:</strong> <%= new Date(registration.created_at).toLocaleDateString('en-IN') %></div>
-          </div>
+            <div class="details-grid">
+              <div class="details-item"><strong>NSS Unit:</strong> <span style="color: var(--color-navy); font-weight: 700;"><%= registration.unit_number %></span></div>
+              <div class="details-item"><strong>Univ Reg No:</strong> <%= registration.univ_reg_no %></div>
+              <div class="details-item"><strong>Course:</strong> <%= registration.course %></div>
+              <div class="details-item"><strong>Department:</strong> <%= registration.department %></div>
+              <div class="details-item"><strong>Year of Study:</strong> <%= registration.year_of_study %></div>
+              <div class="details-item"><strong>Registration Date:</strong> <%= new Date(registration.created_at).toLocaleDateString('en-IN') %></div>
+            </div>
 
-          <div style="display: flex; gap: 10px;">
-            <a href="/track-registration/pdf/<%= registration.registration_id %>" class="btn btn-primary" style="flex: 1; text-align: center;">Download Official Receipt (PDF)</a>
+            <!-- Selection Instructions & WhatsApp Link -->
+            <div class="whatsapp-box">
+              <div class="whatsapp-box-title">
+                <span>📌</span> Selection Process Instructions:
+              </div>
+              <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Join the WhatsApp group for further updates on the selection process: <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800;">Click Here to Join WhatsApp Group</a></strong></li>
+                <li><strong>Please take a printout of your application receipt for the selection interview.</strong></li>
+              </ul>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <a href="/track-registration/pdf/<%= registration.registration_id %>" class="pdf-download-btn">
+                📥 Download Application Form Receipt (PDF)
+              </a>
+              <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" class="whatsapp-link-btn">
+                📲 Join WhatsApp Group
+              </a>
+            </div>
           </div>
-        </div>
-      <% } %>
+        <% } %>
+
+      </div>
     </div>
   </main>
 
   <%- include('partials/footer') %>
+  <script src="/js/main.js"></script>
 </body>
 </html>

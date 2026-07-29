@@ -1,40 +1,57 @@
-﻿const UNITS = ['UNIT 1', 'UNIT 2', 'UNIT 5', 'UNIT 6'];
+const UNITS = ['UNIT 1', 'UNIT 2', 'UNIT 5', 'UNIT 6'];
 
 const DEPARTMENT_UNIT_MAP = {
   'UNIT 1': [
-    'Department of Biochemistry & Molecular Biology',
-    'Department of Biotechnology',
-    'Department of Bioinformatics',
-    'Department of Ecological Science',
-    'Department of Food Science & Technology',
+    'Department of Computer Science',
+    'Department of Electronics Engineering',
+    'Centre for Pollution Control and Environmental Engineering',
+    'Department of Mathematics',
+    'Department of Statistics',
     'Department of Earth Sciences',
-    'Department of Chemistry',
     'Department of Physics',
-    'Department of Computer Science'
+    'Department of Chemistry',
+    'Department of Biochemistry and Molecular Biology',
+    'Department of Biotechnology',
+    'Department of Ecology and Environmental Sciences',
+    'Department of Food Science and Technology',
+    'Department of Microbiology',
+    'Department of Bioinformatics',
+    'Department of Green Energy Technology',
+    'Centre for Nano Sciences & Technology'
   ],
   'UNIT 2': [
+    'Sri Subramania Bharathi School of Tamil Language & Literature',
+    'Department of Electronic Media and Mass Communication',
     'Department of Anthropology',
-    'Department of History',
-    'Department of Politics & International Studies',
     'Department of Sociology',
+    'Department of History',
+    'Department of Politics and International Studies',
     'Department of Social Work',
-    'Department of Philosophy'
+    'Centre for Women\'s Studies',
+    'Centre for South Asian Studies',
+    'Centre for Study of Social Exclusion & Inclusive Policy',
+    'Centre for Maritime Studies',
+    'SEAL (Social & Economic Administration and Law)'
   ],
   'UNIT 5': [
     'Department of Management Studies',
+    'Department of International Business',
+    'Department of Banking Technology',
+    'Department of Tourism Studies',
     'Department of Commerce',
     'Department of Economics',
-    'Department of Tourism Studies',
-    'Department of Banking Technology'
+    'Department of Library and Information Science',
+    'Department of Physical Education and Sports'
   ],
   'UNIT 6': [
-    'Department of Education',
-    'Department of Physical Education',
+    'School of Education',
+    'Department of Applied Psychology',
+    'School of Performing Arts',
     'Department of English',
     'Department of French',
     'Department of Hindi',
-    'Department of Tamil',
     'Department of Sanskrit',
+    'Department of Philosophy',
     'School of Law'
   ]
 };
@@ -66,7 +83,7 @@ const COURSES = [
   'M.A (Integrated)'
 ];
 
-const YEAR_OF_STUDY = ['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year'];
+const YEAR_OF_STUDY = ['First Year', 'Second Year', 'Third Year'];
 
 const BLOOD_GROUPS = [
   'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-',

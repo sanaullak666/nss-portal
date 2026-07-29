@@ -1,22 +1,108 @@
-﻿const PDFDocument = require('pdfkit');
+const PDFDocument = require('pdfkit');
 
 function generateRegistrationPDF(registration, res) {
-  const doc = new PDFDocument({ margin: 50 });
+  const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="NSS_Registration_${registration.registration_id}.pdf"`);
 
   doc.pipe(res);
 
-  doc.fontSize(18).text('Pondicherry University - NSS Registration Slip', { align: 'center' });
-  doc.moveDown();
-  doc.fontSize(12).text(`Registration ID: ${registration.registration_id}`);
-  doc.text(`Name: ${registration.applicant_name}`);
-  doc.text(`University Reg No: ${registration.univ_reg_no}`);
-  doc.text(`Department: ${registration.department}`);
-  doc.text(`Unit Assigned: ${registration.unit_number}`);
-  doc.text(`Email: ${registration.email}`);
-  doc.text(`Contact: ${registration.contact_number}`);
+  // Header Banner
+  doc.rect(40, 40, 515, 60).fill('#0F2042');
+  doc.fillColor('#FFFFFF')
+     .fontSize(16)
+     .font('Helvetica-Bold')
+     .text('PONDICHERRY UNIVERSITY', 50, 52, { align: 'center', width: 495 })
+     .fontSize(12)
+     .font('Helvetica')
+     .text('NATIONAL SERVICE SCHEME (NSS) REGISTRATION SLIP 2026', 50, 75, { align: 'center', width: 495 });
+
+  doc.moveDown(2);
+
+  // Registration Summary Box
+  const startY = 120;
+  doc.rect(40, startY, 515, 45).fillAndStroke('#F8FAFC', '#E2E8F0');
+  doc.fillColor('#D32F2F').fontSize(14).font('Helvetica-Bold').text(`REGISTRATION ID: ${registration.registration_id}`, 55, startY + 12);
+  doc.fillColor('#0F2042').fontSize(12).font('Helvetica-Bold').text(`ASSIGNED UNIT: ${registration.unit_number}`, 360, startY + 12);
+
+  let currentY = startY + 60;
+
+  function addSectionHeader(title) {
+    doc.rect(40, currentY, 515, 22).fill('#E2E8F0');
+    doc.fillColor('#0F2042').fontSize(10).font('Helvetica-Bold').text(title.toUpperCase(), 50, currentY + 6);
+    currentY += 28;
+  }
+
+  function addFieldRow(label1, val1, label2, val2) {
+    doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold').text(label1, 50, currentY);
+    doc.fillColor('#0F2042').fontSize(9.5).font('Helvetica').text(val1 || 'N/A', 150, currentY, { width: 130 });
+
+    if (label2) {
+      doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold').text(label2, 300, currentY);
+      doc.fillColor('#0F2042').fontSize(9.5).font('Helvetica').text(val2 || 'N/A', 400, currentY, { width: 145 });
+    }
+    currentY += 20;
+  }
+
+  // Section 1: Academic Information
+  addSectionHeader('1. Academic Information');
+  addFieldRow('Department:', registration.department, 'Course / Program:', registration.course);
+  addFieldRow('Univ Reg No:', registration.univ_reg_no, 'Year of Study:', registration.year_of_study);
+
+  currentY += 5;
+
+  // Section 2: Personal Information
+  addSectionHeader('2. Personal Details');
+  addFieldRow('Full Name:', registration.applicant_name, 'Gender:', registration.gender);
+  addFieldRow('Email Address:', registration.email, 'Contact Mobile:', registration.contact_number);
+  addFieldRow('Alt Contact:', registration.alt_contact_number || 'N/A', 'Date of Birth:', registration.dob ? new Date(registration.dob).toISOString().split('T')[0] : 'N/A');
+  addFieldRow('Age:', String(registration.age), 'Blood Group:', registration.blood_group);
+  addFieldRow('Aadhaar No:', registration.aadhaar_number, 'Native State:', registration.native_state);
+
+  currentY += 5;
+
+  // Section 3: Address & NSS Skills
+  addSectionHeader('3. Address & NSS Specializations');
+
+  let languages = registration.languages_spoken;
+  if (typeof languages === 'string') {
+    try {
+      const parsed = JSON.parse(languages);
+      if (Array.isArray(parsed)) languages = parsed.join(', ');
+    } catch (e) {}
+  } else if (Array.isArray(languages)) {
+    languages = languages.join(', ');
+  }
+
+  let roles = registration.media_roles;
+  if (typeof roles === 'string') {
+    try {
+      const parsed = JSON.parse(roles);
+      if (Array.isArray(parsed)) roles = parsed.join(', ');
+    } catch (e) {}
+  } else if (Array.isArray(roles)) {
+    roles = roles.join(', ');
+  }
+
+  addFieldRow('Present Addr:', registration.present_address, 'Permanent Addr:', registration.permanent_address);
+  addFieldRow('Languages:', languages || 'N/A', 'Prev Volunteer:', registration.is_previous_volunteer);
+  addFieldRow('Media Interest:', registration.interested_in_media || 'No', 'Media Roles:', roles || 'N/A');
+  addFieldRow('Extra Skills:', registration.extra_curricular_skills || 'None', 'Leadership Interest:', registration.interested_in_leadership || 'No');
+
+  currentY += 15;
+
+  // Declaration & Signature
+  doc.rect(40, currentY, 515, 55).stroke('#CBD5E1');
+  doc.fillColor('#64748B').fontSize(8.5).font('Helvetica-Oblique')
+     .text('Declaration: I hereby declare that all information submitted in this application is true and complete to the best of my knowledge.', 50, currentY + 8, { width: 495 });
+
+  doc.fillColor('#0F2042').fontSize(9).font('Helvetica-Bold')
+     .text('Student Signature', 70, currentY + 36)
+     .text('NSS Programme Officer Signature', 350, currentY + 36);
+
+  // Footer
+  doc.fontSize(8).fillColor('#94A3B8').text('Generated by Pondicherry University NSS Portal 2026', 40, 780, { align: 'center', width: 515 });
 
   doc.end();
 }

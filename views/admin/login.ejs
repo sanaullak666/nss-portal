@@ -1,44 +1,111 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body style="display: flex; flex-direction: column; min-height: 100vh;">
+<body class="login-page-body" style="display: flex; flex-direction: column; min-height: 100vh;">
+
+  <!-- Background Floating Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <%- include('../partials/header') %>
+
   <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
-    <div class="card" style="max-width: 420px; width: 100%; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-      <div style="text-align: center; margin-bottom: 25px;">
-        <h2 style="color: var(--color-navy); margin-bottom: 5px;">NSS Admin Portal</h2>
-        <p style="color: var(--color-text-muted); font-size: 0.9rem;">Sign in to manage volunteer registrations</p>
-      </div>
-
-      <% if (error) { %>
-        <div style="background: #fee2e2; color: #b71c1c; padding: 10px 15px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 20px; text-align: center;">
-          <%= error %>
-        </div>
-      <% } %>
-
-      <form action="/admin/login" method="POST">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="login-wrapper">
+      <div class="login-card">
         
-        <div class="form-group" style="margin-bottom: 18px;">
-          <label class="form-label">Username</label>
-          <input type="text" name="username" class="form-control" placeholder="Enter admin username" required autofocus>
+        <div class="login-brand">
+          <div class="login-logo-group">
+            <img src="/images/pondilogo.png" alt="Pondicherry University Logo" style="height: 48px; width: auto; object-fit: contain;" title="Pondicherry University">
+            <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" style="height: 48px; width: auto; object-fit: contain; border-radius: 4px;" title="40 Years of Excellence">
+            <img src="/images/nsslogo.jpg" alt="NSS Logo" style="height: 48px; width: auto; object-fit: contain; border-radius: 50%;" title="National Service Scheme">
+          </div>
+          <h1>NSS Admin Portal</h1>
+          <span class="subtitle">Pondicherry University Wing • Secure Control Center</span>
+          <div class="motto">"Not Me But You"</div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 25px;">
-          <label class="form-label">Password</label>
-          <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        <% if (error) { %>
+          <div class="alert alert-error" style="background: #fee2e2; color: #b71c1c; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 22px; border-left: 4px solid var(--color-nss-red); display: flex; align-items: center; gap: 8px;">
+            <span>⚠️</span>
+            <div><strong>Authentication Failed:</strong> <%= error %></div>
+          </div>
+        <% } %>
+
+        <form action="/admin/login" method="POST" class="login-form" id="adminLoginForm">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          
+          <div class="form-group">
+            <label for="username">Admin Username or Email</label>
+            <div class="input-container">
+              <input type="text" id="username" name="username" class="form-control-custom" placeholder="Enter admin username or email" required autofocus autocomplete="username">
+              <span class="input-icon">👤</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-container">
+              <input type="password" id="password" name="password" class="form-control-custom" placeholder="Enter admin password" required autocomplete="current-password">
+              <span class="input-icon">🔒</span>
+              <button type="button" class="password-toggle-btn" id="passwordToggle" aria-label="Toggle password visibility" title="Show/Hide Password">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox" name="remember_me" id="rememberMe">
+              <span>Keep me signed in</span>
+            </label>
+          </div>
+
+          <button type="submit" class="login-btn" id="loginSubmitBtn">
+            <span class="btn-text">Sign In to Dashboard</span>
+            <span class="btn-icon">➔</span>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <a href="/">← Return to Student Registration Portal</a>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Sign In</button>
-      </form>
-      
-      <div style="text-align: center; margin-top: 20px;">
-        <a href="/" style="font-size: 0.85rem; color: var(--color-text-muted);">← Back to Volunteer Portal</a>
       </div>
     </div>
   </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/main.js"></script>
+  <script>
+    // Password Visibility Toggle Script
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('passwordToggle');
+      const passwordInput = document.getElementById('password');
+
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          toggleBtn.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+      }
+    });
+  </script>
 </body>
 </html>

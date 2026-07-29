@@ -1,6 +1,7 @@
-﻿const db = require('../config/database');
+const RegistrationModel = require('../models/registrationModel');
 const constants = require('../config/constants');
 const { generateRegistrationId } = require('../utils/helpers');
+const { logAudit } = require('../utils/auditLogger');
 
 exports.renderForm = (req, res) => {
   res.render('index', {
@@ -8,21 +9,25 @@ exports.renderForm = (req, res) => {
     constants,
     csrfToken: req.csrfToken ? req.csrfToken() : '',
     errors: [],
+    error: null,
+    success: null,
     formData: {}
   });
 };
 
 exports.handleRegistration = async (req, res) => {
-  const formData = req.body;
+  const formData = req.body || {};
   const certificateFile = req.file;
 
   try {
-    // Determine NSS Unit from Department Mapping
-    let assignedUnit = '';
-    for (const [unit, depts] of Object.entries(constants.DEPARTMENT_UNIT_MAP)) {
-      if (depts.includes(formData.department)) {
-        assignedUnit = unit;
-        break;
+    // Determine assigned unit from department map
+    let assignedUnit = formData.unit_number;
+    if (!assignedUnit) {
+      for (const [unit, depts] of Object.entries(constants.DEPARTMENT_UNIT_MAP)) {
+        if (depts.includes(formData.department)) {
+          assignedUnit = unit;
+          break;
+        }
       }
     }
 
@@ -31,66 +36,61 @@ exports.handleRegistration = async (req, res) => {
         title: 'Pondicherry University - NSS Volunteer Registration 2026',
         constants,
         csrfToken: req.csrfToken ? req.csrfToken() : '',
-        errors: [{ msg: 'Invalid department selected.' }],
+        errors: [{ param: 'department', msg: 'Selected department does not belong to a valid NSS Unit.' }],
+        error: null,
+        success: null,
         formData
       });
     }
 
     // Process languages spoken array
-    let languages = formData.languages_spoken;
+    let languages = formData.languages_spoken || [];
     if (typeof languages === 'string') languages = [languages];
     if (!Array.isArray(languages)) languages = [];
 
     // Process media roles array
-    let mediaRoles = formData.media_roles;
+    let mediaRoles = formData.media_roles || [];
     if (typeof mediaRoles === 'string') mediaRoles = [mediaRoles];
     if (!Array.isArray(mediaRoles)) mediaRoles = [];
 
     const certificatePath = certificateFile ? certificateFile.filename : null;
-    
-    // Fix: Await the async function to resolve the Promise to a string!
     const registrationId = await generateRegistrationId(assignedUnit);
 
-    const insertQuery = `
-      INSERT INTO registrations (
-        registration_id, unit_number, department, course, year_of_study,
-        applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
-        gender, dob, age, blood_group, aadhaar_number, native_state,
-        present_address, permanent_address, is_same_address, languages_spoken,
-        is_previous_volunteer, certificate_path, interested_in_media, media_roles,
-        declaration_accepted
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    const registrationData = {
+      registration_id: registrationId,
+      unit_number: assignedUnit,
+      department: formData.department,
+      course: formData.course,
+      year_of_study: formData.year_of_study,
+      applicant_name: formData.applicant_name.trim().toUpperCase(),
+      univ_reg_no: formData.univ_reg_no.trim(),
+      email: formData.email.trim().toLowerCase(),
+      contact_number: formData.contact_number.trim(),
+      alt_contact_number: formData.alt_contact_number ? formData.alt_contact_number.trim() : null,
+      gender: formData.gender,
+      dob: formData.dob,
+      age: parseInt(formData.age, 10) || 0,
+      blood_group: formData.blood_group,
+      aadhaar_number: formData.aadhaar_number.trim(),
+      native_state: formData.native_state.trim(),
+      present_address: formData.present_address.trim(),
+      permanent_address: formData.permanent_address.trim(),
+      is_same_address: formData.is_same_address === 'on' || formData.is_same_address === '1' || formData.is_same_address === true,
+      languages_spoken: languages,
+      is_previous_volunteer: formData.is_previous_volunteer,
+      certificate_path: certificatePath,
+      interested_in_media: formData.interested_in_media || 'No',
+      media_roles: formData.interested_in_media === 'Yes' ? mediaRoles : [],
+      extra_curricular_skills: formData.extra_curricular_skills ? formData.extra_curricular_skills.trim() : null,
+      interested_in_leadership: formData.interested_in_leadership || 'No',
+      declaration_accepted: formData.declaration_accepted === 'on' || formData.declaration_accepted === '1' || formData.declaration_accepted === true
+    };
 
-    const values = [
-      registrationId,
-      assignedUnit,
-      formData.department,
-      formData.course,
-      formData.year_of_study,
-      formData.applicant_name.trim().toUpperCase(),
-      formData.univ_reg_no.trim(),
-      formData.email.trim(),
-      formData.contact_number.trim(),
-      formData.alt_contact_number ? formData.alt_contact_number.trim() : null,
-      formData.gender,
-      formData.dob,
-      parseInt(formData.age, 10) || 0,
-      formData.blood_group,
-      formData.aadhaar_number.trim(),
-      formData.native_state,
-      formData.present_address.trim(),
-      formData.permanent_address.trim(),
-      formData.is_same_address === 'on' || formData.is_same_address === '1' ? 1 : 0,
-      JSON.stringify(languages),
-      formData.is_previous_volunteer,
-      certificatePath,
-      formData.interested_in_media,
-      formData.interested_in_media === 'Yes' ? JSON.stringify(mediaRoles) : JSON.stringify([]),
-      formData.declaration_accepted === 'on' || formData.declaration_accepted === '1' ? 1 : 0
-    ];
+    await RegistrationModel.create(registrationData);
 
-    await db.query(insertQuery, values);
+    try {
+      await logAudit('REGISTRATION', 'STUDENT', `New volunteer registered with ID: ${registrationId}`);
+    } catch (aErr) {}
 
     res.redirect(`/success/${registrationId}`);
   } catch (err) {
@@ -112,6 +112,8 @@ exports.handleRegistration = async (req, res) => {
       constants,
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       errors: [{ msg: errorMessage }],
+      error: errorMessage,
+      success: null,
       formData
     });
   }
@@ -121,21 +123,15 @@ exports.renderSuccess = async (req, res) => {
   const { registrationId } = req.params;
 
   try {
-    const [rows] = await db.query('SELECT * FROM registrations WHERE registration_id = ? LIMIT 1', [registrationId]);
+    const registration = await RegistrationModel.findByRegistrationId(registrationId);
 
-    if (rows.length === 0) {
-      return res.status(404).render('index', {
-        title: 'Registration Not Found',
-        constants,
-        csrfToken: req.csrfToken ? req.csrfToken() : '',
-        errors: [{ msg: 'Registration record not found.' }],
-        formData: {}
-      });
+    if (!registration) {
+      return res.status(404).render('404');
     }
 
     res.render('success', {
       title: 'Registration Successful - PU NSS Portal',
-      registration: rows[0]
+      registration
     });
   } catch (err) {
     console.error('Success Render Error:', err);

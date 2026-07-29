@@ -1,96 +1,217 @@
-﻿const db = require('../config/database');
-const { UNITS, DEPARTMENTS, COURSES, YEAR_OF_STUDY } = require('../config/constants');
+const RegistrationModel = require('../models/registrationModel');
+const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
 const { exportRegistrationsToExcel } = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
+const { logAudit } = require('../utils/auditLogger');
 
 exports.renderDashboard = async (req, res) => {
   try {
-    const [[{ totalRegistrations }]] = await db.query('SELECT COUNT(*) as totalRegistrations FROM registrations');
-    const [[{ todayRegistrations }]] = await db.query('SELECT COUNT(*) as todayRegistrations FROM registrations WHERE DATE(created_at) = CURDATE()');
-    const [[{ totalUnits }]] = await db.query('SELECT COUNT(DISTINCT unit_number) as totalUnits FROM registrations');
-    const [[{ totalMediaInterested }]] = await db.query('SELECT COUNT(*) as totalMediaInterested FROM registrations WHERE interested_in_media = "Yes"');
-    const [[{ totalPreviousVolunteers }]] = await db.query('SELECT COUNT(*) as totalPreviousVolunteers FROM registrations WHERE is_previous_volunteer = "Yes"');
-
-    // Chart aggregations
-    const [unitCounts] = await db.query('SELECT unit_number, COUNT(*) as count FROM registrations GROUP BY unit_number ORDER BY unit_number');
-    const [genderCounts] = await db.query('SELECT gender, COUNT(*) as count FROM registrations GROUP BY gender');
-    const [yearCounts] = await db.query('SELECT year_of_study, COUNT(*) as count FROM registrations GROUP BY year_of_study');
-    const [courseCounts] = await db.query('SELECT course, COUNT(*) as count FROM registrations GROUP BY course ORDER BY count DESC LIMIT 8');
-    const [recentRegistrations] = await db.query('SELECT * FROM registrations ORDER BY created_at DESC LIMIT 5');
+    const data = await RegistrationModel.getDashboardStats();
 
     res.render('admin/dashboard', {
       title: 'Admin Analytics & Dashboard - PU NSS Portal',
       admin: req.session.admin,
-      stats: { totalRegistrations, todayRegistrations, totalUnits, totalMediaInterested, totalPreviousVolunteers },
-      chartData: { unitCounts, genderCounts, yearCounts, courseCounts },
-      recentRegistrations
+      stats: data.stats,
+      chartData: data.chartData,
+      recentRegistrations: data.recentRegistrations
     });
   } catch (err) {
-    console.error('Dashboard Error:', err);
+    console.error('Dashboard Render Error:', err);
     res.status(500).render('500');
   }
 };
 
 exports.renderRegistrationsList = async (req, res) => {
   const { unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1 } = req.query;
-  const limit = 15;
-  const offset = (parseInt(page, 10) - 1) * limit;
-
-  let whereClauses = [];
-  let queryParams = [];
-
-  if (unit) { whereClauses.push('unit_number = ?'); queryParams.push(unit); }
-  if (department) { whereClauses.push('department = ?'); queryParams.push(department); }
-  if (course) { whereClauses.push('course = ?'); queryParams.push(course); }
-  if (year_of_study) { whereClauses.push('year_of_study = ?'); queryParams.push(year_of_study); }
-  if (gender) { whereClauses.push('gender = ?'); queryParams.push(gender); }
-  if (is_previous_volunteer) { whereClauses.push('is_previous_volunteer = ?'); queryParams.push(is_previous_volunteer); }
-  if (interested_in_media) { whereClauses.push('interested_in_media = ?'); queryParams.push(interested_in_media); }
-
-  if (search) {
-    whereClauses.push('(applicant_name LIKE ? OR univ_reg_no LIKE ? OR registration_id LIKE ? OR email LIKE ? OR contact_number LIKE ? OR aadhaar_number LIKE ? OR department LIKE ?)');
-    const term = `%${search.trim()}%`;
-    queryParams.push(term, term, term, term, term, term, term);
-  }
-
-  const whereSQL = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
   try {
-    const [[{ totalCount }]] = await db.query(`SELECT COUNT(*) as totalCount FROM registrations ${whereSQL}`, queryParams);
-    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...queryParams, limit, offset]);
+    const result = await RegistrationModel.findAllFiltered({
+      unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page, limit: 15
+    });
 
     res.render('admin/registrations', {
-      title: 'Manage Registrations - PU NSS Portal',
+      title: 'Manage Student Registrations - PU NSS Portal',
       admin: req.session.admin,
-      registrations,
-      pagination: { currentPage: parseInt(page, 10), totalPages: Math.ceil(totalCount / limit) || 1, totalCount },
-      filters: { unit: unit || '', department: department || '', course: course || '', year_of_study: year_of_study || '', gender: gender || '', is_previous_volunteer: is_previous_volunteer || '', interested_in_media: interested_in_media || '', search: search || '' },
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      registrations: result.registrations,
+      pagination: {
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalCount: result.totalCount
+      },
+      filters: {
+        unit: unit || '',
+        department: department || '',
+        course: course || '',
+        year_of_study: year_of_study || '',
+        gender: gender || '',
+        is_previous_volunteer: is_previous_volunteer || '',
+        interested_in_media: interested_in_media || '',
+        search: search || ''
+      },
       UNITS,
       DEPARTMENTS,
       COURSES,
       YEAR_OF_STUDY
     });
   } catch (err) {
-    console.error('Registrations List Error:', err);
+    console.error('Registrations List Render Error:', err);
     res.status(500).render('500');
   }
 };
 
 exports.renderRegistrationView = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM registrations WHERE id = ? LIMIT 1', [req.params.id]);
-    if (rows.length === 0) return res.status(404).render('404');
-    res.render('admin/registration-view', { title: `View Profile - PU NSS Portal`, admin: req.session.admin, registration: rows[0] });
+    const registration = await RegistrationModel.findById(req.params.id);
+    if (!registration) return res.status(404).render('404');
+
+    res.render('admin/registration-view', {
+      title: `View Profile - ${registration.applicant_name}`,
+      admin: req.session.admin,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      registration
+    });
   } catch (err) {
     console.error('View Registration Error:', err);
     res.status(500).render('500');
   }
 };
 
+exports.renderRegistrationEdit = async (req, res) => {
+  try {
+    const registration = await RegistrationModel.findById(req.params.id);
+    if (!registration) return res.status(404).render('404');
+
+    res.render('admin/registration-edit', {
+      title: `Edit Registration - ${registration.applicant_name}`,
+      admin: req.session.admin,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      registration,
+      constants: { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES },
+      error: null
+    });
+  } catch (err) {
+    console.error('Edit Registration Render Error:', err);
+    res.status(500).render('500');
+  }
+};
+
+exports.handleRegistrationEdit = async (req, res) => {
+  const { id } = req.params;
+  const formData = req.body || {};
+
+  try {
+    const registration = await RegistrationModel.findById(id);
+    if (!registration) return res.status(404).render('404');
+
+    // Auto-map department to unit
+    let assignedUnit = formData.unit_number;
+    for (const [unit, depts] of Object.entries(DEPARTMENT_UNIT_MAP)) {
+      if (depts.includes(formData.department)) {
+        assignedUnit = unit;
+        break;
+      }
+    }
+
+    let languages = formData.languages_spoken || [];
+    if (typeof languages === 'string') languages = [languages];
+
+    let mediaRoles = formData.media_roles || [];
+    if (typeof mediaRoles === 'string') mediaRoles = [mediaRoles];
+
+    const updatedData = {
+      applicant_name: formData.applicant_name ? formData.applicant_name.trim().toUpperCase() : registration.applicant_name,
+      univ_reg_no: formData.univ_reg_no ? formData.univ_reg_no.trim().toUpperCase() : registration.univ_reg_no,
+      email: formData.email ? formData.email.trim().toLowerCase() : registration.email,
+      contact_number: formData.contact_number ? formData.contact_number.trim() : registration.contact_number,
+      alt_contact_number: formData.alt_contact_number ? formData.alt_contact_number.trim() : null,
+      department: formData.department || registration.department,
+      course: formData.course || registration.course,
+      year_of_study: formData.year_of_study || registration.year_of_study,
+      unit_number: assignedUnit || registration.unit_number,
+      gender: formData.gender || registration.gender,
+      dob: formData.dob || registration.dob,
+      age: parseInt(formData.age, 10) || registration.age,
+      blood_group: formData.blood_group || registration.blood_group,
+      aadhaar_number: formData.aadhaar_number ? formData.aadhaar_number.trim() : registration.aadhaar_number,
+      native_state: formData.native_state || registration.native_state,
+      present_address: formData.present_address ? formData.present_address.trim() : registration.present_address,
+      permanent_address: formData.permanent_address ? formData.permanent_address.trim() : registration.permanent_address,
+      languages_spoken: languages,
+      is_previous_volunteer: formData.is_previous_volunteer || registration.is_previous_volunteer || 'No',
+      interested_in_media: formData.interested_in_media || registration.interested_in_media || 'No',
+      media_roles: formData.interested_in_media === 'Yes' ? mediaRoles : (formData.interested_in_media === 'No' ? [] : (registration.media_roles || [])),
+      extra_curricular_skills: formData.extra_curricular_skills ? formData.extra_curricular_skills.trim() : null,
+      interested_in_leadership: formData.interested_in_leadership || registration.interested_in_leadership || 'No'
+    };
+
+    const existingRegNo = await RegistrationModel.findByUnivRegNo(updatedData.univ_reg_no, id);
+    if (existingRegNo) {
+      return res.render('admin/registration-edit', {
+        title: `Edit Registration - ${registration.applicant_name}`,
+        admin: req.session.admin,
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        registration: { ...registration, ...updatedData },
+        constants: { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES },
+        error: 'A registration already exists with this Register / Application Number.'
+      });
+    }
+
+    const existingEmail = await RegistrationModel.findByEmail(updatedData.email, id);
+    if (existingEmail) {
+      return res.render('admin/registration-edit', {
+        title: `Edit Registration - ${registration.applicant_name}`,
+        admin: req.session.admin,
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        registration: { ...registration, ...updatedData },
+        constants: { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES },
+        error: 'A registration already exists with this Email Address.'
+      });
+    }
+
+    const existingAadhaar = await RegistrationModel.findByAadhaar(updatedData.aadhaar_number, id);
+    if (existingAadhaar) {
+      return res.render('admin/registration-edit', {
+        title: `Edit Registration - ${registration.applicant_name}`,
+        admin: req.session.admin,
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        registration: { ...registration, ...updatedData },
+        constants: { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES },
+        error: 'A registration already exists with this Aadhaar Number.'
+      });
+    }
+
+    await RegistrationModel.update(id, updatedData);
+    await logAudit('EDIT_REGISTRATION', req.session.admin ? req.session.admin.username : 'Admin', `Updated registration ID: ${registration.registration_id}`);
+
+    res.redirect(`/admin/registrations/${id}`);
+  } catch (err) {
+    console.error('Update Registration Error:', err);
+    res.status(500).render('500');
+  }
+};
+
+exports.deleteRegistration = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const registration = await RegistrationModel.findById(id);
+    if (!registration) return res.status(404).render('404');
+
+    await RegistrationModel.hardDelete(id);
+    await logAudit('DELETE_REGISTRATION', req.session.admin ? req.session.admin.username : 'Admin', `Hard deleted registration ID: ${registration.registration_id}`);
+
+    res.redirect('/admin/registrations');
+  } catch (err) {
+    console.error('Delete Registration Error:', err);
+    res.status(500).render('500');
+  }
+};
+
 exports.exportExcel = async (req, res) => {
   try {
-    const [registrations] = await db.query('SELECT * FROM registrations ORDER BY created_at DESC');
+    const registrations = await RegistrationModel.getAllForExport();
     await exportRegistrationsToExcel(registrations, res);
+    await logAudit('EXPORT_EXCEL', req.session.admin ? req.session.admin.username : 'Admin', `Exported ${registrations.length} registrations to Excel`);
   } catch (err) {
     console.error('Excel Export Error:', err);
     res.status(500).render('500');
@@ -99,9 +220,11 @@ exports.exportExcel = async (req, res) => {
 
 exports.downloadPDF = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM registrations WHERE id = ? LIMIT 1', [req.params.id]);
-    if (rows.length === 0) return res.status(404).render('404');
-    generateRegistrationPDF(rows[0], res);
+    const registration = await RegistrationModel.findById(req.params.id);
+    if (!registration) return res.status(404).render('404');
+
+    generateRegistrationPDF(registration, res);
+    await logAudit('DOWNLOAD_PDF', req.session.admin ? req.session.admin.username : 'Admin', `Downloaded PDF for registration ID: ${registration.registration_id}`);
   } catch (err) {
     console.error('PDF Download Error:', err);
     res.status(500).render('500');

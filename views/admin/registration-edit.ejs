@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body" style="display: flex; flex-direction: column; min-height: 100vh;">
+
+  <!-- Floating Background Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
+        <div class="header-logo-group" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.9); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+          <img src="/images/pondilogo.png" alt="Pondicherry University Logo" style="height: 40px; width: auto; object-fit: contain;" title="Pondicherry University">
+          <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" style="height: 40px; width: auto; object-fit: contain; border-radius: 4px;" title="40 Years of Excellence">
+          <img src="/images/nsslogo.jpg" alt="NSS Logo" style="height: 40px; width: auto; object-fit: contain; border-radius: 50%;" title="National Service Scheme">
+        </div>
+        <div class="logo-text">
+          Edit Volunteer Profile
+          <small style="display: block;">Pondicherry University</small>
+        </div>
+      </div>
+      <div>
+        <a href="/admin/registrations/<%= registration.id %>" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">← Back to Profile</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px; max-width: 880px;">
+    <div class="dash-table-card" style="padding: 35px;">
+      
+      <div style="border-bottom: 2px solid var(--color-border); padding-bottom: 14px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 style="color: var(--color-navy); margin: 0; font-size: 1.8rem; font-weight: 800;">Edit Student Registration Form</h2>
+          <p style="color: var(--color-text-muted); margin: 4px 0 0 0; font-size: 0.95rem;">
+            Registration ID: <strong style="color: var(--color-nss-red); font-size: 1.1rem;"><%= registration.registration_id %></strong>
+          </p>
+        </div>
+        <span class="badge badge-active" style="padding: 6px 16px; font-size: 0.85rem;">Edit Mode Active</span>
+      </div>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error" style="background: #fee2e2; color: #b71c1c; padding: 14px 18px; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 25px; border-left: 4px solid var(--color-nss-red); display: flex; align-items: center; gap: 10px;">
+          <span>⚠️</span>
+          <div><strong>Validation Error:</strong> <%= error %></div>
+        </div>
+      <% } %>
+
+      <form id="registrationForm" action="/admin/registrations/<%= registration.id %>/edit" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <!-- SECTION 1: Personal Details -->
+        <div class="section-header">
+          <span>👤</span> Personal Information
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="applicant_name">Full Name (As given in 10th certificate) <span class="required">*</span></label>
+            <input type="text" id="applicant_name" name="applicant_name" class="form-control" placeholder="Enter full name" required value="<%= registration.applicant_name %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="univ_reg_no">University Register / Application No. <span class="required">*</span></label>
+            <input type="text" id="univ_reg_no" name="univ_reg_no" class="form-control" placeholder="e.g. 25MCA00PY0085" required style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" value="<%= registration.univ_reg_no %>">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="student@pondiuni.ac.in" required value="<%= registration.email %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="contact_number">Contact Mobile Number <span class="required">*</span></label>
+            <input type="tel" id="contact_number" name="contact_number" class="form-control" placeholder="10-digit mobile number" required inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" value="<%= registration.contact_number %>">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="alt_contact_number">Alternate Contact Number</label>
+            <input type="tel" id="alt_contact_number" name="alt_contact_number" class="form-control" placeholder="10-digit mobile number (Optional)" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" value="<%= registration.alt_contact_number || '' %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="gender">Gender <span class="required">*</span></label>
+            <select id="gender" name="gender" class="form-control" required>
+              <option value="Male" <%= registration.gender === 'Male' ? 'selected' : '' %>>Male</option>
+              <option value="Female" <%= registration.gender === 'Female' ? 'selected' : '' %>>Female</option>
+              <option value="Transgender" <%= registration.gender === 'Transgender' ? 'selected' : '' %>>Transgender</option>
+              <option value="Prefer not to say" <%= registration.gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+          <div class="form-group">
+            <label class="form-label" for="dob">Date of Birth <span class="required">*</span></label>
+            <input type="date" id="dob" name="dob" class="form-control" required value="<%= registration.dob ? new Date(registration.dob).toISOString().split('T')[0] : '' %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="age">Age <span class="required">*</span></label>
+            <input type="number" id="age" name="age" class="form-control" placeholder="Age" required min="15" max="60" value="<%= registration.age %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="blood_group">Blood Group <span class="required">*</span></label>
+            <select id="blood_group" name="blood_group" class="form-control" required>
+              <% if (constants && constants.BLOOD_GROUPS) { %>
+                <% constants.BLOOD_GROUPS.forEach(function(bg) { %>
+                  <option value="<%= bg %>" <%= registration.blood_group === bg ? 'selected' : '' %>><%= bg %></option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="aadhaar_number">Aadhaar Number <span class="required">*</span></label>
+            <input type="text" id="aadhaar_number" name="aadhaar_number" class="form-control" placeholder="12-digit Aadhaar Number" required inputmode="numeric" pattern="[0-9]{12}" maxlength="12" value="<%= registration.aadhaar_number %>">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="native_state">Native State / UT <span class="required">*</span></label>
+            <select id="native_state" name="native_state" class="form-control" required>
+              <% if (constants && constants.NATIVE_STATES) { %>
+                <% constants.NATIVE_STATES.forEach(function(state) { %>
+                  <option value="<%= state %>" <%= registration.native_state === state ? 'selected' : '' %>><%= state %></option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Academic Details -->
+        <div class="section-header" style="margin-top: 30px;">
+          <span>🎓</span> Academic Information & Unit Assignment
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="department">Department / Centre / School <span class="required">*</span></label>
+            <select name="department" id="department" class="form-control" required>
+              <% if (constants && constants.DEPARTMENT_UNIT_MAP) { %>
+                <% Object.keys(constants.DEPARTMENT_UNIT_MAP).forEach(function(unitKey) { %>
+                  <optgroup label="<%= unitKey %>">
+                    <% constants.DEPARTMENT_UNIT_MAP[unitKey].forEach(function(dept) { %>
+                      <option value="<%= dept %>" data-unit="<%= unitKey %>" <%= registration.department === dept ? 'selected' : '' %>><%= dept %></option>
+                    <% }); %>
+                  </optgroup>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="course">Course / Programme <span class="required">*</span></label>
+            <select name="course" id="course" class="form-control" required>
+              <% if (constants && constants.COURSES) { %>
+                <% constants.COURSES.forEach(function(courseItem) { %>
+                  <option value="<%= courseItem %>" <%= registration.course === courseItem ? 'selected' : '' %>><%= courseItem %></option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="year_of_study">Year of Study <span class="required">*</span></label>
+            <select name="year_of_study" id="year_of_study" class="form-control" required>
+              <% if (constants && constants.YEAR_OF_STUDY) { %>
+                <% constants.YEAR_OF_STUDY.forEach(function(yr) { %>
+                  <option value="<%= yr %>" <%= registration.year_of_study === yr ? 'selected' : '' %>><%= yr %></option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="unit_number_display">Mapped NSS Unit Number <span class="required">*</span></label>
+            <input type="text" id="unit_number_display" class="form-control" placeholder="Auto-mapped NSS Unit" readonly style="background-color: #f1f5f9; font-weight: 700; color: var(--color-navy);" value="<%= registration.unit_number %>">
+            <input type="hidden" name="unit_number" id="unit_number" value="<%= registration.unit_number %>">
+          </div>
+        </div>
+
+        <!-- SECTION 3: Address Details -->
+        <div class="section-header" style="margin-top: 30px;">
+          <span>📍</span> Address Information
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="present_address">Present Address (Puducherry / Campus Hostel) <span class="required">*</span></label>
+          <textarea id="present_address" name="present_address" class="form-control" rows="2" required><%= registration.present_address %></textarea>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label class="custom-check">
+            <input type="checkbox" id="is_same_address" name="is_same_address" value="1">
+            <span>Permanent Address is same as Present Address</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="permanent_address">Permanent Address <span class="required">*</span></label>
+          <textarea id="permanent_address" name="permanent_address" class="form-control" rows="2" required><%= registration.permanent_address %></textarea>
+        </div>
+
+        <!-- SECTION 4: Language Proficiency -->
+        <div class="section-header" style="margin-top: 30px;">
+          <span>🗣️</span> Language Proficiency
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Languages Spoken & Written:</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 8px; background: rgba(248, 250, 252, 0.9); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+            <% 
+              let selectedLangs = [];
+              if (registration.languages_spoken) {
+                if (Array.isArray(registration.languages_spoken)) selectedLangs = registration.languages_spoken;
+                else if (typeof registration.languages_spoken === 'string') {
+                  try {
+                    const parsed = JSON.parse(registration.languages_spoken);
+                    selectedLangs = Array.isArray(parsed) ? parsed : registration.languages_spoken.split(',').map(s => s.trim());
+                  } catch (e) {
+                    selectedLangs = registration.languages_spoken.split(',').map(s => s.trim());
+                  }
+                }
+              }
+            %>
+            <% if (constants && constants.INDIAN_LANGUAGES) { %>
+              <% constants.INDIAN_LANGUAGES.forEach(function(lang) { %>
+                <label class="custom-check">
+                  <input type="checkbox" name="languages_spoken[]" value="<%= lang %>" <%= selectedLangs.includes(lang) ? 'checked' : '' %>>
+                  <span><%= lang %></span>
+                </label>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- SECTION 5: NSS Experience, Media Roles & Leadership -->
+        <div class="section-header" style="margin-top: 30px;">
+          <span>🌟</span> NSS History, Media Roles & Leadership Interest
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="is_previous_volunteer">Have you been an NSS Volunteer previously? <span class="required">*</span></label>
+            <select id="is_previous_volunteer" name="is_previous_volunteer" class="form-control" required>
+              <option value="No" <%= registration.is_previous_volunteer === 'No' ? 'selected' : '' %>>No</option>
+              <option value="Yes" <%= registration.is_previous_volunteer === 'Yes' ? 'selected' : '' %>>Yes</option>
+            </select>
+          </div>
+
+          <% if (registration.certificate_path) { %>
+            <div class="form-group">
+              <label class="form-label">Uploaded Certificate Document</label>
+              <div style="padding-top: 8px;">
+                <a href="/uploads/<%= registration.certificate_path %>" target="_blank" class="btn btn-success btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                  📎 View Uploaded Certificate
+                </a>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="interested_in_media">Interested in Media / PR / Documentation Team? <span class="required">*</span></label>
+            <select id="interested_in_media" name="interested_in_media" class="form-control" required>
+              <option value="No" <%= registration.interested_in_media === 'No' ? 'selected' : '' %>>No</option>
+              <option value="Yes" <%= registration.interested_in_media === 'Yes' ? 'selected' : '' %>>Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="media_roles_group" style="<%= registration.interested_in_media === 'Yes' ? 'display: block;' : 'display: none;' %>">
+          <label class="form-label">Select Preferred Media / Creative Roles:</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; background: rgba(248, 250, 252, 0.9); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+            <% 
+              let selectedRoles = [];
+              if (registration.media_roles) {
+                if (Array.isArray(registration.media_roles)) selectedRoles = registration.media_roles;
+                else if (typeof registration.media_roles === 'string') {
+                  try {
+                    const parsed = JSON.parse(registration.media_roles);
+                    selectedRoles = Array.isArray(parsed) ? parsed : registration.media_roles.split(',').map(s => s.trim());
+                  } catch (e) {
+                    selectedRoles = registration.media_roles.split(',').map(s => s.trim());
+                  }
+                }
+              }
+            %>
+            <% if (constants && constants.MEDIA_ROLES) { %>
+              <% constants.MEDIA_ROLES.forEach(function(role) { %>
+                <label class="custom-check">
+                  <input type="checkbox" name="media_roles[]" value="<%= role %>" <%= selectedRoles.includes(role) ? 'checked' : '' %>>
+                  <span><%= role %></span>
+                </label>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="extra_curricular_skills">Extra Curricular Skills (Mention if any)</label>
+          <textarea id="extra_curricular_skills" name="extra_curricular_skills" class="form-control" rows="2" placeholder="e.g. Sports, Music, Dance, Public Speaking, Fine Arts"><%= registration.extra_curricular_skills || '' %></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+          <label class="form-label" for="interested_in_leadership">Are you interested in being a leader in NSS PU? <span class="required">*</span></label>
+          <select id="interested_in_leadership" name="interested_in_leadership" class="form-control" required>
+            <option value="No" <%= registration.interested_in_leadership === 'No' ? 'selected' : '' %>>No</option>
+            <option value="Yes" <%= registration.interested_in_leadership === 'Yes' ? 'selected' : '' %>>Yes</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 14px; margin-top: 30px;">
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 2; padding: 14px; font-size: 1.05rem; justify-content: center;">
+            💾 Save & Update Volunteer Profile
+          </button>
+          <a href="/admin/registrations/<%= registration.id %>" class="btn btn-secondary" style="flex: 1; justify-content: center;">
+            Cancel
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>
