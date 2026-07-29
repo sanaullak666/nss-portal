@@ -11,13 +11,16 @@ const constants = require('../config/constants');
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax'
   }
 });
 
 // Render Registration Form
 router.get('/', csrfProtection, registrationController.renderForm);
+
+// Redirect /register GET requests to home page
+router.get('/register', (req, res) => res.redirect('/'));
 
 // Handle Volunteer Registration Submission
 router.post(

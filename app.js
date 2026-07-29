@@ -85,7 +85,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Ensure session cookies are sent across Vercel proxies
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 Hours
     }

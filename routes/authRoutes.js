@@ -7,7 +7,7 @@ const { loginLimiter } = require('../middleware/rateLimiter');
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax'
   }
 });

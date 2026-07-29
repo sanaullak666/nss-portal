@@ -7,7 +7,7 @@ const { isAuthenticated } = require('../middleware/authMiddleware');
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax'
   }
 });
