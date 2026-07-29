@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -17,11 +18,13 @@ const PORT = process.env.PORT || 3000;
 // Database Connection Pool
 const db = require('./config/database');
 
-// Ensure uploads directory exists (use /tmp fallback for Vercel read-only filesystem)
-const uploadDir = process.env.VERCEL === '1' ? '/tmp' : path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
-}
+// Ensure local uploads directory exists if writable
+const uploadDir = path.join(__dirname, 'uploads');
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {}
 
 // Trust Reverse Proxy for Vercel / Production deployment
 app.set('trust proxy', 1);
@@ -89,12 +92,10 @@ app.use(
   })
 );
 
-// Static Asset Directories (support serving uploads from /tmp if on Vercel)
+// Static Asset Directories (Serve uploaded files from both local uploads/ and OS /tmp for Vercel)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-if (process.env.VERCEL === '1') {
-  app.use('/uploads', express.static('/tmp'));
-}
+app.use('/uploads', express.static(os.tmpdir()));
 
 // View Engine Setup
 app.set('view engine', 'ejs');

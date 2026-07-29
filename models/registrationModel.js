@@ -178,10 +178,15 @@ class RegistrationModel {
   static async hardDelete(id) {
     const registration = await this.findById(id);
     if (registration && registration.certificate_path) {
-      const filePath = path.join(__dirname, '../uploads', registration.certificate_path);
-      if (fs.existsSync(filePath)) {
-        try { fs.unlinkSync(filePath); } catch (e) {}
-      }
+      const os = require('os');
+      const localPath = path.join(__dirname, '../uploads', registration.certificate_path);
+      const tmpPath = path.join(os.tmpdir(), registration.certificate_path);
+      try {
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+      } catch (e) {}
+      try {
+        if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      } catch (e) {}
     }
     const [result] = await db.query('DELETE FROM registrations WHERE id = ?', [id]);
     return result.affectedRows > 0;
