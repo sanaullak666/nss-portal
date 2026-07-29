@@ -92,6 +92,35 @@ app.use(
   })
 );
 
+// Dynamic Certificate Uploads Route (Fetches certificate from MySQL Blob first, then static fallbacks)
+app.get('/uploads/:filename', async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const [rows] = await db.query(
+      'SELECT certificate_data, certificate_mimetype FROM registrations WHERE certificate_path = ? LIMIT 1',
+      [filename]
+    );
+    if (rows.length > 0 && rows[0].certificate_data) {
+      res.setHeader('Content-Type', rows[0].certificate_mimetype || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      return res.send(rows[0].certificate_data);
+    }
+  } catch (e) {
+    console.error('Database certificate retrieval error:', e.message);
+  }
+
+  const localFile = path.join(__dirname, 'uploads', req.params.filename);
+  if (fs.existsSync(localFile)) {
+    return res.sendFile(localFile);
+  }
+  const tmpFile = path.join(os.tmpdir(), req.params.filename);
+  if (fs.existsSync(tmpFile)) {
+    return res.sendFile(tmpFile);
+  }
+
+  res.status(404).send('Certificate file not found');
+});
+
 // Static Asset Directories (Serve uploaded files from both local uploads/ and OS /tmp for Vercel)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -161,6 +190,8 @@ async function autoMigrate(connection) {
       languages_spoken TEXT NOT NULL,
       is_previous_volunteer VARCHAR(10) NOT NULL,
       certificate_path VARCHAR(255) DEFAULT NULL,
+      certificate_data MEDIUMBLOB DEFAULT NULL,
+      certificate_mimetype VARCHAR(100) DEFAULT NULL,
       interested_in_media VARCHAR(10) NOT NULL DEFAULT 'No',
       media_roles TEXT DEFAULT NULL,
       extra_curricular_skills TEXT DEFAULT NULL,
@@ -173,6 +204,16 @@ async function autoMigrate(connection) {
   `);
 
   try {
+    const [certDataCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'certificate_data'`);
+    if (certDataCol.length === 0) {
+      await connection.query(`ALTER TABLE registrations ADD COLUMN certificate_data MEDIUMBLOB DEFAULT NULL AFTER certificate_path`);
+    }
+
+    const [certMimeCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'certificate_mimetype'`);
+    if (certMimeCol.length === 0) {
+      await connection.query(`ALTER TABLE registrations ADD COLUMN certificate_mimetype VARCHAR(100) DEFAULT NULL AFTER certificate_data`);
+    }
+
     const [extraSkillsCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'extra_curricular_skills'`);
     if (extraSkillsCol.length === 0) {
       await connection.query(`ALTER TABLE registrations ADD COLUMN extra_curricular_skills TEXT DEFAULT NULL AFTER media_roles`);

@@ -53,7 +53,19 @@ exports.handleRegistration = async (req, res) => {
     if (typeof mediaRoles === 'string') mediaRoles = [mediaRoles];
     if (!Array.isArray(mediaRoles)) mediaRoles = [];
 
-    const certificatePath = certificateFile ? certificateFile.filename : null;
+    let certificatePath = null;
+    let certificateData = null;
+    let certificateMime = null;
+
+    if (certificateFile) {
+      const path = require('path');
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = path.extname(certificateFile.originalname).toLowerCase();
+      certificatePath = `cert-${uniqueSuffix}${ext}`;
+      certificateData = certificateFile.buffer;
+      certificateMime = certificateFile.mimetype;
+    }
+
     const registrationId = await generateRegistrationId(assignedUnit);
 
     const registrationData = {
@@ -79,6 +91,8 @@ exports.handleRegistration = async (req, res) => {
       languages_spoken: languages,
       is_previous_volunteer: formData.is_previous_volunteer,
       certificate_path: certificatePath,
+      certificate_data: certificateData,
+      certificate_mimetype: certificateMime,
       interested_in_media: formData.interested_in_media || 'No',
       media_roles: formData.interested_in_media === 'Yes' ? mediaRoles : [],
       extra_curricular_skills: formData.extra_curricular_skills ? formData.extra_curricular_skills.trim() : null,

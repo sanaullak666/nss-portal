@@ -10,10 +10,10 @@ class RegistrationModel {
         applicant_name, univ_reg_no, email, contact_number, alt_contact_number,
         gender, dob, age, blood_group, aadhaar_number, native_state,
         present_address, permanent_address, is_same_address, languages_spoken,
-        is_previous_volunteer, certificate_path, interested_in_media, media_roles,
+        is_previous_volunteer, certificate_path, certificate_data, certificate_mimetype, interested_in_media, media_roles,
         extra_curricular_skills, interested_in_leadership,
         declaration_accepted, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Active')
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Active')
     `;
 
     const values = [
@@ -39,6 +39,8 @@ class RegistrationModel {
       typeof data.languages_spoken === 'string' ? data.languages_spoken : JSON.stringify(data.languages_spoken || []),
       data.is_previous_volunteer,
       data.certificate_path || null,
+      data.certificate_data || null,
+      data.certificate_mimetype || null,
       data.interested_in_media || 'No',
       typeof data.media_roles === 'string' ? data.media_roles : JSON.stringify(data.media_roles || []),
       data.extra_curricular_skills ? data.extra_curricular_skills.trim() : null,
