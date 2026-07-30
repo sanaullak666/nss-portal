@@ -316,6 +316,16 @@ body.login-page-body::before {
   transition: all var(--transition-fast);
   pointer-events: none;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: fill var(--transition-fast);
 }
 
 .form-control-custom {
