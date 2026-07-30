@@ -111,13 +111,16 @@ exports.handleRegistration = async (req, res) => {
     console.error('Registration Processing Error:', err);
 
     let errorMessage = 'An error occurred while saving your registration. Please try again.';
-    if (err.code === 'ER_DUP_ENTRY') {
-      if (err.sqlMessage && err.sqlMessage.includes('univ_reg_no')) {
+    if (err.code === '23505' || err.code === 'ER_DUP_ENTRY') {
+      const msg = err.detail || err.sqlMessage || err.message || '';
+      if (msg.includes('univ_reg_no')) {
         errorMessage = 'A registration already exists with this Register / Application Number.';
-      } else if (err.sqlMessage && err.sqlMessage.includes('aadhaar_number')) {
+      } else if (msg.includes('aadhaar_number')) {
         errorMessage = 'A registration already exists with this Aadhaar Number.';
-      } else if (err.sqlMessage && err.sqlMessage.includes('email')) {
+      } else if (msg.includes('email')) {
         errorMessage = 'A registration already exists with this Email Address.';
+      } else {
+        errorMessage = 'A registration already exists with these details.';
       }
     }
 

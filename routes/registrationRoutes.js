@@ -11,7 +11,7 @@ const constants = require('../config/constants');
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production' || process.env.VERCEL === '1',
+    secure: process.env.COOKIE_SECURE === 'true',
     sameSite: 'lax'
   },
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS']

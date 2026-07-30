@@ -89,6 +89,7 @@ exports.handleLogout = (req, res) => {
       try {
         await logAudit('LOGOUT', username, 'Admin logged out');
       } catch (aErr) {}
+      res.clearCookie('nss_session_id');
       res.clearCookie('connect.sid');
       res.redirect('/admin/login');
     });

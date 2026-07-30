@@ -195,7 +195,9 @@ class RegistrationModel {
   }
 
   static async findAllFiltered({ unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1, limit = 15 }) {
-    const offset = (parseInt(page, 10) - 1) * limit;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 15);
+    const offset = (pageNum - 1) * limitNum;
     let whereClauses = ["status = 'Active'"];
     let queryParams = [];
 
@@ -215,36 +217,44 @@ class RegistrationModel {
 
     const whereSQL = `WHERE ${whereClauses.join(' AND ')}`;
 
-    const [[{ totalCount }]] = await db.query(`SELECT COUNT(*) as totalCount FROM registrations ${whereSQL}`, queryParams);
-    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...queryParams, limit, offset]);
+    const [countRows] = await db.query(`SELECT COUNT(*) as "totalCount" FROM registrations ${whereSQL}`, queryParams);
+    const totalCount = parseInt(countRows[0]?.totalCount || countRows[0]?.totalcount || 0, 10);
+    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
 
     return {
       registrations,
       totalCount,
-      totalPages: Math.ceil(totalCount / limit) || 1,
-      currentPage: parseInt(page, 10)
+      totalPages: Math.ceil(totalCount / limitNum) || 1,
+      currentPage: pageNum
     };
   }
 
   static async getAllForExport() {
-    const [registrations] = await db.query('SELECT * FROM registrations WHERE status = "Active" ORDER BY created_at DESC');
+    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Active' ORDER BY created_at DESC");
     return registrations;
   }
 
   static async getDashboardStats() {
-    const [[{ totalRegistrations }]] = await db.query('SELECT COUNT(*) as totalRegistrations FROM registrations WHERE status = "Active"');
-    const [[{ todayRegistrations }]] = await db.query('SELECT COUNT(*) as todayRegistrations FROM registrations WHERE status = "Active" AND DATE(created_at) = CURDATE()');
-    const [[{ totalUnits }]] = await db.query('SELECT COUNT(DISTINCT unit_number) as totalUnits FROM registrations WHERE status = "Active"');
-    const [[{ totalMediaInterested }]] = await db.query('SELECT COUNT(*) as totalMediaInterested FROM registrations WHERE status = "Active" AND interested_in_media = "Yes"');
-    const [[{ totalPreviousVolunteers }]] = await db.query('SELECT COUNT(*) as totalPreviousVolunteers FROM registrations WHERE status = "Active" AND is_previous_volunteer = "Yes"');
-    const [[{ totalLeadershipInterested }]] = await db.query('SELECT COUNT(*) as totalLeadershipInterested FROM registrations WHERE status = "Active" AND interested_in_leadership = "Yes"');
+    const [r1] = await db.query("SELECT COUNT(*) as \"totalRegistrations\" FROM registrations WHERE status = 'Active'");
+    const [r2] = await db.query("SELECT COUNT(*) as \"todayRegistrations\" FROM registrations WHERE status = 'Active' AND DATE(created_at) = CURRENT_DATE");
+    const [r3] = await db.query("SELECT COUNT(DISTINCT unit_number) as \"totalUnits\" FROM registrations WHERE status = 'Active'");
+    const [r4] = await db.query("SELECT COUNT(*) as \"totalMediaInterested\" FROM registrations WHERE status = 'Active' AND interested_in_media = 'Yes'");
+    const [r5] = await db.query("SELECT COUNT(*) as \"totalPreviousVolunteers\" FROM registrations WHERE status = 'Active' AND is_previous_volunteer = 'Yes'");
+    const [r6] = await db.query("SELECT COUNT(*) as \"totalLeadershipInterested\" FROM registrations WHERE status = 'Active' AND interested_in_leadership = 'Yes'");
 
-    const [unitCounts] = await db.query('SELECT unit_number, COUNT(*) as count FROM registrations WHERE status = "Active" GROUP BY unit_number ORDER BY unit_number');
-    const [genderCounts] = await db.query('SELECT gender, COUNT(*) as count FROM registrations WHERE status = "Active" GROUP BY gender');
-    const [yearCounts] = await db.query('SELECT year_of_study, COUNT(*) as count FROM registrations WHERE status = "Active" GROUP BY year_of_study');
-    const [courseCounts] = await db.query('SELECT course, COUNT(*) as count FROM registrations WHERE status = "Active" GROUP BY course ORDER BY count DESC LIMIT 10');
-    const [deptCounts] = await db.query('SELECT department, COUNT(*) as count FROM registrations WHERE status = "Active" GROUP BY department ORDER BY count DESC LIMIT 10');
-    const [recentRegistrations] = await db.query('SELECT * FROM registrations WHERE status = "Active" ORDER BY created_at DESC LIMIT 5');
+    const totalRegistrations = parseInt(r1[0]?.totalRegistrations || r1[0]?.totalregistrations || 0, 10);
+    const todayRegistrations = parseInt(r2[0]?.todayRegistrations || r2[0]?.todayregistrations || 0, 10);
+    const totalUnits = parseInt(r3[0]?.totalUnits || r3[0]?.totalunits || 0, 10);
+    const totalMediaInterested = parseInt(r4[0]?.totalMediaInterested || r4[0]?.totalmediainterested || 0, 10);
+    const totalPreviousVolunteers = parseInt(r5[0]?.totalPreviousVolunteers || r5[0]?.totalpreviousvolunteers || 0, 10);
+    const totalLeadershipInterested = parseInt(r6[0]?.totalLeadershipInterested || r6[0]?.totalleadershipinterested || 0, 10);
+
+    const [unitCounts] = await db.query("SELECT unit_number, COUNT(*) as count FROM registrations WHERE status = 'Active' GROUP BY unit_number ORDER BY unit_number");
+    const [genderCounts] = await db.query("SELECT gender, COUNT(*) as count FROM registrations WHERE status = 'Active' GROUP BY gender");
+    const [yearCounts] = await db.query("SELECT year_of_study, COUNT(*) as count FROM registrations WHERE status = 'Active' GROUP BY year_of_study");
+    const [courseCounts] = await db.query("SELECT course, COUNT(*) as count FROM registrations WHERE status = 'Active' GROUP BY course ORDER BY count DESC LIMIT 10");
+    const [deptCounts] = await db.query("SELECT department, COUNT(*) as count FROM registrations WHERE status = 'Active' GROUP BY department ORDER BY count DESC LIMIT 10");
+    const [recentRegistrations] = await db.query("SELECT * FROM registrations WHERE status = 'Active' ORDER BY created_at DESC LIMIT 5");
 
     return {
       stats: { totalRegistrations, todayRegistrations, totalUnits, totalMediaInterested, totalPreviousVolunteers, totalLeadershipInterested },

@@ -77,7 +77,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' || process.env.VERCEL === '1',
+      secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 Hours
     }
@@ -231,9 +231,9 @@ async function autoMigrate(connection) {
   const adminHash = await bcrypt.hash('Admin@NSS2026', 10);
   await connection.query(
     `INSERT INTO admins (username, password_hash, full_name, email, role) 
-     VALUES ('admin', ?, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin') 
+     VALUES (?, ?, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin') 
      ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
-    [adminHash]
+    ['admin', adminHash]
   );
 }
 
