@@ -22,7 +22,12 @@
     <nav class="main-nav">
       <a href="/">Register Form</a>
       <a href="/track-registration">Track Status</a>
-      <a href="/admin/login">Admin Portal</a>
+      <% if (typeof admin !== 'undefined' && admin) { %>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/logout" class="btn btn-logout" style="padding: 4px 12px; font-size: 0.82rem; margin-left: 6px;">🚪 Logout</a>
+      <% } else { %>
+        <a href="/admin/login">Admin Portal</a>
+      <% } %>
     </nav>
   </div>
 </header>

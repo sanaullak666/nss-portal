@@ -518,17 +518,21 @@ a:hover {
 }
 
 .btn-danger,
-.btn-danger-premium {
-    background: linear-gradient(135deg, var(--nss-secondary) 0%, var(--nss-secondary-dark) 100%);
+.btn-danger-premium,
+.btn-logout {
+    background: linear-gradient(135deg, var(--nss-secondary) 0%, var(--nss-secondary-dark) 100%) !important;
     color: white !important;
-    border: none;
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.35) !important;
+    font-weight: 700 !important;
 }
 
 .btn-danger:hover,
-.btn-danger-premium:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
+.btn-danger-premium:hover,
+.btn-logout:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #c0392b 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.5) !important;
     color: white !important;
 }
 
