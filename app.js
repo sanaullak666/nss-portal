@@ -1,13 +1,12 @@
 const express = require('express');
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
+const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const dotenv = require('dotenv');
-const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
 dotenv.config();
@@ -59,21 +58,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Cookie Parser & MySQL Serverless Session Store
+// Cookie Parser & PostgreSQL Serverless Session Store
 app.use(cookieParser());
 
-const sessionStore = new MySQLStore({
-  expiration: 24 * 60 * 60 * 1000,
-  createDatabaseTable: true,
-  schema: {
-    tableName: 'sessions',
-    columnNames: {
-      session_id: 'session_id',
-      expires: 'expires',
-      data: 'data'
-    }
-  }
-}, db);
+const sessionStore = new pgSession({
+  pool: db.pool,
+  tableName: 'session',
+  createTableIfMissing: true
+});
 
 app.use(
   session({
@@ -85,7 +77,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: false, // Ensure session cookies are sent across Vercel proxies
+      secure: process.env.NODE_ENV === 'production' || process.env.VERCEL === '1',
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 Hours
     }
@@ -170,7 +162,7 @@ async function autoMigrate(connection) {
   // 1. Ensure registrations table & columns
   await connection.query(`
     CREATE TABLE IF NOT EXISTS registrations (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       registration_id VARCHAR(50) UNIQUE NOT NULL,
       unit_number VARCHAR(20) NOT NULL,
       department VARCHAR(150) NOT NULL,
@@ -189,112 +181,58 @@ async function autoMigrate(connection) {
       native_state VARCHAR(100) NOT NULL,
       present_address TEXT NOT NULL,
       permanent_address TEXT NOT NULL,
-      is_same_address TINYINT(1) DEFAULT 0,
+      is_same_address SMALLINT DEFAULT 0,
       languages_spoken TEXT NOT NULL,
       is_previous_volunteer VARCHAR(10) NOT NULL,
       certificate_path VARCHAR(255) DEFAULT NULL,
-      certificate_data MEDIUMBLOB DEFAULT NULL,
+      certificate_data BYTEA DEFAULT NULL,
       certificate_mimetype VARCHAR(100) DEFAULT NULL,
       interested_in_media VARCHAR(10) NOT NULL DEFAULT 'No',
       media_roles TEXT DEFAULT NULL,
       extra_curricular_skills TEXT DEFAULT NULL,
       interested_in_leadership VARCHAR(10) NOT NULL DEFAULT 'No',
-      declaration_accepted TINYINT(1) NOT NULL DEFAULT 1,
+      declaration_accepted SMALLINT NOT NULL DEFAULT 1,
       status VARCHAR(20) NOT NULL DEFAULT 'Active',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   try {
-    const [certDataCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'certificate_data'`);
-    if (certDataCol.length === 0) {
-      await connection.query(`ALTER TABLE registrations ADD COLUMN certificate_data MEDIUMBLOB DEFAULT NULL AFTER certificate_path`);
-    }
-
-    const [certMimeCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'certificate_mimetype'`);
-    if (certMimeCol.length === 0) {
-      await connection.query(`ALTER TABLE registrations ADD COLUMN certificate_mimetype VARCHAR(100) DEFAULT NULL AFTER certificate_data`);
-    }
-
-    const [extraSkillsCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'extra_curricular_skills'`);
-    if (extraSkillsCol.length === 0) {
-      await connection.query(`ALTER TABLE registrations ADD COLUMN extra_curricular_skills TEXT DEFAULT NULL AFTER media_roles`);
-    }
-
-    const [leadershipCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'interested_in_leadership'`);
-    if (leadershipCol.length === 0) {
-      await connection.query(`ALTER TABLE registrations ADD COLUMN interested_in_leadership VARCHAR(10) NOT NULL DEFAULT 'No' AFTER extra_curricular_skills`);
-    }
-
-    const [statusCol] = await connection.query(`SHOW COLUMNS FROM registrations LIKE 'status'`);
-    if (statusCol.length === 0) {
-      await connection.query(`ALTER TABLE registrations ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Active' AFTER declaration_accepted`);
-    }
-
     await connection.query("DELETE FROM registrations WHERE status = 'Deleted'");
   } catch (e) {}
 
   // 2. Ensure audit_logs table
   await connection.query(`
     CREATE TABLE IF NOT EXISTS audit_logs (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       action VARCHAR(50) NOT NULL,
       performed_by VARCHAR(100) NOT NULL,
       details TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    );
   `);
 
   // 3. Ensure admins table
   await connection.query(`
     CREATE TABLE IF NOT EXISTS admins (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       username VARCHAR(50) UNIQUE NOT NULL,
       password_hash VARCHAR(255) NOT NULL,
       full_name VARCHAR(100) NOT NULL DEFAULT 'PU NSS Super Administrator',
       email VARCHAR(150) UNIQUE NOT NULL,
       role VARCHAR(30) NOT NULL DEFAULT 'superadmin',
-      last_login DATETIME DEFAULT NULL,
+      last_login TIMESTAMP DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    );
   `);
-
-  try {
-    const [passHashCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'password_hash'`);
-    if (passHashCol.length === 0) {
-      const [oldPassCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'password'`);
-      if (oldPassCol.length > 0) {
-        await connection.query(`ALTER TABLE admins CHANGE COLUMN \`password\` \`password_hash\` VARCHAR(255) NOT NULL`);
-      } else {
-        await connection.query(`ALTER TABLE admins ADD COLUMN \`password_hash\` VARCHAR(255) NOT NULL`);
-      }
-    }
-
-    const [fullNameCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'full_name'`);
-    if (fullNameCol.length === 0) {
-      await connection.query(`ALTER TABLE admins ADD COLUMN \`full_name\` VARCHAR(100) NOT NULL DEFAULT 'PU NSS Super Administrator'`);
-    }
-
-    const [roleCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'role'`);
-    if (roleCol.length === 0) {
-      await connection.query(`ALTER TABLE admins ADD COLUMN \`role\` VARCHAR(30) NOT NULL DEFAULT 'superadmin'`);
-    }
-
-    const [lastLoginCol] = await connection.query(`SHOW COLUMNS FROM admins LIKE 'last_login'`);
-    if (lastLoginCol.length === 0) {
-      await connection.query(`ALTER TABLE admins ADD COLUMN \`last_login\` DATETIME DEFAULT NULL`);
-    }
-  } catch (mErr) {
-    console.error('Admin table migration notice:', mErr.message);
-  }
 
   // Seed default admin user
   const adminHash = await bcrypt.hash('Admin@NSS2026', 10);
   await connection.query(
     `INSERT INTO admins (username, password_hash, full_name, email, role) 
      VALUES ('admin', ?, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin') 
-     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)`,
+     ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
     [adminHash]
   );
 }
@@ -304,9 +242,7 @@ let migrationDone = false;
 async function initDb() {
   if (migrationDone) return;
   try {
-    const connection = await db.getConnection();
-    await autoMigrate(connection);
-    connection.release();
+    await autoMigrate(db);
     migrationDone = true;
     console.log('✅ Database schema verified and migrated successfully.');
   } catch (err) {
