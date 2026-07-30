@@ -1668,3 +1668,185 @@ a:hover {
  }
 }
 
+/* ============================================================
+   UNIVERSAL MULTI-DEVICE RESPONSIVE OPTIMIZATIONS (2026)
+   ============================================================ */
+
+/* 1. Base Touch & Viewport Guards */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Touch targets & form elements optimization for mobile devices */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+    min-height: 44px;
+  }
+
+  .btn, button, input[type="submit"] {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .nss-motto-banner {
+    flex-direction: column !important;
+    gap: 4px !important;
+    text-align: center !important;
+    padding: 6px 12px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .header-inner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .filter-bar-custom {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .filter-bar-custom input,
+  .filter-bar-custom select,
+  .filter-bar-custom button,
+  .filter-bar-custom a {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .dash-stat-card {
+    padding: 14px 12px !important;
+  }
+
+  .dash-stat-number {
+    font-size: 1.6rem !important;
+  }
+
+  .dash-stat-label {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* 2. Compact Mobile Screens (< 576px) */
+@media (max-width: 576px) {
+  .header-logo-group {
+    padding: 3px 6px !important;
+    gap: 4px !important;
+  }
+
+  .header-logo-group img {
+    height: 32px !important;
+  }
+
+  .logo-text {
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .logo-text small {
+    font-size: 0.65rem !important;
+  }
+
+  .register-card,
+  .track-card,
+  .login-card {
+    padding: 18px 14px !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .register-header h1 {
+    font-size: 1.4rem !important;
+  }
+
+  .section-header {
+    font-size: 1rem !important;
+    padding: 8px 12px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .table-responsive {
+    border-radius: var(--radius-md);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap;
+  }
+
+  .pagination-custom {
+    gap: 4px !important;
+  }
+
+  .pagination-custom a,
+  .pagination-custom span {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* 3. High Resolution Desktop & Ultra-wide Screens (> 1400px) */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 4. Print Mode Clean Formatting */
+@media print {
+  .site-header,
+  .nss-motto-banner,
+  .site-footer,
+  .btn,
+  .filter-bar-custom,
+  .particles,
+  .loader-overlay {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+
