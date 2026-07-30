@@ -1,16 +1,14 @@
-﻿const db = require('./config/database');
+const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 async function reseedAdmin() {
   try {
     const hashedPassword = await bcrypt.hash('Admin@NSS2026', 10);
 
-    // Delete existing admin records
-    await db.query('DELETE FROM admins WHERE username = "admin"');
+    await db.query("DELETE FROM admins WHERE username = 'admin'");
 
-    // Insert fresh admin record
     await db.query(
-      `INSERT INTO admins (username, password, full_name, email, role) 
+      `INSERT INTO admins (username, password_hash, full_name, email, role) 
        VALUES (?, ?, ?, ?, ?)`,
       ['admin', hashedPassword, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin']
     );
