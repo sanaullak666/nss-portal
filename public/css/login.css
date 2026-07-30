@@ -376,6 +376,16 @@ body.login-page-body::before {
   transition: all var(--transition-fast);
   font-size: var(--font-size-base);
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  transition: stroke var(--transition-fast);
 }
 
 .password-toggle-btn:hover {
