@@ -2,10 +2,10 @@
   "name": "nss-registration-portal",
   "version": "1.0.0",
   "description": "Production-ready National Service Scheme (NSS) Registration Portal for Pondicherry University",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon app.js"
   },
   "keywords": [
     "nss",
