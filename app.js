@@ -250,8 +250,13 @@ async function initDb() {
   }
 }
 
-// Ensure database is initialized
-initDb();
+// Ensure database schema is initialized before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await initDb();
+  } catch (e) {}
+  next();
+});
 
 // Start HTTP Server when running locally
 if (require.main === module || process.env.VERCEL !== '1') {

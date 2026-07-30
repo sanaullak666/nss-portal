@@ -77,7 +77,7 @@ exports.handleLogin = async (req, res) => {
     res.render('admin/login', {
       title: 'Admin Login - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
-      error: 'Server error during login. Please try again.'
+      error: `Server error during login: ${err.message || 'Please try again.'}`
     });
   }
 };
