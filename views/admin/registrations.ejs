@@ -354,15 +354,19 @@
     });
 
     function toggleAdminProfileMenu(event) {
-      if (event) event.stopPropagation();
-      const menu = document.getElementById('adminProfileMenuReg');
+      if (event) {
+        event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+      }
+      const menu = document.getElementById('adminProfileMenuReg') || document.getElementById('adminProfileMenu') || document.getElementById('profileDropdownMenu');
       if (menu) {
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        const isHidden = window.getComputedStyle(menu).display === 'none';
+        menu.style.display = isHidden ? 'block' : 'none';
       }
     }
 
     document.addEventListener('click', function(e) {
-      const menu = document.getElementById('adminProfileMenuReg');
+      const menu = document.getElementById('adminProfileMenuReg') || document.getElementById('adminProfileMenu') || document.getElementById('profileDropdownMenu');
       if (menu && !menu.contains(e.target)) {
         menu.style.display = 'none';
       }

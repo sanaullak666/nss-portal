@@ -280,19 +280,24 @@
             backgroundColor: ['#16A34A', '#F59E0B', '#0F2042']
           }]
         },
-      }
+        options: { responsive: true }
+      });
     });
 
     function toggleAdminProfileMenu(event) {
-      if (event) event.stopPropagation();
-      const menu = document.getElementById('adminProfileMenu');
+      if (event) {
+        event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+      }
+      const menu = document.getElementById('adminProfileMenu') || document.getElementById('adminProfileMenuReg') || document.getElementById('profileDropdownMenu');
       if (menu) {
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        const isHidden = window.getComputedStyle(menu).display === 'none';
+        menu.style.display = isHidden ? 'block' : 'none';
       }
     }
 
     document.addEventListener('click', function(e) {
-      const menu = document.getElementById('adminProfileMenu');
+      const menu = document.getElementById('adminProfileMenu') || document.getElementById('adminProfileMenuReg') || document.getElementById('profileDropdownMenu');
       if (menu && !menu.contains(e.target)) {
         menu.style.display = 'none';
       }
