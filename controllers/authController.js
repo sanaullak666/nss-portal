@@ -159,7 +159,7 @@ exports.handleSendOTP = async (req, res) => {
       title: 'Verify OTP & Change Password - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       email: AUTHORIZED_EMAIL,
-      otpCode: process.env.NODE_ENV === 'development' ? otpCode : '',
+      otpCode: '',
       error: null,
       success: `A 6-digit verification OTP has been sent to ${AUTHORIZED_EMAIL}. Please check your inbox/spam folder.`
     });
