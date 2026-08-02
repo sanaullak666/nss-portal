@@ -99,10 +99,9 @@ exports.handleLogout = (req, res) => {
   }
 };
 
-// --- ADMIN PASSWORD RESET VIA EMAIL & WHATSAPP OTP ---
+// --- ADMIN PASSWORD RESET VIA EMAIL OTP ---
 
 const { sendOTPEmail } = require('../utils/emailService');
-const { sendWhatsAppOTP } = require('../utils/whatsappService');
 
 exports.renderForgotPassword = (req, res) => {
   res.render('admin/forgot-password', {
@@ -157,17 +156,13 @@ exports.handleSendOTP = async (req, res) => {
     // Send email
     await sendOTPEmail(targetEmail, otpCode);
 
-    // Send WhatsApp OTP
-    const targetPhone = req.body.phone || activeAdmin.phone_number || activeAdmin.phone || activeAdmin.mobile || process.env.ADMIN_WHATSAPP_NUMBER;
-    await sendWhatsAppOTP(targetPhone, otpCode);
-
     res.render('admin/verify-otp', {
       title: 'Verify OTP & Change Password - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       email: targetEmail,
       otpCode: '',
       error: null,
-      success: `A 6-digit verification OTP has been sent to ${targetEmail} (and WhatsApp if configured). Please check your inbox/WhatsApp.`
+      success: `A 6-digit verification OTP has been sent to ${targetEmail}. Please check your inbox/spam folder.`
     });
 
   } catch (err) {
