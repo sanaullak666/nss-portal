@@ -35,7 +35,7 @@ router.post(
           constants,
           csrfToken: req.csrfToken ? req.csrfToken() : '',
           formData: req.body || {},
-          error: err.message || 'File upload failed. Ensure file size is within 250 KB (PDF, JPG, JPEG, PNG).',
+          error: err.message || 'File upload failed. Ensure file size is within 150 KB (PDF, JPG, JPEG, PNG).',
           errors: [{ param: 'certificate', msg: err.message || 'Invalid certificate file.' }],
           success: null
         });

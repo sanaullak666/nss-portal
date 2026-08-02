@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
     toggleMediaRoles(); // Run on load
   }
 
-  // 7. Strict 250 KB File Size Guard
+  // 7. Strict 150 KB File Size Guard
   if (certificateInput) {
     certificateInput.addEventListener('change', function () {
       const file = this.files[0];
@@ -146,16 +146,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
         if (!allowedTypes.includes(file.type)) {
           if (fileError) {
-            fileError.textContent = 'Invalid file type. Only PDF, JPG, JPEG, and PNG files are allowed.';
+            fileError.textContent = 'Invalid file type. Only PDF and Image files (JPG, JPEG, PNG) are allowed.';
             fileError.style.display = 'block';
           }
           this.value = '';
           return;
         }
 
-        if (file.size > 250 * 1024) {
+        if (file.size > 150 * 1024) {
           if (fileError) {
-            fileError.textContent = 'File size exceeds maximum limit of 250 KB. Selected file size: ' + (file.size / 1024).toFixed(1) + ' KB.';
+            fileError.textContent = 'File size exceeds maximum limit of 150 KB. Selected file size: ' + (file.size / 1024).toFixed(1) + ' KB.';
             fileError.style.display = 'block';
           }
           this.value = '';

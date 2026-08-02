@@ -12,14 +12,14 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF, JPG, JPEG, and PNG files under 250 KB are allowed.'), false);
+    cb(new Error('Only PDF and image files (JPG, JPEG, PNG) under 150 KB are allowed.'), false);
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 250 * 1024 } // Strict 250 KB limit
+  limits: { fileSize: 150 * 1024 } // Strict 150 KB limit
 });
 
 module.exports = upload;
