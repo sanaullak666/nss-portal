@@ -122,7 +122,7 @@ exports.handleSendOTP = async (req, res) => {
       title: 'Admin Password Reset - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       defaultEmail: targetEmail,
-      error: `Unauthorized email address. OTP can only be sent to registered admin emails (${ALLOWED_EMAILS.join(', ')}).`,
+      error: 'Unauthorized email address. OTP can only be sent to registered admin emails.',
       success: null
     });
   }
