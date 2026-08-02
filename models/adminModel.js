@@ -29,15 +29,30 @@ class AdminModel {
   }
 
   static async saveOTP(adminId, email, otpCode, expiresAt) {
-    // Invalidate prior unused OTPs for this email
-    await db.query('UPDATE admin_otps SET used = 1 WHERE email = ? AND used = 0', [email.trim().toLowerCase()]);
+    try {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS admin_otps (
+          id SERIAL PRIMARY KEY,
+          admin_id INT NOT NULL,
+          email VARCHAR(150) NOT NULL,
+          otp_code VARCHAR(10) NOT NULL,
+          expires_at TIMESTAMP NOT NULL,
+          used SMALLINT DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    } catch (e) {}
+
+    try {
+      await db.query('UPDATE admin_otps SET used = 1 WHERE email = ? AND used = 0', [email.trim().toLowerCase()]);
+    } catch (e) {}
     
     const query = `
       INSERT INTO admin_otps (admin_id, email, otp_code, expires_at, used)
       VALUES (?, ?, ?, ?, 0)
     `;
     const [result] = await db.query(query, [adminId, email.trim().toLowerCase(), otpCode, expiresAt]);
-    return result.insertId;
+    return result ? result.insertId : null;
   }
 
   static async verifyOTP(email, otpCode) {

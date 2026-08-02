@@ -113,13 +113,22 @@ exports.renderForgotPassword = (req, res) => {
 };
 
 exports.handleSendOTP = async (req, res) => {
-  const targetEmail = (req.body.email || 'sanaullak294@gmail.com').trim().toLowerCase();
+  const targetEmail = (req.body.email || '').trim().toLowerCase();
+  const AUTHORIZED_EMAIL = 'sanaullak294@gmail.com';
+
+  // Strict Email Restriction Check
+  if (targetEmail !== AUTHORIZED_EMAIL) {
+    return res.render('admin/forgot-password', {
+      title: 'Admin Password Reset - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      defaultEmail: targetEmail,
+      error: `Unauthorized email address. OTP can only be sent to the registered admin email (${AUTHORIZED_EMAIL}).`,
+      success: null
+    });
+  }
 
   try {
-    const admin = await AdminModel.findByUsernameOrEmail(targetEmail);
-    
-    // Fallback search by default username if admin email not matched yet
-    let activeAdmin = admin;
+    let activeAdmin = await AdminModel.findByUsernameOrEmail(AUTHORIZED_EMAIL);
     if (!activeAdmin) {
       activeAdmin = await AdminModel.findByUsernameOrEmail('admin');
     }
@@ -129,7 +138,7 @@ exports.handleSendOTP = async (req, res) => {
         title: 'Admin Password Reset - PU NSS Portal',
         csrfToken: req.csrfToken ? req.csrfToken() : '',
         defaultEmail: targetEmail,
-        error: 'No admin account found.',
+        error: 'Admin account not found in database.',
         success: null
       });
     }
@@ -141,18 +150,18 @@ exports.handleSendOTP = async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Save to DB
-    await AdminModel.saveOTP(activeAdmin.id, targetEmail, otpCode, expiresAt);
+    await AdminModel.saveOTP(activeAdmin.id, AUTHORIZED_EMAIL, otpCode, expiresAt);
 
     // Send email
-    await sendOTPEmail(targetEmail, otpCode);
+    await sendOTPEmail(AUTHORIZED_EMAIL, otpCode);
 
     res.render('admin/verify-otp', {
       title: 'Verify OTP & Change Password - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
-      email: targetEmail,
+      email: AUTHORIZED_EMAIL,
       otpCode: process.env.NODE_ENV === 'development' ? otpCode : '',
       error: null,
-      success: `A 6-digit verification OTP has been sent to ${targetEmail}. Please check your inbox/spam folder.`
+      success: `A 6-digit verification OTP has been sent to ${AUTHORIZED_EMAIL}. Please check your inbox/spam folder.`
     });
 
   } catch (err) {
@@ -161,7 +170,7 @@ exports.handleSendOTP = async (req, res) => {
       title: 'Admin Password Reset - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       defaultEmail: targetEmail,
-      error: 'Failed to send OTP email. Please try again.',
+      error: `Failed to send OTP email: ${err.message || 'Please try again.'}`,
       success: null
     });
   }
