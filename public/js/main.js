@@ -219,8 +219,18 @@ window.hideGlobalLoader = function () {
   }
 };
 
-// Handle browser Back / Forward cache navigation
+// Handle browser Back / Forward (bfcache) navigation
 window.addEventListener('pageshow', function (event) {
   window.hideGlobalLoader();
+
+  // Force a fresh server reload when navigating via Chrome Back or Forward (Next) buttons
+  var isBackForward = event.persisted || 
+    (window.performance && window.performance.getEntriesByType && 
+     window.performance.getEntriesByType('navigation')[0] && 
+     window.performance.getEntriesByType('navigation')[0].type === 'back_forward');
+
+  if (isBackForward) {
+    window.location.reload();
+  }
 });
 
