@@ -227,12 +227,25 @@ async function autoMigrate(connection) {
     );
   `);
 
+  // 4. Ensure admin_otps table
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS admin_otps (
+      id SERIAL PRIMARY KEY,
+      admin_id INT NOT NULL,
+      email VARCHAR(150) NOT NULL,
+      otp_code VARCHAR(10) NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      used SMALLINT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   // Seed default admin user
   const adminHash = await bcrypt.hash('Admin@NSS2026', 10);
   await connection.query(
     `INSERT INTO admins (username, password_hash, full_name, email, role) 
-     VALUES (?, ?, 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin') 
-     ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
+     VALUES (?, ?, 'PU NSS Super Administrator', 'sanaullak294@gmail.com', 'superadmin') 
+     ON CONFLICT (username) DO UPDATE SET email = 'sanaullak294@gmail.com'`,
     ['admin', adminHash]
   );
 }

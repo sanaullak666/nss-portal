@@ -97,3 +97,167 @@ exports.handleLogout = (req, res) => {
     res.redirect('/admin/login');
   }
 };
+
+// --- ADMIN PASSWORD RESET VIA EMAIL OTP ---
+
+const { sendOTPEmail } = require('../utils/emailService');
+
+exports.renderForgotPassword = (req, res) => {
+  res.render('admin/forgot-password', {
+    title: 'Admin Password Reset - PU NSS Portal',
+    csrfToken: req.csrfToken ? req.csrfToken() : '',
+    defaultEmail: 'sanaullak294@gmail.com',
+    error: null,
+    success: null
+  });
+};
+
+exports.handleSendOTP = async (req, res) => {
+  const targetEmail = (req.body.email || 'sanaullak294@gmail.com').trim().toLowerCase();
+
+  try {
+    const admin = await AdminModel.findByUsernameOrEmail(targetEmail);
+    
+    // Fallback search by default username if admin email not matched yet
+    let activeAdmin = admin;
+    if (!activeAdmin) {
+      activeAdmin = await AdminModel.findByUsernameOrEmail('admin');
+    }
+
+    if (!activeAdmin) {
+      return res.render('admin/forgot-password', {
+        title: 'Admin Password Reset - PU NSS Portal',
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        defaultEmail: targetEmail,
+        error: 'No admin account found.',
+        success: null
+      });
+    }
+
+    // Generate 6-digit random OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Expiration: 10 minutes from now
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Save to DB
+    await AdminModel.saveOTP(activeAdmin.id, targetEmail, otpCode, expiresAt);
+
+    // Send email
+    await sendOTPEmail(targetEmail, otpCode);
+
+    res.render('admin/verify-otp', {
+      title: 'Verify OTP & Change Password - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: targetEmail,
+      otpCode: process.env.NODE_ENV === 'development' ? otpCode : '',
+      error: null,
+      success: `A 6-digit verification OTP has been sent to ${targetEmail}. Please check your inbox/spam folder.`
+    });
+
+  } catch (err) {
+    console.error('Send OTP Error:', err);
+    res.render('admin/forgot-password', {
+      title: 'Admin Password Reset - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      defaultEmail: targetEmail,
+      error: 'Failed to send OTP email. Please try again.',
+      success: null
+    });
+  }
+};
+
+exports.renderVerifyOTP = (req, res) => {
+  res.render('admin/verify-otp', {
+    title: 'Verify OTP & Change Password - PU NSS Portal',
+    csrfToken: req.csrfToken ? req.csrfToken() : '',
+    email: req.query.email || 'sanaullak294@gmail.com',
+    otpCode: '',
+    error: null,
+    success: null
+  });
+};
+
+exports.handleVerifyOTP = async (req, res) => {
+  const { email, otp_code, new_password, confirm_password } = req.body || {};
+  const cleanEmail = (email || 'sanaullak294@gmail.com').trim().toLowerCase();
+
+  if (!otp_code || !new_password || !confirm_password) {
+    return res.render('admin/verify-otp', {
+      title: 'Verify OTP & Change Password - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: cleanEmail,
+      otpCode: otp_code || '',
+      error: 'Please fill in all required fields (OTP, New Password, Confirm Password).',
+      success: null
+    });
+  }
+
+  if (new_password.length < 6) {
+    return res.render('admin/verify-otp', {
+      title: 'Verify OTP & Change Password - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: cleanEmail,
+      otpCode: otp_code,
+      error: 'New password must be at least 6 characters long.',
+      success: null
+    });
+  }
+
+  if (new_password !== confirm_password) {
+    return res.render('admin/verify-otp', {
+      title: 'Verify OTP & Change Password - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: cleanEmail,
+      otpCode: otp_code,
+      error: 'New password and confirmation password do not match.',
+      success: null
+    });
+  }
+
+  try {
+    const validOtp = await AdminModel.verifyOTP(cleanEmail, otp_code);
+
+    if (!validOtp) {
+      return res.render('admin/verify-otp', {
+        title: 'Verify OTP & Change Password - PU NSS Portal',
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        email: cleanEmail,
+        otpCode: otp_code,
+        error: 'Invalid or expired OTP code. Please request a new OTP.',
+        success: null
+      });
+    }
+
+    // Hash new password
+    const newHash = await bcrypt.hash(new_password, 10);
+
+    // Update password in DB
+    await AdminModel.updatePassword(validOtp.admin_id, newHash);
+
+    // Mark OTP used
+    await AdminModel.markOTPUsed(validOtp.id);
+
+    try {
+      await logAudit('PASSWORD_CHANGE_OTP', cleanEmail, 'Admin password changed successfully using OTP');
+    } catch (e) {}
+
+    res.render('admin/login', {
+      title: 'Admin Login - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: null,
+      success: 'Your admin password has been changed successfully! Please log in with your new password.'
+    });
+
+  } catch (err) {
+    console.error('Verify OTP Error:', err);
+    res.render('admin/verify-otp', {
+      title: 'Verify OTP & Change Password - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: cleanEmail,
+      otpCode: otp_code,
+      error: 'An error occurred while updating your password. Please try again.',
+      success: null
+    });
+  }
+};

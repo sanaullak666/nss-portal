@@ -22,6 +22,47 @@ class AdminModel {
     const [result] = await db.query(query, [username, password_hash, full_name, email, role]);
     return result.insertId;
   }
+
+  static async findById(id) {
+    const [rows] = await db.query('SELECT * FROM admins WHERE id = ? LIMIT 1', [id]);
+    return rows[0] || null;
+  }
+
+  static async saveOTP(adminId, email, otpCode, expiresAt) {
+    // Invalidate prior unused OTPs for this email
+    await db.query('UPDATE admin_otps SET used = 1 WHERE email = ? AND used = 0', [email.trim().toLowerCase()]);
+    
+    const query = `
+      INSERT INTO admin_otps (admin_id, email, otp_code, expires_at, used)
+      VALUES (?, ?, ?, ?, 0)
+    `;
+    const [result] = await db.query(query, [adminId, email.trim().toLowerCase(), otpCode, expiresAt]);
+    return result.insertId;
+  }
+
+  static async verifyOTP(email, otpCode) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otpCode.trim();
+    const [rows] = await db.query(
+      `SELECT * FROM admin_otps 
+       WHERE email = ? AND otp_code = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP 
+       ORDER BY created_at DESC LIMIT 1`,
+      [cleanEmail, cleanOtp]
+    );
+    return rows[0] || null;
+  }
+
+  static async markOTPUsed(otpId) {
+    await db.query('UPDATE admin_otps SET used = 1 WHERE id = ?', [otpId]);
+  }
+
+  static async updatePassword(adminId, newPasswordHash) {
+    const [result] = await db.query(
+      'UPDATE admins SET password_hash = ? WHERE id = ?',
+      [newPasswordHash, adminId]
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = AdminModel;

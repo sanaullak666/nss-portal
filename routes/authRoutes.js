@@ -18,4 +18,10 @@ router.post('/admin/login', loginLimiter, csrfProtection, authController.handleL
 router.get('/admin/logout', authController.handleLogout);
 router.post('/admin/logout', authController.handleLogout);
 
+// Admin Password Reset via Email OTP
+router.get('/admin/forgot-password', csrfProtection, authController.renderForgotPassword);
+router.post('/admin/send-otp', csrfProtection, authController.handleSendOTP);
+router.get('/admin/verify-otp', csrfProtection, authController.renderVerifyOTP);
+router.post('/admin/verify-otp', csrfProtection, authController.handleVerifyOTP);
+
 module.exports = router;
