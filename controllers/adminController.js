@@ -1,4 +1,6 @@
 const RegistrationModel = require('../models/registrationModel');
+const AdminModel = require('../models/adminModel');
+const bcrypt = require('bcryptjs');
 const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
 const { exportRegistrationsToExcel } = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
@@ -228,5 +230,103 @@ exports.downloadPDF = async (req, res) => {
   } catch (err) {
     console.error('PDF Download Error:', err);
     res.status(500).render('500');
+  }
+};
+
+// --- DIRECT ADMIN CHANGE PASSWORD (INSIDE DASHBOARD) ---
+
+exports.renderChangePassword = (req, res) => {
+  res.render('admin/change-password', {
+    title: 'Change Password - PU NSS Portal',
+    admin: req.session.admin,
+    csrfToken: req.csrfToken ? req.csrfToken() : '',
+    error: null,
+    success: null
+  });
+};
+
+exports.handleChangePassword = async (req, res) => {
+  const { current_password, new_password, confirm_password } = req.body || {};
+  const adminSession = req.session.admin;
+
+  if (!current_password || !new_password || !confirm_password) {
+    return res.render('admin/change-password', {
+      title: 'Change Password - PU NSS Portal',
+      admin: adminSession,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: 'Please fill in all fields (Current Password, New Password, Confirm Password).',
+      success: null
+    });
+  }
+
+  if (new_password.length < 6) {
+    return res.render('admin/change-password', {
+      title: 'Change Password - PU NSS Portal',
+      admin: adminSession,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: 'New password must be at least 6 characters long.',
+      success: null
+    });
+  }
+
+  if (new_password !== confirm_password) {
+    return res.render('admin/change-password', {
+      title: 'Change Password - PU NSS Portal',
+      admin: adminSession,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: 'New password and confirm password do not match.',
+      success: null
+    });
+  }
+
+  try {
+    const adminRecord = await AdminModel.findById(adminSession.id) || await AdminModel.findByUsernameOrEmail(adminSession.username);
+    if (!adminRecord) {
+      return res.render('admin/change-password', {
+        title: 'Change Password - PU NSS Portal',
+        admin: adminSession,
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        error: 'Admin account record not found.',
+        success: null
+      });
+    }
+
+    const hashToCompare = adminRecord.password_hash || adminRecord.password;
+    const isMatch = await bcrypt.compare(current_password, hashToCompare);
+
+    if (!isMatch) {
+      return res.render('admin/change-password', {
+        title: 'Change Password - PU NSS Portal',
+        admin: adminSession,
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        error: 'Current password is incorrect. Please try again.',
+        success: null
+      });
+    }
+
+    const newHash = await bcrypt.hash(new_password, 10);
+    await AdminModel.updatePassword(adminRecord.id, newHash);
+
+    try {
+      await logAudit('PASSWORD_CHANGE_DIRECT', adminSession.username, 'Admin password changed directly from dashboard');
+    } catch (e) {}
+
+    res.render('admin/change-password', {
+      title: 'Change Password - PU NSS Portal',
+      admin: adminSession,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: null,
+      success: 'Your password has been changed successfully!'
+    });
+
+  } catch (err) {
+    console.error('Change Password Error:', err);
+    res.render('admin/change-password', {
+      title: 'Change Password - PU NSS Portal',
+      admin: adminSession,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      error: 'Failed to update password. Please try again.',
+      success: null
+    });
   }
 };

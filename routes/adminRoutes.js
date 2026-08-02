@@ -26,4 +26,8 @@ router.post('/admin/registrations/:id/edit', csrfProtection, adminController.han
 router.post('/admin/registrations/:id/delete', csrfProtection, adminController.deleteRegistration);
 router.get('/admin/registrations/:id/pdf', adminController.downloadPDF);
 
+// Admin Direct Change Password Routes
+router.get('/admin/change-password', csrfProtection, adminController.renderChangePassword);
+router.post('/admin/change-password', csrfProtection, adminController.handleChangePassword);
+
 module.exports = router;
