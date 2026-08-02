@@ -3,6 +3,7 @@ const router = express.Router();
 const csurf = require('csurf');
 const authController = require('../controllers/authController');
 const { isGuest } = require('../middleware/authMiddleware');
+const { loginLimiter } = require('../middleware/rateLimiter');
 
 const csrfProtection = csurf({ 
   cookie: {
