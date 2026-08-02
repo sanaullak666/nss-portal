@@ -14,7 +14,7 @@ exports.renderDashboard = async (req, res) => {
     const [[{ totalPreviousVolunteers }]] = await db.query('SELECT COUNT(*) as totalPreviousVolunteers FROM registrations WHERE is_previous_volunteer = "Yes"');
 
     const [unitCounts] = await db.query('SELECT unit_number, COUNT(*) as count FROM registrations GROUP BY unit_number ORDER BY unit_number');
-    const [recentRegistrations] = await db.query('SELECT * FROM registrations ORDER BY created_at DESC LIMIT 5');
+    const [recentRegistrations] = await db.query('SELECT * FROM registrations ORDER BY created_at ASC, id ASC LIMIT 5');
 
     res.render('admin/dashboard', {
       title: 'Admin Dashboard - PU NSS Portal',
