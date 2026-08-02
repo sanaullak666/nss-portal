@@ -106,7 +106,7 @@ exports.renderForgotPassword = (req, res) => {
   res.render('admin/forgot-password', {
     title: 'Admin Password Reset - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    defaultEmail: 'sanaullaamini@gmail.com',
+    defaultEmail: '',
     error: null,
     success: null
   });
@@ -180,7 +180,7 @@ exports.renderVerifyOTP = (req, res) => {
   res.render('admin/verify-otp', {
     title: 'Verify OTP & Change Password - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    email: req.query.email || 'sanaullaamini@gmail.com',
+    email: req.query.email || '',
     otpCode: '',
     error: null,
     success: null
@@ -189,7 +189,7 @@ exports.renderVerifyOTP = (req, res) => {
 
 exports.handleVerifyOTP = async (req, res) => {
   const { email, otp_code, new_password, confirm_password } = req.body || {};
-  const cleanEmail = (email || 'sanaullaamini@gmail.com').trim().toLowerCase();
+  const cleanEmail = (email || '').trim().toLowerCase();
 
   if (!otp_code || !new_password || !confirm_password) {
     return res.render('admin/verify-otp', {
