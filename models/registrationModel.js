@@ -219,7 +219,7 @@ class RegistrationModel {
 
     const [countRows] = await db.query(`SELECT COUNT(*) as "totalCount" FROM registrations ${whereSQL}`, queryParams);
     const totalCount = parseInt(countRows[0]?.totalCount || countRows[0]?.totalcount || 0, 10);
-    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
+    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
 
     return {
       registrations,
@@ -230,7 +230,7 @@ class RegistrationModel {
   }
 
   static async getAllForExport() {
-    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Active' ORDER BY created_at DESC");
+    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Active' ORDER BY created_at ASC, id ASC");
     return registrations;
   }
 

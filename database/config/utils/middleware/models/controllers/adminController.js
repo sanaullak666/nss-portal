@@ -66,7 +66,7 @@ exports.renderRegistrationsList = async (req, res) => {
   try {
     const [[{ totalCount }]] = await db.query(`SELECT COUNT(*) as totalCount FROM registrations ${whereSQL}`, queryParams);
     const [registrations] = await db.query(
-      `SELECT * FROM registrations ${whereSQL} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM registrations ${whereSQL} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`,
       [...queryParams, limit, offset]
     );
 
@@ -120,7 +120,7 @@ exports.renderRegistrationView = async (req, res) => {
  */
 exports.exportExcel = async (req, res) => {
   try {
-    const [registrations] = await db.query('SELECT * FROM registrations ORDER BY created_at DESC');
+    const [registrations] = await db.query('SELECT * FROM registrations ORDER BY created_at ASC, id ASC');
     await exportRegistrationsToExcel(registrations, res);
   } catch (err) {
     console.error('Excel Export Error:', err);
