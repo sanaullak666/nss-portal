@@ -61,11 +61,20 @@ app.use((req, res, next) => {
 // Cookie Parser & PostgreSQL Serverless Session Store
 app.use(cookieParser());
 
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.COOKIE_SECURE === 'true';
+
 const sessionStore = new pgSession({
   pool: db.pool,
   tableName: 'session',
-  createTableIfMissing: true
+  createTableIfMissing: true,
+  pruneSessionInterval: 60 * 15 // Prune expired sessions every 15 mins
 });
+
+sessionStore.on('error', (err) => {
+  console.error('[SESSION STORE ERROR]', err.message);
+});
+
+const { attachSessionLocals } = require('./middleware/authMiddleware');
 
 app.use(
   session({
@@ -74,15 +83,19 @@ app.use(
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Refreshes session expiration on active requests
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 Hours
     }
   })
 );
+
+// Inject Session Data Globally to View Templates
+app.use(attachSessionLocals);
 
 // Dynamic Certificate Uploads Route (Fetches certificate from MySQL Blob first, then static fallbacks)
 app.get('/uploads/:filename', async (req, res) => {

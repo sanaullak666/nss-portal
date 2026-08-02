@@ -55,6 +55,7 @@ exports.handleLogin = async (req, res) => {
       email: admin.email,
       role: admin.role || 'admin'
     };
+    req.session.lastActivity = Date.now();
 
     req.session.save(async (err) => {
       if (err) {
@@ -89,9 +90,9 @@ exports.handleLogout = (req, res) => {
       try {
         await logAudit('LOGOUT', username, 'Admin logged out');
       } catch (aErr) {}
-      res.clearCookie('nss_session_id');
-      res.clearCookie('connect.sid');
-      res.redirect('/admin/login');
+      res.clearCookie('nss_session_id', { path: '/' });
+      res.clearCookie('connect.sid', { path: '/' });
+      res.redirect('/admin/login?success=Logged+out+successfully.');
     });
   } else {
     res.redirect('/admin/login');

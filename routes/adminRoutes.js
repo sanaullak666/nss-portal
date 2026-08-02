@@ -4,10 +4,12 @@ const csurf = require('csurf');
 const adminController = require('../controllers/adminController');
 const { isAuthenticated } = require('../middleware/authMiddleware');
 
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.COOKIE_SECURE === 'true';
+
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.COOKIE_SECURE === 'true',
+    secure: isProduction,
     sameSite: 'lax'
   },
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
