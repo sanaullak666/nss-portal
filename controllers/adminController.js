@@ -23,6 +23,21 @@ exports.renderDashboard = async (req, res) => {
   }
 };
 
+exports.getLiveDashboardStats = async (req, res) => {
+  try {
+    const data = await RegistrationModel.getDashboardStats();
+    res.json({
+      success: true,
+      stats: data.stats,
+      chartData: data.chartData,
+      recentRegistrations: data.recentRegistrations
+    });
+  } catch (err) {
+    console.error('Live Stats API Error:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 exports.renderRegistrationsList = async (req, res) => {
   const { unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1 } = req.query;
 

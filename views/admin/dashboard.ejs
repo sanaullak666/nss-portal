@@ -337,6 +337,81 @@
         },
         options: { responsive: true }
       });
+
+      // Real-Time Live Data Auto-Update Polling (Every 6 Seconds)
+      (function initLiveUpdates() {
+        let lastTotal = parseInt('<%= stats.totalRegistrations %>', 10) || 0;
+
+        async function fetchLiveStats() {
+          try {
+            const res = await fetch('/admin/api/live-stats');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data.success || !data.stats) return;
+
+            const newTotal = parseInt(data.stats.totalRegistrations, 10) || 0;
+
+            // Update Stat Numbers automatically
+            const numbers = document.querySelectorAll('.dash-stat-number');
+            if (numbers.length >= 6) {
+              numbers[0].textContent = data.stats.totalRegistrations;
+              numbers[1].textContent = data.stats.todayRegistrations;
+              numbers[2].textContent = data.stats.totalUnits;
+              numbers[3].textContent = data.stats.totalLeadershipInterested || 0;
+              numbers[4].textContent = data.stats.totalMediaInterested;
+              numbers[5].textContent = data.stats.totalPreviousVolunteers;
+            }
+
+            // If a new registration has arrived
+            if (newTotal > lastTotal) {
+              showToastNotification(`🔔 ${newTotal - lastTotal} New Volunteer Registration Recorded!`);
+              lastTotal = newTotal;
+              updateRecentTable(data.recentRegistrations);
+            }
+          } catch (e) {}
+        }
+
+        function showToastNotification(message) {
+          let toast = document.getElementById('liveToastBox');
+          if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'liveToastBox';
+            toast.style.cssText = 'position: fixed; bottom: 25px; right: 25px; z-index: 999999; background: #002B49; color: #ffffff; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-left: 5px solid #b71c1c; display: flex; align-items: center; gap: 10px; transition: opacity 0.4s ease;';
+            document.body.appendChild(toast);
+          }
+          toast.innerHTML = `<span>🔔</span><div>${message}</div>`;
+          toast.style.opacity = '1';
+          setTimeout(function() { toast.style.opacity = '0'; }, 5000);
+        }
+
+        function updateRecentTable(registrations) {
+          const tbody = document.querySelector('.dash-table-card table tbody');
+          if (!tbody || !registrations) return;
+          if (registrations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 25px; color: var(--color-text-muted);">No volunteer registrations recorded yet.</td></tr>';
+            return;
+          }
+
+          let html = '';
+          registrations.forEach(function(reg) {
+            html += `
+              <tr style="background: rgba(220, 252, 231, 0.4); transition: background 1s;">
+                <td><strong style="color: var(--color-nss-red);">${reg.registration_id}</strong></td>
+                <td><strong>${reg.applicant_name}</strong></td>
+                <td>${reg.univ_reg_no}</td>
+                <td><span class="badge badge-submitted">${reg.unit_number}</span></td>
+                <td>${reg.course}</td>
+                <td>${reg.department}</td>
+                <td><span class="badge ${reg.interested_in_leadership === 'Yes' ? 'badge-active' : 'badge-deleted'}">${reg.interested_in_leadership || 'No'}</span></td>
+                <td><a href="/admin/registrations/${reg.id}" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.8rem;">Profile</a></td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        }
+
+        setInterval(fetchLiveStats, 6000);
+      })();
     });
 
     function toggleAdminProfileMenu(event) {
