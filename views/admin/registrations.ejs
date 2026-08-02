@@ -232,5 +232,103 @@
 
   <%- include('../partials/footer') %>
   <script src="/js/main.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterForm = document.querySelector('.filter-bar-custom');
+      if (!filterForm) return;
+
+      const searchInput = filterForm.querySelector('input[name="search"]');
+      const selectInputs = filterForm.querySelectorAll('select');
+      const tableCard = document.querySelector('.dash-table-card');
+
+      let debounceTimer = null;
+
+      function performFilter(targetUrl) {
+        let url = targetUrl;
+        if (!url) {
+          const formData = new FormData(filterForm);
+          const params = new URLSearchParams();
+          for (const [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+              params.append(key, value.trim());
+            }
+          }
+          url = filterForm.action + '?' + params.toString();
+        }
+
+        if (tableCard) tableCard.style.opacity = '0.65';
+
+        fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(htmlText => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlText, 'text/html');
+          
+          const newTableCard = doc.querySelector('.dash-table-card');
+          const newPagination = doc.querySelector('.pagination-custom');
+          const currentPagination = document.querySelector('.pagination-custom');
+
+          if (newTableCard && tableCard) {
+            tableCard.innerHTML = newTableCard.innerHTML;
+            tableCard.style.opacity = '1';
+          }
+
+          if (currentPagination && newPagination) {
+            currentPagination.replaceWith(newPagination);
+          } else if (currentPagination && !newPagination) {
+            currentPagination.remove();
+          } else if (!currentPagination && newPagination) {
+            const mainContainer = document.querySelector('main.container');
+            if (mainContainer) mainContainer.appendChild(newPagination);
+          }
+
+          window.history.pushState({}, '', url);
+          attachPaginationEvents();
+        })
+        .catch(err => {
+          console.error('Filtering error:', err);
+          if (tableCard) tableCard.style.opacity = '1';
+        });
+      }
+
+      function attachPaginationEvents() {
+        const pagLinks = document.querySelectorAll('.pagination-custom a');
+        pagLinks.forEach(link => {
+          link.onclick = function(e) {
+            e.preventDefault();
+            performFilter(this.href);
+          };
+        });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function() {
+            performFilter();
+          }, 300);
+        });
+
+        filterForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          clearTimeout(debounceTimer);
+          performFilter();
+        });
+      }
+
+      selectInputs.forEach(select => {
+        select.addEventListener('change', function() {
+          performFilter();
+        });
+      });
+
+      attachPaginationEvents();
+    });
+  </script>
 </body>
 </html>
