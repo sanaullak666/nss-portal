@@ -23,7 +23,7 @@ async function sendOTPEmail(toEmail, otpCode) {
   console.log(`==================================================\n`);
 
   const gmailUser = process.env.GMAIL_USER || 'nsspondiuni2409@gmail.com';
-  const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS || 'xirqyokhyorkoitn';
+  const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS || 'qikdszaasapkypzu';
 
   if (!gmailPass) {
     throw new Error('Gmail App Password (GMAIL_PASS) is not configured.');
