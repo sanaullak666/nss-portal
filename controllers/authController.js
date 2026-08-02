@@ -114,21 +114,21 @@ exports.renderForgotPassword = (req, res) => {
 
 exports.handleSendOTP = async (req, res) => {
   const targetEmail = (req.body.email || '').trim().toLowerCase();
-  const AUTHORIZED_EMAIL = 'sanaullaamini@gmail.com';
+  const ALLOWED_EMAILS = ['sanaullaamini@gmail.com', 'sanaullak294@gmail.com'];
 
-  // Strict Email Restriction Check
-  if (targetEmail !== AUTHORIZED_EMAIL) {
+  // Email Authorization Check
+  if (!ALLOWED_EMAILS.includes(targetEmail)) {
     return res.render('admin/forgot-password', {
       title: 'Admin Password Reset - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       defaultEmail: targetEmail,
-      error: `Unauthorized email address. OTP can only be sent to the registered admin email (${AUTHORIZED_EMAIL}).`,
+      error: `Unauthorized email address. OTP can only be sent to registered admin emails (${ALLOWED_EMAILS.join(', ')}).`,
       success: null
     });
   }
 
   try {
-    let activeAdmin = await AdminModel.findByUsernameOrEmail(AUTHORIZED_EMAIL);
+    let activeAdmin = await AdminModel.findByUsernameOrEmail(targetEmail);
     if (!activeAdmin) {
       activeAdmin = await AdminModel.findByUsernameOrEmail('admin');
     }
@@ -150,18 +150,18 @@ exports.handleSendOTP = async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Save to DB
-    await AdminModel.saveOTP(activeAdmin.id, AUTHORIZED_EMAIL, otpCode, expiresAt);
+    await AdminModel.saveOTP(activeAdmin.id, targetEmail, otpCode, expiresAt);
 
     // Send email
-    await sendOTPEmail(AUTHORIZED_EMAIL, otpCode);
+    await sendOTPEmail(targetEmail, otpCode);
 
     res.render('admin/verify-otp', {
       title: 'Verify OTP & Change Password - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
-      email: AUTHORIZED_EMAIL,
+      email: targetEmail,
       otpCode: '',
       error: null,
-      success: `A 6-digit verification OTP has been sent to ${AUTHORIZED_EMAIL}. Please check your inbox/spam folder.`
+      success: `A 6-digit verification OTP has been sent to ${targetEmail}. Please check your inbox/spam folder.`
     });
 
   } catch (err) {
