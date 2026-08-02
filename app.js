@@ -61,13 +61,11 @@ app.use((req, res, next) => {
 // Cookie Parser & PostgreSQL Serverless Session Store
 app.use(cookieParser());
 
-const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.COOKIE_SECURE === 'true';
-
 const sessionStore = new pgSession({
   pool: db.pool,
   tableName: 'session',
   createTableIfMissing: true,
-  pruneSessionInterval: 60 * 15 // Prune expired sessions every 15 mins
+  pruneSessionInterval: false // Disabled background timer for Vercel Serverless compatibility
 });
 
 sessionStore.on('error', (err) => {
@@ -87,7 +85,7 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: isProduction,
+      secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 Hours
     }
