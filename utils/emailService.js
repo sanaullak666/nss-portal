@@ -18,7 +18,7 @@ async function sendOTPEmail(toEmail, otpCode) {
   console.log(`Validity: 10 Minutes`);
   console.log(`==================================================\n`);
 
-  const gmailUser = process.env.GMAIL_USER || 'sanaullak294@gmail.com';
+  const gmailUser = process.env.GMAIL_USER || 'sanaullaamini@gmail.com';
   const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS;
 
   if (!gmailPass) {

@@ -106,7 +106,7 @@ exports.renderForgotPassword = (req, res) => {
   res.render('admin/forgot-password', {
     title: 'Admin Password Reset - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    defaultEmail: 'sanaullak294@gmail.com',
+    defaultEmail: 'sanaullaamini@gmail.com',
     error: null,
     success: null
   });
@@ -114,7 +114,7 @@ exports.renderForgotPassword = (req, res) => {
 
 exports.handleSendOTP = async (req, res) => {
   const targetEmail = (req.body.email || '').trim().toLowerCase();
-  const AUTHORIZED_EMAIL = 'sanaullak294@gmail.com';
+  const AUTHORIZED_EMAIL = 'sanaullaamini@gmail.com';
 
   // Strict Email Restriction Check
   if (targetEmail !== AUTHORIZED_EMAIL) {
@@ -180,7 +180,7 @@ exports.renderVerifyOTP = (req, res) => {
   res.render('admin/verify-otp', {
     title: 'Verify OTP & Change Password - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    email: req.query.email || 'sanaullak294@gmail.com',
+    email: req.query.email || 'sanaullaamini@gmail.com',
     otpCode: '',
     error: null,
     success: null
@@ -189,7 +189,7 @@ exports.renderVerifyOTP = (req, res) => {
 
 exports.handleVerifyOTP = async (req, res) => {
   const { email, otp_code, new_password, confirm_password } = req.body || {};
-  const cleanEmail = (email || 'sanaullak294@gmail.com').trim().toLowerCase();
+  const cleanEmail = (email || 'sanaullaamini@gmail.com').trim().toLowerCase();
 
   if (!otp_code || !new_password || !confirm_password) {
     return res.render('admin/verify-otp', {
