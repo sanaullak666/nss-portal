@@ -30,7 +30,7 @@ CREATE TABLE `admins` (
 
 -- Default Admin Credential Seed: Username: admin | Password: Admin@NSS2026
 INSERT INTO `admins` (`username`, `password_hash`, `full_name`, `email`, `role`) VALUES
-('admin', '$2b$10$3zR1qE1vC3X9s/Bq9vXN7.fQJ2w7G6P8Y4kR1v8L0M9P3X2Y1Z0Wq', 'PU NSS Super Administrator', 'nssadmin@pondiuni.edu.in', 'superadmin')
+('admin', '$2b$10$3zR1qE1vC3X9s/Bq9vXN7.fQJ2w7G6P8Y4kR1v8L0M9P3X2Y1Z0Wq', 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin')
 ON DUPLICATE KEY UPDATE `username`=`username`;
 
 -- ----------------------------------------------------------------------------

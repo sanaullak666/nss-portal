@@ -114,7 +114,7 @@ exports.renderForgotPassword = (req, res) => {
 
 exports.handleSendOTP = async (req, res) => {
   const targetEmail = (req.body.email || '').trim().toLowerCase();
-  const ALLOWED_EMAILS = ['sanaullaamini@gmail.com', 'sanaullak294@gmail.com'];
+  const ALLOWED_EMAILS = ['sanaullaamini@gmail.com', 'sanaullak294@gmail.com', 'nsspondiuni2409@gmail.com'];
 
   // Email Authorization Check
   if (!ALLOWED_EMAILS.includes(targetEmail)) {
