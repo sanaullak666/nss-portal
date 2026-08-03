@@ -106,11 +106,17 @@ class RegistrationModel {
     const [rows] = await db.query(
       `SELECT * FROM registrations 
        WHERE (registration_id = ? OR univ_reg_no = ? OR email = ? OR contact_number = ? OR aadhaar_number = ?)
-         AND status = 'Active' 
+         AND status IN ('Active', 'Selected', 'Rejected') 
        LIMIT 1`,
       [q, q, q, q, q]
     );
     return rows[0] || null;
+  }
+
+  static async updateStatus(id, newStatus) {
+    if (!['Active', 'Selected', 'Rejected'].includes(newStatus)) return false;
+    const [result] = await db.query("UPDATE registrations SET status = ? WHERE id = ?", [newStatus, id]);
+    return result.affectedRows > 0;
   }
 
   static async update(id, data) {
@@ -229,8 +235,61 @@ class RegistrationModel {
     };
   }
 
+  static async findForSelectionFiltered({ selectionStatus, unit, department, course, search, page = 1, limit = 15 }) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 15);
+    const offset = (pageNum - 1) * limitNum;
+
+    let whereClauses = [];
+    let queryParams = [];
+
+    if (selectionStatus && ['Active', 'Selected', 'Rejected'].includes(selectionStatus)) {
+      whereClauses.push('status = ?');
+      queryParams.push(selectionStatus);
+    } else {
+      whereClauses.push("status IN ('Active', 'Selected', 'Rejected')");
+    }
+
+    if (unit) { whereClauses.push('unit_number = ?'); queryParams.push(unit); }
+    if (department) { whereClauses.push('department = ?'); queryParams.push(department); }
+    if (course) { whereClauses.push('course = ?'); queryParams.push(course); }
+
+    if (search && search.trim()) {
+      whereClauses.push('(applicant_name LIKE ? OR univ_reg_no LIKE ? OR registration_id LIKE ? OR email LIKE ? OR contact_number LIKE ? OR department LIKE ?)');
+      const term = `%${search.trim()}%`;
+      queryParams.push(term, term, term, term, term, term);
+    }
+
+    const whereSQL = `WHERE ${whereClauses.join(' AND ')}`;
+
+    const [countRows] = await db.query(`SELECT COUNT(*) as "totalCount" FROM registrations ${whereSQL}`, queryParams);
+    const totalCount = parseInt(countRows[0]?.totalCount || countRows[0]?.totalcount || 0, 10);
+    const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
+
+    const [selectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected'");
+    const [rejectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Rejected'");
+    const [activeRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'");
+
+    return {
+      registrations,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limitNum) || 1,
+      currentPage: pageNum,
+      selectionStats: {
+        totalSelected: parseInt(selectedRows[0]?.count || 0, 10),
+        totalRejected: parseInt(rejectedRows[0]?.count || 0, 10),
+        totalActive: parseInt(activeRows[0]?.count || 0, 10)
+      }
+    };
+  }
+
   static async getAllForExport() {
-    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Active' ORDER BY created_at ASC, id ASC");
+    const [registrations] = await db.query("SELECT * FROM registrations WHERE status IN ('Active', 'Selected') ORDER BY created_at ASC, id ASC");
+    return registrations;
+  }
+
+  static async getSelectedForExport() {
+    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Selected' ORDER BY created_at ASC, id ASC");
     return registrations;
   }
 

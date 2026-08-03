@@ -2,7 +2,7 @@ const RegistrationModel = require('../models/registrationModel');
 const AdminModel = require('../models/adminModel');
 const bcrypt = require('bcryptjs');
 const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
-const { exportRegistrationsToExcel } = require('../utils/excelExporter');
+const { exportRegistrationsToExcel, exportSelectedRegistrationsToExcel } = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
 const { logAudit } = require('../utils/auditLogger');
 
@@ -343,5 +343,84 @@ exports.handleChangePassword = async (req, res) => {
       error: 'Failed to update password. Please try again.',
       success: null
     });
+  }
+};
+
+exports.renderSelectionPage = async (req, res) => {
+  const { selectionStatus, unit, department, course, search, page = 1 } = req.query;
+
+  try {
+    const result = await RegistrationModel.findForSelectionFiltered({
+      selectionStatus, unit, department, course, search, page, limit: 15
+    });
+
+    res.render('admin/selection', {
+      title: 'Volunteer Selection Process - PU NSS Portal',
+      admin: req.session.admin,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      registrations: result.registrations,
+      selectionStats: result.selectionStats,
+      pagination: {
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalCount: result.totalCount
+      },
+      filters: {
+        selectionStatus: selectionStatus || 'All',
+        unit: unit || '',
+        department: department || '',
+        course: course || '',
+        search: search || ''
+      },
+      constants: { UNITS, DEPARTMENTS, COURSES }
+    });
+  } catch (err) {
+    console.error('Render Selection Page Error:', err);
+    res.status(500).render('500');
+  }
+};
+
+exports.updateVolunteerStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const success = await RegistrationModel.updateStatus(id, status);
+    if (!success) {
+      if (req.xhr || req.headers.accept?.includes('json')) {
+        return res.status(400).json({ success: false, message: 'Failed to update status' });
+      }
+    }
+    
+    try {
+      await logAudit('STATUS_UPDATE', req.session.admin ? req.session.admin.username : 'admin', `Updated registration ID ${id} status to ${status}`);
+    } catch (e) {}
+
+    if (req.xhr || req.headers.accept?.includes('json')) {
+      return res.json({ success: true, status });
+    }
+
+    const redirectUrl = req.get('Referrer') || '/admin/selection';
+    res.redirect(redirectUrl);
+  } catch (err) {
+    console.error('Update Status Error:', err);
+    if (req.xhr || req.headers.accept?.includes('json')) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    res.status(500).render('500');
+  }
+};
+
+exports.exportSelectedToExcel = async (req, res) => {
+  try {
+    const selectedStudents = await RegistrationModel.getSelectedForExport();
+    await exportSelectedRegistrationsToExcel(selectedStudents, res);
+
+    try {
+      await logAudit('EXCEL_EXPORT_SELECTED', req.session.admin ? req.session.admin.username : 'admin', `Exported ${selectedStudents.length} selected volunteers to Excel`);
+    } catch (e) {}
+  } catch (err) {
+    console.error('Export Selected Excel Error:', err);
+    res.status(500).send('Failed to export selected registrations to Excel');
   }
 };

@@ -64,7 +64,13 @@
                 <h3 class="applicant-title"><%= registration.applicant_name %></h3>
                 <div class="reg-id-badge">Registration ID: <strong><%= registration.registration_id %></strong></div>
               </div>
-              <span class="status-tag">Status: Active</span>
+              <% if (registration.status === 'Selected') { %>
+                <span class="status-tag" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0; font-weight: 800;">🟢 Status: Selected</span>
+              <% } else if (registration.status === 'Rejected') { %>
+                <span class="status-tag" style="background: #fee2e2; color: #b91c1c; border-color: #fecaca; font-weight: 800;">🔴 Status: Rejected</span>
+              <% } else { %>
+                <span class="status-tag" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd; font-weight: 800;">🟡 Status: Active (Under Review)</span>
+              <% } %>
             </div>
 
             <div class="details-grid">
@@ -76,25 +82,61 @@
               <div class="details-item"><strong>Registration Date:</strong> <%= new Date(registration.created_at).toLocaleDateString('en-IN') %></div>
             </div>
 
-            <!-- Selection Instructions & WhatsApp Link -->
-            <div class="whatsapp-box">
-              <div class="whatsapp-box-title">
-                <span><svg style="display:inline-block; vertical-align:-2px; margin-right:4px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> Selection Process Instructions:
+            <!-- Selection Status Box -->
+            <% if (registration.status === 'Selected') { %>
+              <div class="whatsapp-box" style="background: #f0fdf4; border-color: #16a34a;">
+                <div class="whatsapp-box-title" style="color: #15803d;">
+                  <span>🎉</span> Congratulations! You are Selected!
+                </div>
+                <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong style="color: #15803d;">You have been officially selected as an NSS Volunteer for Pondicherry University (Batch 2026).</strong></li>
+                  <li><strong>Join the Official Selection WhatsApp group for orientation & event schedule: <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800;">Click Here to Join WhatsApp Group</a></strong></li>
+                  <li><strong>Download and keep your official registration receipt for verification.</strong></li>
+                </ul>
               </div>
-              <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
-                <li><strong>Join the WhatsApp group for further updates on the selection process: <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800;">Click Here to Join WhatsApp Group</a></strong></li>
-                <li><strong>Please take a printout of your application receipt for the selection interview.</strong></li>
-              </ul>
-            </div>
 
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <a href="/track-registration/pdf/<%= registration.registration_id %>" class="pdf-download-btn">
-                <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Download Application Form Receipt (PDF)
-              </a>
-              <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" class="whatsapp-link-btn">
-                <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.206 8.206 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.05-1.08l-.29-.17-3.01.79.8-2.93-.19-.3A8.196 8.196 0 0 1 3.8 11.91c0-4.54 3.7-8.24 8.25-8.24zm4.52 10.3c-.25-.13-1.47-.73-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.65.81-.8 1-.15.18-.3.2-.55.07-.25-.13-1.05-.39-2.01-1.24-.74-.66-1.24-1.47-1.39-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45-.06-.13-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.42 1.01 2.58.13.17 1.76 2.69 4.27 3.77.6.26 1.07.41 1.44.53.6.19 1.15.16 1.59.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.11-.22-.17-.47-.3z"/></svg> Join WhatsApp Group
-              </a>
-            </div>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="/track-registration/pdf/<%= registration.registration_id %>" class="pdf-download-btn">
+                  <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Download Selection Receipt (PDF)
+                </a>
+                <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" class="whatsapp-link-btn">
+                  <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.206 8.206 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.05-1.08l-.29-.17-3.01.79.8-2.93-.19-.3A8.196 8.196 0 0 1 3.8 11.91c0-4.54 3.7-8.24 8.25-8.24zm4.52 10.3c-.25-.13-1.47-.73-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.65.81-.8 1-.15.18-.3.2-.55.07-.25-.13-1.05-.39-2.01-1.24-.74-.66-1.24-1.47-1.39-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45-.06-.13-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.42 1.01 2.58.13.17 1.76 2.69 4.27 3.77.6.26 1.07.41 1.44.53.6.19 1.15.16 1.59.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.11-.22-.17-.47-.3z"/></svg> Join Official WhatsApp Group
+                </a>
+              </div>
+
+            <% } else if (registration.status === 'Rejected') { %>
+              <div class="whatsapp-box" style="background: #fef2f2; border-color: #ef4444;">
+                <div class="whatsapp-box-title" style="color: #b91c1c;">
+                  <span>ℹ️</span> Selection Status Notice
+                </div>
+                <p style="margin: 0; color: #7f1d1d; font-size: 0.95rem; line-height: 1.5;">
+                  Thank you for applying to the National Service Scheme (NSS), Pondicherry University. We appreciate your interest in community service. 
+                  Unfortunately, you have not been selected for the current volunteer batch.
+                </p>
+              </div>
+
+            <% } else { %>
+              <div class="whatsapp-box">
+                <div class="whatsapp-box-title">
+                  <span><svg style="display:inline-block; vertical-align:-2px; margin-right:4px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> Selection Process Instructions:
+                </div>
+                <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Your application is active and under review for the volunteer selection process.</strong></li>
+                  <li><strong>Join the WhatsApp group for further updates on the selection process: <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800;">Click Here to Join WhatsApp Group</a></strong></li>
+                  <li><strong>Please take a printout of your application receipt for the selection interview.</strong></li>
+                </ul>
+              </div>
+
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="/track-registration/pdf/<%= registration.registration_id %>" class="pdf-download-btn">
+                  <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Download Application Form Receipt (PDF)
+                </a>
+                <a href="https://chat.whatsapp.com/C9CDzrf616b9VgzbayKWF3?s=qt&p=a&ilr=1" target="_blank" rel="noopener noreferrer" class="whatsapp-link-btn">
+                  <svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.206 8.206 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.05-1.08l-.29-.17-3.01.79.8-2.93-.19-.3A8.196 8.196 0 0 1 3.8 11.91c0-4.54 3.7-8.24 8.25-8.24zm4.52 10.3c-.25-.13-1.47-.73-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.65.81-.8 1-.15.18-.3.2-.55.07-.25-.13-1.05-.39-2.01-1.24-.74-.66-1.24-1.47-1.39-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45-.06-.13-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.42 1.01 2.58.13.17 1.76 2.69 4.27 3.77.6.26 1.07.41 1.44.53.6.19 1.15.16 1.59.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.11-.22-.17-.47-.3z"/></svg> Join Selection WhatsApp Group
+                </a>
+              </div>
+            <% } %>
+
           </div>
         <% } %>
 

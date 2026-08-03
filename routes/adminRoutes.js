@@ -31,4 +31,9 @@ router.get('/admin/registrations/:id/pdf', adminController.downloadPDF);
 router.get('/admin/change-password', csrfProtection, adminController.renderChangePassword);
 router.post('/admin/change-password', csrfProtection, adminController.handleChangePassword);
 
+// Volunteer Selection Process Routes
+router.get('/admin/selection', csrfProtection, adminController.renderSelectionPage);
+router.post('/admin/selection/:id/status', csrfProtection, adminController.updateVolunteerStatus);
+router.get('/admin/selection/export-excel', adminController.exportSelectedToExcel);
+
 module.exports = router;
