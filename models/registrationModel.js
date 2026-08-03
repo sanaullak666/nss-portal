@@ -327,17 +327,21 @@ class RegistrationModel {
     const [activeRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'");
 
     return {
-      totalRegistrations,
-      todayRegistrations,
-      totalUnits,
-      totalMediaInterested,
-      totalPreviousVolunteers,
-      totalLeadershipInterested,
-      unitCounts,
-      genderCounts,
-      yearCounts,
-      courseCounts,
-      deptCounts,
+      stats: {
+        totalRegistrations,
+        todayRegistrations,
+        totalUnits,
+        totalMediaInterested,
+        totalPreviousVolunteers,
+        totalLeadershipInterested
+      },
+      chartData: {
+        unitCounts,
+        genderCounts,
+        yearCounts,
+        courseCounts,
+        deptCounts
+      },
       recentRegistrations,
       selectionStats: {
         totalSelected: parseInt(selectedRows[0]?.count || 0, 10),

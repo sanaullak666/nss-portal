@@ -14,9 +14,10 @@ exports.renderDashboard = async (req, res) => {
     res.render('admin/dashboard', {
       title: 'Admin Analytics & Dashboard - PU NSS Portal',
       admin: req.session.admin,
-      stats: data.stats,
-      chartData: data.chartData,
-      recentRegistrations: data.recentRegistrations
+      stats: data.stats || {},
+      chartData: data.chartData || {},
+      recentRegistrations: data.recentRegistrations || [],
+      selectionStats: data.selectionStats || {}
     });
   } catch (err) {
     console.error('Dashboard Render Error:', err);
@@ -29,9 +30,10 @@ exports.getLiveDashboardStats = async (req, res) => {
     const data = await RegistrationModel.getDashboardStats();
     res.json({
       success: true,
-      stats: data.stats,
-      chartData: data.chartData,
-      recentRegistrations: data.recentRegistrations
+      stats: data.stats || {},
+      chartData: data.chartData || {},
+      recentRegistrations: data.recentRegistrations || [],
+      selectionStats: data.selectionStats || {}
     });
   } catch (err) {
     console.error('Live Stats API Error:', err.message);
