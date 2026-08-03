@@ -41,7 +41,6 @@
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      align-items: center;
       box-shadow: var(--shadow-md);
     }
     .filter-bar-custom input, .filter-bar-custom select {
@@ -70,82 +69,25 @@
       margin-top: 24px;
       flex-wrap: wrap;
     }
-    .selection-action-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
+    .pagination-custom a, .pagination-custom span {
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--color-navy);
+      background: var(--color-surface);
+      transition: all var(--transition-fast);
     }
-    .btn-select {
-      background: #16a34a;
-      color: #ffffff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    .pagination-custom a:hover {
+      border-color: var(--color-nss-red);
+      color: var(--color-nss-red);
     }
-    .btn-select:hover {
-      background: #15803d;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
-    }
-    .btn-select.active-selected {
-      background: #15803d;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-      border: 2px solid #14532d;
-    }
-    .btn-reject {
-      background: #dc2626;
-      color: #ffffff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .btn-reject:hover {
-      background: #b91c1c;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
-    }
-    .btn-reject.active-rejected {
-      background: #b91c1c;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-      border: 2px solid #7f1d1d;
-    }
-    .status-pill {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      display: inline-block;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .status-pill-active {
-      background: #e0f2fe;
-      color: #0369a1;
-      border: 1px solid #bae6fd;
-    }
-    .status-pill-selected {
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-    }
-    .status-pill-rejected {
-      background: #fee2e2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
+    .pagination-custom .active {
+      background: var(--color-nss-red);
+      color: white;
+      border-color: var(--color-nss-red);
     }
   </style>
 </head>
@@ -153,7 +95,7 @@
 
   <%- include('../partials/loader') %>
 
-  <!-- Background Floating Particles -->
+  <!-- Floating Particles -->
   <div class="particles" aria-hidden="true">
     <div class="particle"></div>
     <div class="particle"></div>
@@ -161,7 +103,7 @@
     <div class="particle"></div>
   </div>
 
-  <header class="site-header" style="position: sticky; top: 0; z-index: 100;">
+  <header class="site-header">
     <div class="header-inner container">
       <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
         <div class="header-logo-group" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.9); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
@@ -174,25 +116,31 @@
           <small style="display: block;">Pondicherry University</small>
         </div>
       </div>
-
-      <!-- Navigation Links & Admin Profile Menu -->
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="/admin/dashboard" class="btn btn-outline btn-sm">📊 Dashboard</a>
-        <a href="/admin/registrations" class="btn btn-outline btn-sm">👥 All Registrations</a>
-        <a href="/admin/selection" class="btn btn-primary btn-sm" style="background: var(--color-navy); color: white;">📋 Selection Process</a>
-
-        <div style="position: relative;">
-          <button type="button" id="adminProfileBtn" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;">
-            <span>👤 <%= admin ? admin.username : 'Admin' %></span>
-            <span style="font-size: 0.75rem;">▼</span>
-          </button>
-          
-          <div id="adminProfileMenu" class="admin-profile-menu-box">
-            <div style="padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #0f2042; font-size: 0.85rem;">
-              Logged in as: <%= admin ? admin.username : 'Admin' %>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="/admin/dashboard" class="btn btn-secondary btn-sm">📊 Dashboard</a>
+        <a href="/admin/registrations" class="btn btn-secondary btn-sm">👥 All Registrations</a>
+        <a href="/admin/selection/export-excel" class="btn btn-success btn-sm" style="font-weight: 700; background: #16a34a; border-color: #15803d; color: white;"><svg style="display:inline-block; vertical-align:-2px; margin-right:4px;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Selected Excel</a>
+        
+        <!-- Admin Profile Dropdown -->
+        <div style="position: relative; display: inline-block;">
+          <button id="adminProfileBtnReg" type="button" onclick="toggleAdminProfileMenu(event)" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.18); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); padding: 5px 12px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--color-nss-red, #b71c1c); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+              A
             </div>
-            <a href="/admin/change-password" style="display: block; padding: 10px 16px; color: #334155; text-decoration: none; font-size: 0.85rem; font-weight: 600;">🔑 Change Password</a>
-            <a href="/admin/logout" style="display: block; padding: 10px 16px; color: #dc2626; text-decoration: none; font-size: 0.85rem; font-weight: 700; border-top: 1px solid #f1f5f9;">🚪 Logout</a>
+            <span style="font-size: 0.85rem; color: #ffffff;">Welcome, <strong>Admin</strong></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+          </button>
+
+          <div id="adminProfileMenuReg" class="admin-profile-menu-box" style="display: none; position: absolute; right: 0; top: 120%; width: 220px; background: #ffffff; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.2); border: 1px solid #cbd5e1; z-index: 99999; overflow: hidden; padding: 6px 0;">
+            <div style="padding: 10px 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+              <div style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Admin</div>
+            </div>
+            <a href="/admin/change-password" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #0f172a; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+              🔑 Change Password
+            </a>
+            <a href="/admin/logout" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #b71c1c; text-decoration: none; font-size: 0.88rem; font-weight: 600; border-top: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+              🚪 Logout
+            </a>
           </div>
         </div>
       </div>
@@ -201,120 +149,82 @@
 
   <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px;">
     
-    <!-- Page Header & Stats Summary -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-      <div>
-        <h1 style="color: var(--color-navy); font-size: 1.8rem; font-weight: 800; margin: 0;">Volunteer Selection Process 2026</h1>
-        <p style="color: var(--color-text-muted); margin: 4px 0 0; font-size: 0.95rem;">Review registered volunteers, mark selection status (Selected / Rejected), and export selected lists.</p>
-      </div>
-
-      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <a href="/admin/selection/export-excel" class="btn" style="background: #16a34a; color: white; padding: 10px 20px; font-weight: 700; font-size: 0.9rem; border-radius: 8px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 6px;">
-          📥 Export Selected Students (Excel)
-        </a>
-      </div>
-    </div>
-
-    <!-- Selection Summary Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
-      <div style="background: white; border-radius: 12px; padding: 18px; border-left: 5px solid #0369a1; box-shadow: var(--shadow-sm);">
-        <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Active / Under Review</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #0369a1; margin-top: 4px;"><%= selectionStats.totalActive %></div>
-      </div>
-
-      <div style="background: white; border-radius: 12px; padding: 18px; border-left: 5px solid #16a34a; box-shadow: var(--shadow-sm);">
-        <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Selected Volunteers</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #16a34a; margin-top: 4px;"><%= selectionStats.totalSelected %></div>
-      </div>
-
-      <div style="background: white; border-radius: 12px; padding: 18px; border-left: 5px solid #dc2626; box-shadow: var(--shadow-sm);">
-        <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Rejected Applicants</div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #dc2626; margin-top: 4px;"><%= selectionStats.totalRejected %></div>
-      </div>
-    </div>
-
-    <!-- Filter & Search Bar -->
-    <form action="/admin/selection" method="GET" class="filter-bar-custom">
-      <select name="selectionStatus" onchange="this.form.submit()" style="font-weight: 700;">
+    <!-- Search & Filter Form -->
+    <form method="GET" action="/admin/selection" class="filter-bar-custom">
+      <input type="text" name="search" placeholder="Search Name, Reg ID, Mobile, Aadhaar, Dept..." value="<%= filters.search %>" style="flex: 2; min-width: 240px;">
+      
+      <!-- Filter by Selection Status -->
+      <select name="selectionStatus" style="font-weight: 700; color: var(--color-navy);">
         <option value="All" <%= filters.selectionStatus === 'All' ? 'selected' : '' %>>All Statuses</option>
         <option value="Active" <%= filters.selectionStatus === 'Active' ? 'selected' : '' %>>Active / Under Review</option>
         <option value="Selected" <%= filters.selectionStatus === 'Selected' ? 'selected' : '' %>>🟢 Selected Only</option>
         <option value="Rejected" <%= filters.selectionStatus === 'Rejected' ? 'selected' : '' %>>🔴 Rejected Only</option>
       </select>
 
-      <select name="unit" onchange="this.form.submit()">
-        <option value="">All Units</option>
+      <!-- Filter by Unit -->
+      <select name="unit">
+        <option value="">All NSS Units</option>
         <% constants.UNITS.forEach(function(u) { %>
           <option value="<%= u %>" <%= filters.unit === u ? 'selected' : '' %>><%= u %></option>
         <% }); %>
       </select>
 
-      <input type="text" name="search" placeholder="Search Name, Reg No, Email..." value="<%= filters.search %>" style="flex: 1; min-width: 200px;">
+      <!-- Filter by Course -->
+      <select name="course">
+        <option value="">All Courses</option>
+        <% constants.COURSES.forEach(function(c) { %>
+          <option value="<%= c %>" <%= filters.course === c ? 'selected' : '' %>><%= c %></option>
+        <% }); %>
+      </select>
 
-      <button type="submit" class="btn btn-secondary btn-sm">🔍 Filter</button>
-      <% if (filters.selectionStatus !== 'All' || filters.unit || filters.search) { %>
-        <a href="/admin/selection" class="btn btn-ghost btn-sm" style="color: var(--color-nss-red);">✖ Reset</a>
-      <% } %>
+      <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+      <a href="/admin/selection" class="btn btn-ghost btn-sm">Reset</a>
+      <a href="/admin/selection/export-excel" class="btn btn-success btn-sm" style="background: #16a34a; border-color: #15803d; color: white; margin-left: auto;">📥 Export Selected Excel</a>
     </form>
 
-    <!-- Selection Table Card -->
-    <div class="dash-table-card">
-      <div style="padding: 20px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; color: var(--color-navy); font-weight: 800;">Volunteer Application Records (<%= pagination.totalCount %>)</h3>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table class="dash-table">
+    <!-- Table Card -->
+    <div class="dash-table-card" style="padding: 0; overflow: hidden;">
+      <div class="table-responsive">
+        <table class="data-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Registration ID</th>
+              <th>Reg ID</th>
               <th>Applicant Name</th>
               <th>Univ Reg No</th>
-              <th>Department & Course</th>
-              <th>NSS Unit</th>
-              <th>Current Status</th>
+              <th>Course</th>
+              <th>Unit</th>
+              <th>Status</th>
               <th style="text-align: center;">Selection Actions</th>
             </tr>
           </thead>
           <tbody>
-            <% if (registrations && registrations.length > 0) { %>
-              <% registrations.forEach(function(reg, index) { %>
+            <% if (!registrations || registrations.length === 0) { %>
+              <tr><td colspan="7" style="text-align:center; padding: 35px; color: var(--color-text-muted);">No student records found matching your selection criteria.</td></tr>
+            <% } else { %>
+              <% registrations.forEach(function(reg) { %>
                 <tr>
-                  <td><%= ((pagination.currentPage - 1) * 15) + index + 1 %></td>
-                  <td>
-                    <strong style="color: var(--color-navy);"><%= reg.registration_id %></strong>
-                  </td>
-                  <td>
-                    <a href="/admin/registrations/<%= reg.id %>" style="color: var(--color-navy); font-weight: 700; text-decoration: underline;" title="View Full Profile">
-                      <%= reg.applicant_name %>
-                    </a>
-                  </td>
+                  <td><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
+                  <td><strong><%= reg.applicant_name %></strong></td>
                   <td><%= reg.univ_reg_no %></td>
-                  <td>
-                    <div style="font-weight: 600; color: var(--color-navy);"><%= reg.department %></div>
-                    <small style="color: var(--color-text-muted);"><%= reg.course %> (<%= reg.year_of_study %>)</small>
-                  </td>
-                  <td>
-                    <span class="badge badge-submitted"><%= reg.unit_number %></span>
-                  </td>
+                  <td><%= reg.course %></td>
+                  <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
                   <td>
                     <% if (reg.status === 'Selected') { %>
-                      <span class="status-pill status-pill-selected">🟢 Selected</span>
+                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800;">🟢 Selected</span>
                     <% } else if (reg.status === 'Rejected') { %>
-                      <span class="status-pill status-pill-rejected">🔴 Rejected</span>
+                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800;">🔴 Rejected</span>
                     <% } else { %>
-                      <span class="status-pill status-pill-active">🟡 Active</span>
+                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800;">🟡 Active</span>
                     <% } %>
                   </td>
                   <td>
-                    <div class="selection-action-group" style="justify-content: center;">
+                    <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
                       <!-- Select Button Form -->
                       <form action="/admin/selection/<%= reg.id %>/status" method="POST" style="margin: 0;">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="status" value="Selected">
-                        <button type="submit" class="btn-select <%= reg.status === 'Selected' ? 'active-selected' : '' %>">
-                          ✓ Select
+                        <button type="submit" class="btn btn-success btn-sm" style="padding: 4px 14px; font-weight: 700; background: #16a34a; border-color: #15803d;" title="Mark as Selected">
+                          <%= reg.status === 'Selected' ? '✓ Selected' : 'Select' %>
                         </button>
                       </form>
 
@@ -322,37 +232,36 @@
                       <form action="/admin/selection/<%= reg.id %>/status" method="POST" style="margin: 0;" onsubmit="return confirm('Mark <%= reg.applicant_name %> as Rejected? (Student record will remain safely saved in the database)');">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="status" value="Rejected">
-                        <button type="submit" class="btn-reject <%= reg.status === 'Rejected' ? 'active-rejected' : '' %>">
-                          ✕ Reject
+                        <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #b71c1c; padding: 4px 14px; font-weight: 700; border: 1px solid #fecaca;" title="Mark as Rejected">
+                          <%= reg.status === 'Rejected' ? '✕ Rejected' : 'Reject' %>
                         </button>
                       </form>
                     </div>
                   </td>
                 </tr>
               <% }); %>
-            <% } else { %>
-              <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
-                  No volunteer records found matching the selected filters.
-                </td>
-              </tr>
             <% } %>
           </tbody>
         </table>
       </div>
-
-      <!-- Pagination -->
-      <% if (pagination.totalPages > 1) { %>
-        <div class="pagination-custom" style="padding: 20px;">
-          <% for (let i = 1; i <= pagination.totalPages; i++) { %>
-            <a href="/admin/selection?page=<%= i %>&selectionStatus=<%= filters.selectionStatus %>&unit=<%= filters.unit %>&search=<%= filters.search %>" class="btn btn-sm <%= pagination.currentPage === i ? 'btn-primary' : 'btn-secondary' %>">
-              <%= i %>
-            </a>
-          <% } %>
-        </div>
-      <% } %>
-
     </div>
+
+    <!-- Pagination Bar -->
+    <% if (pagination.totalPages > 1) { %>
+      <div class="pagination-custom">
+        <% if (pagination.currentPage > 1) { %>
+          <a href="/admin/selection?page=<%= pagination.currentPage - 1 %>&selectionStatus=<%= filters.selectionStatus %>&unit=<%= filters.unit %>&course=<%= filters.course %>&search=<%= filters.search %>">« Prev</a>
+        <% } %>
+
+        <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+          <a href="/admin/selection?page=<%= i %>&selectionStatus=<%= filters.selectionStatus %>&unit=<%= filters.unit %>&course=<%= filters.course %>&search=<%= filters.search %>" class="<%= pagination.currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+
+        <% if (pagination.currentPage < pagination.totalPages) { %>
+          <a href="/admin/selection?page=<%= pagination.currentPage + 1 %>&selectionStatus=<%= filters.selectionStatus %>&unit=<%= filters.unit %>&course=<%= filters.course %>&search=<%= filters.search %>">Next »</a>
+        <% } %>
+      </div>
+    <% } %>
 
   </main>
 
@@ -360,21 +269,118 @@
   <script src="/js/main.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const profileBtn = document.getElementById('adminProfileBtn');
-      const profileMenu = document.getElementById('adminProfileMenu');
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterForm = document.querySelector('.filter-bar-custom');
+      if (!filterForm) return;
 
-      if (profileBtn && profileMenu) {
-        profileBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          profileMenu.classList.toggle('active-menu');
-        });
+      const searchInput = filterForm.querySelector('input[name="search"]');
+      const selectInputs = filterForm.querySelectorAll('select');
+      const tableCard = document.querySelector('.dash-table-card');
 
-        document.addEventListener('click', function (e) {
-          if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
-            profileMenu.classList.remove('active-menu');
+      let debounceTimer = null;
+
+      function performFilter(targetUrl) {
+        let url = targetUrl;
+        if (!url) {
+          const formData = new FormData(filterForm);
+          const params = new URLSearchParams();
+          for (const [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+              params.append(key, value.trim());
+            }
           }
+          url = filterForm.action + '?' + params.toString();
+        }
+
+        if (tableCard) tableCard.style.opacity = '0.65';
+
+        fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(htmlText => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlText, 'text/html');
+          
+          const newTableCard = doc.querySelector('.dash-table-card');
+          const newPagination = doc.querySelector('.pagination-custom');
+          const currentPagination = document.querySelector('.pagination-custom');
+
+          if (newTableCard && tableCard) {
+            tableCard.innerHTML = newTableCard.innerHTML;
+            tableCard.style.opacity = '1';
+          }
+
+          if (currentPagination && newPagination) {
+            currentPagination.replaceWith(newPagination);
+          } else if (currentPagination && !newPagination) {
+            currentPagination.remove();
+          } else if (!currentPagination && newPagination) {
+            const mainContainer = document.querySelector('main.container');
+            if (mainContainer) mainContainer.appendChild(newPagination);
+          }
+
+          window.history.pushState({}, '', url);
+          attachPaginationEvents();
+        })
+        .catch(err => {
+          console.error('Filtering error:', err);
+          if (tableCard) tableCard.style.opacity = '1';
         });
+      }
+
+      function attachPaginationEvents() {
+        const pagLinks = document.querySelectorAll('.pagination-custom a');
+        pagLinks.forEach(link => {
+          link.onclick = function(e) {
+            e.preventDefault();
+            performFilter(this.href);
+          };
+        });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function() {
+            performFilter();
+          }, 300);
+        });
+
+        filterForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          clearTimeout(debounceTimer);
+          performFilter();
+        });
+      }
+
+      selectInputs.forEach(select => {
+        select.addEventListener('change', function() {
+          performFilter();
+        });
+      });
+
+      attachPaginationEvents();
+    });
+
+    function toggleAdminProfileMenu(event) {
+      if (event) {
+        event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+      }
+      const menu = document.getElementById('adminProfileMenuReg') || document.getElementById('adminProfileMenu') || document.getElementById('profileDropdownMenu');
+      if (menu) {
+        const isHidden = window.getComputedStyle(menu).display === 'none';
+        menu.style.display = isHidden ? 'block' : 'none';
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('adminProfileMenuReg') || document.getElementById('adminProfileMenu') || document.getElementById('profileDropdownMenu');
+      if (menu && !menu.contains(e.target)) {
+        menu.style.display = 'none';
       }
     });
   </script>
