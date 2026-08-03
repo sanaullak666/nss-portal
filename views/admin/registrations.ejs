@@ -153,6 +153,14 @@
     <form method="GET" action="/admin/registrations" class="filter-bar-custom">
       <input type="text" name="search" placeholder="Search Name, Reg ID, Mobile, Aadhaar, Dept..." value="<%= filters.search %>" style="flex: 2; min-width: 240px;">
       
+      <!-- Filter by Status -->
+      <select name="statusFilter" style="font-weight: 700; color: var(--color-navy);">
+        <option value="">All Statuses</option>
+        <option value="Active" <%= filters.statusFilter === 'Active' ? 'selected' : '' %>>Active / Under Review</option>
+        <option value="Selected" <%= filters.statusFilter === 'Selected' ? 'selected' : '' %>>🟢 Selected</option>
+        <option value="Rejected" <%= filters.statusFilter === 'Rejected' ? 'selected' : '' %>>🔴 Rejected</option>
+      </select>
+
       <!-- Filter by Unit -->
       <select name="unit">
         <option value="">All NSS Units</option>
@@ -206,6 +214,7 @@
               <th>Univ Reg No</th>
               <th>Course</th>
               <th>Unit</th>
+              <th>Status</th>
               <th>Mobile</th>
               <th>Certificate</th>
               <th>Actions</th>
@@ -213,7 +222,7 @@
           </thead>
           <tbody>
             <% if (!registrations || registrations.length === 0) { %>
-              <tr><td colspan="8" style="text-align:center; padding: 35px; color: var(--color-text-muted);">No student registrations found matching your query criteria.</td></tr>
+              <tr><td colspan="9" style="text-align:center; padding: 35px; color: var(--color-text-muted);">No student registrations found matching your query criteria.</td></tr>
             <% } else { %>
               <% registrations.forEach(function(reg) { %>
                 <tr>
@@ -222,6 +231,15 @@
                   <td><%= reg.univ_reg_no %></td>
                   <td><%= reg.course %></td>
                   <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
+                  <td>
+                    <% if (reg.status === 'Selected') { %>
+                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800;">🟢 Selected</span>
+                    <% } else if (reg.status === 'Rejected') { %>
+                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800;">🔴 Rejected</span>
+                    <% } else { %>
+                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800;">🟡 Active</span>
+                    <% } %>
+                  </td>
                   <td><%= reg.contact_number %></td>
                   <td>
                     <% if (reg.certificate_path) { %>

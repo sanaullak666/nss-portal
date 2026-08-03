@@ -200,12 +200,19 @@ class RegistrationModel {
     return result.affectedRows > 0;
   }
 
-  static async findAllFiltered({ unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1, limit = 15 }) {
+  static async findAllFiltered({ statusFilter, unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1, limit = 15 }) {
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.max(1, parseInt(limit, 10) || 15);
     const offset = (pageNum - 1) * limitNum;
-    let whereClauses = ["status = 'Active'"];
+    let whereClauses = [];
     let queryParams = [];
+
+    if (statusFilter && ['Active', 'Selected', 'Rejected'].includes(statusFilter)) {
+      whereClauses.push('status = ?');
+      queryParams.push(statusFilter);
+    } else {
+      whereClauses.push("status IN ('Active', 'Selected', 'Rejected')");
+    }
 
     if (unit) { whereClauses.push('unit_number = ?'); queryParams.push(unit); }
     if (department) { whereClauses.push('department = ?'); queryParams.push(department); }
@@ -284,7 +291,7 @@ class RegistrationModel {
   }
 
   static async getAllForExport() {
-    const [registrations] = await db.query("SELECT * FROM registrations WHERE status IN ('Active', 'Selected') ORDER BY created_at ASC, id ASC");
+    const [registrations] = await db.query("SELECT * FROM registrations WHERE status IN ('Active', 'Selected', 'Rejected') ORDER BY created_at ASC, id ASC");
     return registrations;
   }
 

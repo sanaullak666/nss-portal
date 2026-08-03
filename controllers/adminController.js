@@ -40,11 +40,11 @@ exports.getLiveDashboardStats = async (req, res) => {
 };
 
 exports.renderRegistrationsList = async (req, res) => {
-  const { unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1 } = req.query;
+  const { statusFilter, unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page = 1 } = req.query;
 
   try {
     const result = await RegistrationModel.findAllFiltered({
-      unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page, limit: 15
+      statusFilter, unit, department, course, year_of_study, gender, is_previous_volunteer, interested_in_media, search, page, limit: 15
     });
 
     res.render('admin/registrations', {
@@ -58,6 +58,7 @@ exports.renderRegistrationsList = async (req, res) => {
         totalCount: result.totalCount
       },
       filters: {
+        statusFilter: statusFilter || '',
         unit: unit || '',
         department: department || '',
         course: course || '',
