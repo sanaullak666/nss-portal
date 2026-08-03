@@ -5,6 +5,7 @@ const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_G
 const { exportRegistrationsToExcel, exportSelectedRegistrationsToExcel } = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
 const { logAudit } = require('../utils/auditLogger');
+const { sendSelectionApprovalEmail } = require('../utils/emailService');
 
 exports.renderDashboard = async (req, res) => {
   try {
@@ -395,6 +396,19 @@ exports.updateVolunteerStatus = async (req, res) => {
     try {
       await logAudit('STATUS_UPDATE', req.session.admin ? req.session.admin.username : 'admin', `Updated registration ID ${id} status to ${status}`);
     } catch (e) {}
+
+    // If student is approved (Selected), trigger approval email notification in background
+    if (status === 'Selected') {
+      RegistrationModel.findById(id).then(student => {
+        if (student && student.email) {
+          sendSelectionApprovalEmail(student).catch(err => {
+            console.error('[APPROVAL EMAIL BACKEND ERROR]', err);
+          });
+        }
+      }).catch(err => {
+        console.error('[FETCH STUDENT FOR EMAIL ERROR]', err);
+      });
+    }
 
     if (req.xhr || req.headers.accept?.includes('json')) {
       return res.json({ success: true, status });
