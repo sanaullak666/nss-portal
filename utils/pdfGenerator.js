@@ -34,9 +34,15 @@ function generateRegistrationPDF(registration, res) {
     currentY += 28;
   }
 
+  function cleanVal(val) {
+    if (val === undefined || val === null) return 'N/A';
+    const str = String(val).replace(/\r\n/g, '\n').replace(/\r/g, '').trim();
+    return str || 'N/A';
+  }
+
   function addFieldRow(label1, val1, label2, val2, spacingAfter = 7) {
-    const text1 = val1 !== undefined && val1 !== null && String(val1).trim() ? String(val1) : 'N/A';
-    const text2 = val2 !== undefined && val2 !== null && String(val2).trim() ? String(val2) : 'N/A';
+    const text1 = cleanVal(val1);
+    const text2 = cleanVal(val2);
 
     doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label1, 50, currentY);
     doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text1, 160, currentY, { width: 130, lineGap: 2 });
@@ -54,7 +60,7 @@ function generateRegistrationPDF(registration, res) {
   }
 
   function addFullWidthField(label, val, spacingAfter = 8) {
-    const text = val !== undefined && val !== null && String(val).trim() ? String(val) : 'N/A';
+    const text = cleanVal(val);
     doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label, 50, currentY);
     doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text, 160, currentY, { width: 385, lineGap: 2.5 });
     const h = doc.heightOfString(text, { width: 385, fontSize: 9.5, lineGap: 2.5 });
