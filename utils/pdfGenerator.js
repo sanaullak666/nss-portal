@@ -34,31 +34,31 @@ function generateRegistrationPDF(registration, res) {
     currentY += 28;
   }
 
-  function addFieldRow(label1, val1, label2, val2) {
-    const text1 = val1 !== undefined && val1 !== null ? String(val1) : 'N/A';
-    const text2 = val2 !== undefined && val2 !== null ? String(val2) : 'N/A';
+  function addFieldRow(label1, val1, label2, val2, spacingAfter = 7) {
+    const text1 = val1 !== undefined && val1 !== null && String(val1).trim() ? String(val1) : 'N/A';
+    const text2 = val2 !== undefined && val2 !== null && String(val2).trim() ? String(val2) : 'N/A';
 
     doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label1, 50, currentY);
-    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text1, 150, currentY, { width: 130 });
-    const h1 = doc.heightOfString(text1, { width: 130, fontSize: 9.5 });
+    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text1, 160, currentY, { width: 130, lineGap: 2 });
+    const h1 = doc.heightOfString(text1, { width: 130, fontSize: 9.5, lineGap: 2 });
 
     let h2 = 0;
     if (label2) {
-      doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label2, 300, currentY);
-      doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text2, 400, currentY, { width: 145 });
-      h2 = doc.heightOfString(text2, { width: 145, fontSize: 9.5 });
+      doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label2, 310, currentY);
+      doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text2, 410, currentY, { width: 135, lineGap: 2 });
+      h2 = doc.heightOfString(text2, { width: 135, fontSize: 9.5, lineGap: 2 });
     }
 
     const rowHeight = Math.max(h1, h2, 14);
-    currentY += rowHeight + 5;
+    currentY += rowHeight + spacingAfter;
   }
 
-  function addFullWidthField(label, val) {
-    const text = val !== undefined && val !== null ? String(val) : 'N/A';
+  function addFullWidthField(label, val, spacingAfter = 8) {
+    const text = val !== undefined && val !== null && String(val).trim() ? String(val) : 'N/A';
     doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label, 50, currentY);
-    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text, 150, currentY, { width: 395 });
-    const h = doc.heightOfString(text, { width: 395, fontSize: 9.5 });
-    currentY += Math.max(h, 14) + 6;
+    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text, 160, currentY, { width: 385, lineGap: 2.5 });
+    const h = doc.heightOfString(text, { width: 385, fontSize: 9.5, lineGap: 2.5 });
+    currentY += Math.max(h, 14) + spacingAfter;
   }
 
   // Section 1: Academic Information
@@ -101,11 +101,12 @@ function generateRegistrationPDF(registration, res) {
     roles = roles.join(', ');
   }
 
-  addFullWidthField('Present Address:', registration.present_address);
-  addFullWidthField('Permanent Address:', registration.permanent_address);
-  addFieldRow('Languages:', languages || 'N/A', 'Prev Volunteer:', registration.is_previous_volunteer);
-  addFieldRow('Media Interest:', registration.interested_in_media || 'No', 'Media Roles:', roles || 'N/A');
-  addFieldRow('Extra Skills:', registration.extra_curricular_skills || 'None', 'Leadership Interest:', registration.interested_in_leadership || 'No');
+  addFullWidthField('Present Address:', registration.present_address, 8);
+  addFullWidthField('Permanent Address:', registration.permanent_address, 8);
+  addFullWidthField('Languages Spoken:', languages || 'N/A', 8);
+  addFieldRow('Prev Volunteer:', registration.is_previous_volunteer, 'Leadership Interest:', registration.interested_in_leadership || 'No', 8);
+  addFieldRow('Media Interest:', registration.interested_in_media || 'No', 'Media Roles:', roles || 'N/A', 8);
+  addFullWidthField('Extra Skills:', registration.extra_curricular_skills || 'None', 10);
 
   currentY += 10;
 
