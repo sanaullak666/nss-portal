@@ -174,6 +174,18 @@ document.addEventListener('DOMContentLoaded', function () {
         return; // Allow native validation tooltips
       }
 
+      const checkedLangs = regForm.querySelectorAll('input[name="languages_spoken[]"]:checked');
+      if (checkedLangs.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one language in the Language Proficiency section.');
+        const langSection = regForm.querySelector('input[name="languages_spoken[]"]');
+        if (langSection) {
+          langSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          langSection.focus();
+        }
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.innerHTML = '<span class="spinner"></span> Processing Registration...';

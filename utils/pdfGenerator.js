@@ -35,14 +35,30 @@ function generateRegistrationPDF(registration, res) {
   }
 
   function addFieldRow(label1, val1, label2, val2) {
-    doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold').text(label1, 50, currentY);
-    doc.fillColor('#0F2042').fontSize(9.5).font('Helvetica').text(val1 || 'N/A', 150, currentY, { width: 130 });
+    const text1 = val1 !== undefined && val1 !== null ? String(val1) : 'N/A';
+    const text2 = val2 !== undefined && val2 !== null ? String(val2) : 'N/A';
 
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label1, 50, currentY);
+    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text1, 150, currentY, { width: 130 });
+    const h1 = doc.heightOfString(text1, { width: 130, fontSize: 9.5 });
+
+    let h2 = 0;
     if (label2) {
-      doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold').text(label2, 300, currentY);
-      doc.fillColor('#0F2042').fontSize(9.5).font('Helvetica').text(val2 || 'N/A', 400, currentY, { width: 145 });
+      doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label2, 300, currentY);
+      doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text2, 400, currentY, { width: 145 });
+      h2 = doc.heightOfString(text2, { width: 145, fontSize: 9.5 });
     }
-    currentY += 20;
+
+    const rowHeight = Math.max(h1, h2, 14);
+    currentY += rowHeight + 5;
+  }
+
+  function addFullWidthField(label, val) {
+    const text = val !== undefined && val !== null ? String(val) : 'N/A';
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#475569').text(label, 50, currentY);
+    doc.font('Helvetica').fontSize(9.5).fillColor('#0F2042').text(text, 150, currentY, { width: 395 });
+    const h = doc.heightOfString(text, { width: 395, fontSize: 9.5 });
+    currentY += Math.max(h, 14) + 6;
   }
 
   // Section 1: Academic Information
@@ -50,7 +66,7 @@ function generateRegistrationPDF(registration, res) {
   addFieldRow('Department:', registration.department, 'Course / Program:', registration.course);
   addFieldRow('Univ Reg No:', registration.univ_reg_no, 'Year of Study:', registration.year_of_study);
 
-  currentY += 5;
+  currentY += 4;
 
   // Section 2: Personal Information
   addSectionHeader('2. Personal Details');
@@ -60,7 +76,7 @@ function generateRegistrationPDF(registration, res) {
   addFieldRow('Age:', String(registration.age), 'Blood Group:', registration.blood_group);
   addFieldRow('Aadhaar No:', registration.aadhaar_number, 'Native State:', registration.native_state);
 
-  currentY += 5;
+  currentY += 4;
 
   // Section 3: Address & NSS Skills
   addSectionHeader('3. Address & NSS Specializations');
@@ -85,12 +101,13 @@ function generateRegistrationPDF(registration, res) {
     roles = roles.join(', ');
   }
 
-  addFieldRow('Present Addr:', registration.present_address, 'Permanent Addr:', registration.permanent_address);
+  addFullWidthField('Present Address:', registration.present_address);
+  addFullWidthField('Permanent Address:', registration.permanent_address);
   addFieldRow('Languages:', languages || 'N/A', 'Prev Volunteer:', registration.is_previous_volunteer);
   addFieldRow('Media Interest:', registration.interested_in_media || 'No', 'Media Roles:', roles || 'N/A');
   addFieldRow('Extra Skills:', registration.extra_curricular_skills || 'None', 'Leadership Interest:', registration.interested_in_leadership || 'No');
 
-  currentY += 15;
+  currentY += 10;
 
   // Declaration & Signature
   doc.rect(40, currentY, 515, 55).stroke('#CBD5E1');

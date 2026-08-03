@@ -113,6 +113,12 @@ exports.validateRegistration = async (req, res, next) => {
     errors.push({ param: 'permanent_address', msg: 'Permanent Address is required.' });
   }
 
+  // 14.5. Languages Spoken Validation
+  const langs = body.languages_spoken;
+  if (!langs || (Array.isArray(langs) && langs.length === 0) || (typeof langs === 'string' && !langs.trim())) {
+    errors.push({ param: 'languages_spoken', msg: 'Please select at least one language.' });
+  }
+
   // 15. Previous NSS Volunteer & Certificate File Validation
   if (!body.is_previous_volunteer) {
     errors.push({ param: 'is_previous_volunteer', msg: 'Previous NSS Volunteer status is required.' });
