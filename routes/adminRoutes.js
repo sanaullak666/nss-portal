@@ -36,9 +36,6 @@ router.get('/admin/selection', csrfProtection, adminController.renderSelectionPa
 router.post('/admin/selection/:id/status', csrfProtection, adminController.updateVolunteerStatus);
 router.get('/admin/selection/export-excel', adminController.exportSelectedToExcel);
 
-// Announcement Email Routes
-router.get('/admin/announcement/recipient-count', adminController.getUnitRecipientCount);
-router.post('/admin/announcement/send', csrfProtection, adminController.sendUnitAnnouncement);
-
 module.exports = router;
+
 
