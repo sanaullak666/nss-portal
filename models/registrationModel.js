@@ -349,7 +349,36 @@ class RegistrationModel {
         totalActive: parseInt(activeRows[0]?.count || 0, 10)
       }
     };
+  static async getSelectedVolunteersByUnit(unitNumber) {
+    if (!unitNumber || unitNumber === 'All') {
+      const [rows] = await db.query(
+        "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND email IS NOT NULL AND TRIM(email) != '' ORDER BY unit_number ASC, applicant_name ASC"
+      );
+      return rows;
+    } else {
+      const [rows] = await db.query(
+        "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND unit_number = ? AND email IS NOT NULL AND TRIM(email) != '' ORDER BY applicant_name ASC",
+        [unitNumber]
+      );
+      return rows;
+    }
+  }
+
+  static async getSelectedCountByUnit(unitNumber) {
+    if (!unitNumber || unitNumber === 'All') {
+      const [rows] = await db.query(
+        "SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected' AND email IS NOT NULL AND TRIM(email) != ''"
+      );
+      return parseInt(rows[0]?.count || 0, 10);
+    } else {
+      const [rows] = await db.query(
+        "SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected' AND unit_number = ? AND email IS NOT NULL AND TRIM(email) != ''",
+        [unitNumber]
+      );
+      return parseInt(rows[0]?.count || 0, 10);
+    }
   }
 }
 
 module.exports = RegistrationModel;
+

@@ -2,10 +2,15 @@ const RegistrationModel = require('../models/registrationModel');
 const AdminModel = require('../models/adminModel');
 const bcrypt = require('bcryptjs');
 const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
+
 const { exportRegistrationsToExcel, exportSelectedRegistrationsToExcel } = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
 const { logAudit } = require('../utils/auditLogger');
-const { sendSelectionApprovalEmail } = require('../utils/emailService');
+const { sendSelectionApprovalEmail, sendUnitAnnouncementEmail } = require('../utils/emailService');
+
+
+
+
 
 exports.renderDashboard = async (req, res) => {
   try {
@@ -441,3 +446,51 @@ exports.exportSelectedToExcel = async (req, res) => {
     res.status(500).send('Failed to export selected registrations to Excel');
   }
 };
+
+exports.getUnitRecipientCount = async (req, res) => {
+  try {
+    const unitNumber = req.query.unit || 'All';
+    const count = await RegistrationModel.getSelectedCountByUnit(unitNumber);
+    res.json({ success: true, count, unit: unitNumber });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+exports.sendUnitAnnouncement = async (req, res) => {
+  try {
+    const { targetUnit, subject, message } = req.body || {};
+
+    if (!subject || !subject.trim() || !message || !message.trim()) {
+      return res.status(400).json({ success: false, error: 'Subject and Announcement Message are required.' });
+    }
+
+    const recipients = await RegistrationModel.getSelectedVolunteersByUnit(targetUnit || 'All');
+
+    if (!recipients || recipients.length === 0) {
+      return res.status(404).json({ success: false, error: `No selected volunteers with valid email addresses found for ${targetUnit === 'All' ? 'any Unit' : targetUnit}.` });
+    }
+
+    const result = await sendUnitAnnouncementEmail({
+      recipients,
+      subject: subject.trim(),
+      announcementText: message.trim(),
+      unitNumber: targetUnit || 'All'
+    });
+
+    try {
+      const adminName = req.session.admin ? req.session.admin.username : 'Admin';
+      await logAudit('UNIT_ANNOUNCEMENT_EMAIL', adminName, `Sent announcement "${subject.trim()}" to ${result.count} selected volunteers in ${targetUnit || 'All'}`);
+    } catch (e) {}
+
+    return res.json({
+      success: true,
+      message: `Announcement email successfully sent to ${result.count} selected volunteer(s) in ${targetUnit === 'All' ? 'All Units' : targetUnit}.`,
+      sentCount: result.count
+    });
+  } catch (err) {
+    console.error('Send Unit Announcement Error:', err);
+    return res.status(500).json({ success: false, error: err.message || 'Failed to send unit announcement email.' });
+  }
+};
+
