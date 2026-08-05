@@ -349,7 +349,10 @@ class RegistrationModel {
         totalActive: parseInt(activeRows[0]?.count || 0, 10)
       }
     };
+  }
+
   static async getSelectedVolunteersByUnit(unitNumber) {
+
     if (!unitNumber || unitNumber === 'All') {
       const [rows] = await db.query(
         "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND email IS NOT NULL AND TRIM(email) != '' ORDER BY unit_number ASC, applicant_name ASC"
