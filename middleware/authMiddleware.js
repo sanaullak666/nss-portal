@@ -21,8 +21,9 @@ exports.attachSessionLocals = (req, res, next) => {
  */
 exports.isAuthenticated = (req, res, next) => {
   if (!req.session || !req.session.admin) {
-    return res.redirect('/admin/login?error=Please+log+in+to+access+the+admin+dashboard.');
+    return res.redirect('/admin/login?error=Logged+out+because+another+device+logged+in+or+session+ended.');
   }
+
 
   const now = Date.now();
   const lastActivity = req.session.lastActivity || now;

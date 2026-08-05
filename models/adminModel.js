@@ -78,6 +78,21 @@ class AdminModel {
     );
     return result.affectedRows > 0;
   }
+
+  static async invalidateOtherSessions(currentSid, username) {
+    if (!currentSid) return;
+    try {
+      await db.query(
+        "DELETE FROM session WHERE sid != ? AND (sess LIKE ? OR sess LIKE ?)",
+        [currentSid, `%"username":"${username}"%`, `%"admin":%`]
+      );
+    } catch (err) {
+      try {
+        await db.query("DELETE FROM session WHERE sid != ?", [currentSid]);
+      } catch (e) {}
+    }
+  }
 }
 
 module.exports = AdminModel;
+

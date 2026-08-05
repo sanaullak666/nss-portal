@@ -67,11 +67,16 @@ exports.handleLogin = async (req, res) => {
       }
 
       try {
+        await AdminModel.invalidateOtherSessions(req.sessionID, admin.username);
+      } catch (sErr) {}
+
+      try {
         await logAudit('LOGIN', admin.username, 'Admin logged in successfully');
       } catch (aErr) {}
 
       res.redirect('/admin/dashboard');
     });
+
 
   } catch (err) {
     console.error('Login Error:', err);

@@ -256,9 +256,10 @@ async function autoMigrate(connection) {
   await connection.query(
     `INSERT INTO admins (username, password_hash, full_name, email, role) 
      VALUES (?, ?, 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin') 
-     ON CONFLICT (username) DO UPDATE SET email = 'nsspondiuni2409@gmail.com'`,
+     ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = 'nsspondiuni2409@gmail.com'`,
     ['admin', adminHash]
   );
+
 }
 
 // Database Auto-Initialization
