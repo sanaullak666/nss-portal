@@ -478,6 +478,13 @@ exports.sendUnitAnnouncement = async (req, res) => {
       unitNumber: targetUnit || 'All'
     });
 
+    if (!result.success || result.count === 0) {
+      return res.status(500).json({
+        success: false,
+        error: result.lastError || result.error || 'Failed to deliver announcement email via SMTP. Please check Gmail credentials.'
+      });
+    }
+
     try {
       const adminName = req.session.admin ? req.session.admin.username : 'Admin';
       await logAudit('UNIT_ANNOUNCEMENT_EMAIL', adminName, `Sent announcement "${subject.trim()}" to ${result.count} selected volunteers in ${targetUnit || 'All'}`);
@@ -488,6 +495,7 @@ exports.sendUnitAnnouncement = async (req, res) => {
       message: `Announcement email successfully sent to ${result.count} selected volunteer(s) in ${targetUnit === 'All' ? 'All Units' : targetUnit}.`,
       sentCount: result.count
     });
+
   } catch (err) {
     console.error('Send Unit Announcement Error:', err);
     return res.status(500).json({ success: false, error: err.message || 'Failed to send unit announcement email.' });

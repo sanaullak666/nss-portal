@@ -253,6 +253,7 @@ async function sendUnitAnnouncementEmail({ recipients, subject, announcementText
   );
 
   let successCount = 0;
+  let lastError = null;
 
   for (const student of recipients) {
     if (!student.email) continue;
@@ -318,11 +319,13 @@ async function sendUnitAnnouncementEmail({ recipients, subject, announcementText
       successCount++;
     } catch (err) {
       console.error(`[ANNOUNCEMENT EMAIL ERROR] Failed for ${student.email}:`, err.message);
+      lastError = err;
     }
   }
 
-  return { success: true, count: successCount };
+  return { success: successCount > 0, count: successCount, lastError: lastError ? lastError.message : null };
 }
 
 module.exports = { sendOTPEmail, sendSelectionApprovalEmail, sendUnitAnnouncementEmail };
+
 

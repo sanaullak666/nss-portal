@@ -352,7 +352,6 @@ class RegistrationModel {
   }
 
   static async getSelectedVolunteersByUnit(unitNumber) {
-
     if (!unitNumber || unitNumber === 'All') {
       const [rows] = await db.query(
         "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND email IS NOT NULL AND TRIM(email) != '' ORDER BY unit_number ASC, applicant_name ASC"
@@ -360,7 +359,7 @@ class RegistrationModel {
       return rows;
     } else {
       const [rows] = await db.query(
-        "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND unit_number = ? AND email IS NOT NULL AND TRIM(email) != '' ORDER BY applicant_name ASC",
+        "SELECT id, registration_id, applicant_name, email, unit_number FROM registrations WHERE status = 'Selected' AND LOWER(TRIM(unit_number)) = LOWER(TRIM(?)) AND email IS NOT NULL AND TRIM(email) != '' ORDER BY applicant_name ASC",
         [unitNumber]
       );
       return rows;
@@ -375,13 +374,14 @@ class RegistrationModel {
       return parseInt(rows[0]?.count || 0, 10);
     } else {
       const [rows] = await db.query(
-        "SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected' AND unit_number = ? AND email IS NOT NULL AND TRIM(email) != ''",
+        "SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected' AND LOWER(TRIM(unit_number)) = LOWER(TRIM(?)) AND email IS NOT NULL AND TRIM(email) != ''",
         [unitNumber]
       );
       return parseInt(rows[0]?.count || 0, 10);
     }
   }
 }
+
 
 module.exports = RegistrationModel;
 
