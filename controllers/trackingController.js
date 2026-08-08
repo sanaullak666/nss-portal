@@ -53,11 +53,18 @@ exports.searchRegistration = async (req, res) => {
 
 exports.downloadStudentReceipt = async (req, res) => {
   const { registrationId } = req.params;
+  const cleanId = registrationId ? registrationId.trim() : '';
+
   try {
-    const registration = await RegistrationModel.findByRegistrationId(registrationId);
-    if (!registration || registration.status !== 'Active') {
+    let registration = await RegistrationModel.findByRegistrationId(cleanId);
+    if (!registration) {
+      registration = await RegistrationModel.searchActive(cleanId);
+    }
+
+    if (!registration || !['Active', 'Selected', 'Rejected'].includes(registration.status)) {
       return res.status(404).render('404');
     }
+
     generateRegistrationPDF(registration, res);
   } catch (err) {
     console.error('Student PDF Download Error:', err);

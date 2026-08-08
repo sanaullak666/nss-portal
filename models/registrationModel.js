@@ -58,7 +58,12 @@ class RegistrationModel {
   }
 
   static async findByRegistrationId(registrationId) {
-    const [rows] = await db.query('SELECT * FROM registrations WHERE registration_id = ? LIMIT 1', [registrationId]);
+    if (!registrationId) return null;
+    const cleanId = registrationId.trim();
+    const [rows] = await db.query(
+      'SELECT * FROM registrations WHERE registration_id = ? OR LOWER(registration_id) = LOWER(?) LIMIT 1',
+      [cleanId, cleanId]
+    );
     return rows[0] || null;
   }
 
