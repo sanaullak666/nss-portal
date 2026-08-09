@@ -193,43 +193,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Handle all other forms (Login, Track Status, Admin Filters, etc.)
+  // Form handling without blocking preloader delay
   document.querySelectorAll('form').forEach(function(form) {
-    if (form === regForm) return; // already handled above
+    if (form === regForm) return;
     form.addEventListener('submit', function (e) {
       if (form.checkValidity && !form.checkValidity()) {
         return;
       }
-      const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-      const customText = submitBtn ? (submitBtn.getAttribute('data-loading-text') || submitBtn.innerText || submitBtn.value) : 'Request';
-      window.showGlobalLoader('Processing ' + customText.trim() + '...');
     });
   });
-
-  // Hide page preloader after 3.5 seconds (3 to 4 seconds)
-  setTimeout(function() {
-    window.hideGlobalLoader();
-  }, 3500);
 });
 
-// Window-level Global Loader Control API
-window.showGlobalLoader = function (text) {
-  const overlay = document.getElementById('globalLoaderOverlay');
-  const textEl = document.getElementById('globalLoaderText');
-  if (textEl && text) {
-    textEl.textContent = text;
-  }
-  if (overlay) {
-    overlay.classList.remove('hidden');
-  }
-};
-
-window.hideGlobalLoader = function () {
-  const overlay = document.getElementById('globalLoaderOverlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-};
+// Window-level Global Loader Control API (No-op)
+window.showGlobalLoader = function (text) {};
+window.hideGlobalLoader = function () {};
 
 // Handle browser Back / Forward (bfcache) navigation
 window.addEventListener('pageshow', function (event) {
