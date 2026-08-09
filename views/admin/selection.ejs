@@ -117,8 +117,8 @@
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <a href="/admin/dashboard" class="btn btn-secondary btn-sm">📊 Dashboard</a>
-        <a href="/admin/registrations" class="btn btn-secondary btn-sm">📋 Manage Registrations</a>
+        <a href="/admin/dashboard" class="btn btn-secondary btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg> Dashboard</a>
+        <a href="/admin/registrations" class="btn btn-secondary btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Manage Registrations</a>
         
 
         <!-- Admin Profile Dropdown -->
@@ -136,10 +136,10 @@
               <div style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Admin</div>
             </div>
             <a href="/admin/change-password" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #0f172a; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-              🔑 Change Password
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg> Change Password
             </a>
             <a href="/admin/logout" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #b71c1c; text-decoration: none; font-size: 0.88rem; font-weight: 600; border-top: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
-              🚪 Logout
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" /></svg> Logout
             </a>
           </div>
         </div>
@@ -157,8 +157,8 @@
       <select name="selectionStatus" style="font-weight: 700; color: var(--color-navy);">
         <option value="All" <%= filters.selectionStatus === 'All' ? 'selected' : '' %>>All Statuses</option>
         <option value="Active" <%= filters.selectionStatus === 'Active' ? 'selected' : '' %>>Active / Under Review</option>
-        <option value="Selected" <%= filters.selectionStatus === 'Selected' ? 'selected' : '' %>>🟢 Selected Only</option>
-        <option value="Rejected" <%= filters.selectionStatus === 'Rejected' ? 'selected' : '' %>>🔴 Rejected Only</option>
+        <option value="Selected" <%= filters.selectionStatus === 'Selected' ? 'selected' : '' %>>Selected Only</option>
+        <option value="Rejected" <%= filters.selectionStatus === 'Rejected' ? 'selected' : '' %>>Rejected Only</option>
       </select>
 
       <!-- Filter by Unit -->
@@ -179,7 +179,7 @@
 
       <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
       <a href="/admin/selection" class="btn btn-ghost btn-sm">Reset</a>
-      <a href="/admin/selection/export-excel" class="btn btn-success btn-sm" style="background: #16a34a; border-color: #15803d; color: white; margin-left: auto;">📥 Export Selected Excel</a>
+      <a href="/admin/selection/export-excel" class="btn btn-success btn-sm" style="background: #16a34a; border-color: #15803d; color: white; margin-left: auto;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Selected Excel</a>
     </form>
 
 
@@ -212,11 +212,11 @@
                   <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
                   <td>
                     <% if (reg.status === 'Selected') { %>
-                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800;">🟢 Selected</span>
+                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #16a34a;"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l4.004-5.606z" clip-rule="evenodd" /></svg> Selected</span>
                     <% } else if (reg.status === 'Rejected') { %>
-                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800;">🔴 Rejected</span>
+                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #dc2626;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" /></svg> Rejected</span>
                     <% } else { %>
-                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800;">🟡 Active</span>
+                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #0284c7;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .2.079.39.22.53l3.5 3.5a.75.75 0 001.06-1.06l-3.28-3.28V6z" clip-rule="evenodd" /></svg> Active</span>
                     <% } %>
                   </td>
                   <td>
@@ -226,7 +226,7 @@
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="status" value="Selected">
                         <button type="submit" class="btn btn-success btn-sm" style="padding: 4px 14px; font-weight: 700; background: #16a34a; border-color: #15803d;" title="Mark as Selected">
-                          <%= reg.status === 'Selected' ? '✓ Selected' : 'Select' %>
+                          <% if (reg.status === 'Selected') { %><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Selected<% } else { %>Select<% } %>
                         </button>
                       </form>
 
@@ -235,7 +235,7 @@
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="status" value="Rejected">
                         <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #b71c1c; padding: 4px 14px; font-weight: 700; border: 1px solid #fecaca;" title="Mark as Rejected">
-                          <%= reg.status === 'Rejected' ? '✕ Rejected' : 'Reject' %>
+                          <% if (reg.status === 'Rejected') { %><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> Rejected<% } else { %>Reject<% } %>
                         </button>
                       </form>
                     </div>

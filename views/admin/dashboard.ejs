@@ -96,7 +96,7 @@
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="/admin/selection" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700;">📋 Selection Process</a>
+        <a href="/admin/selection" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Selection Process</a>
         <!-- Admin Profile Avatar Dropdown -->
         <div style="position: relative; display: inline-block;">
           <button id="adminProfileBtn" type="button" onclick="toggleAdminProfileMenu(event)" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.18); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); padding: 6px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
@@ -112,10 +112,10 @@
               <div style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">Admin</div>
             </div>
             <a href="/admin/change-password" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #0f172a; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-              🔑 Change Password
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg> Change Password
             </a>
             <a href="/admin/logout" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #b71c1c; text-decoration: none; font-size: 0.88rem; font-weight: 600; border-top: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
-              🚪 Logout
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" /></svg> Logout
             </a>
           </div>
         </div>
@@ -133,7 +133,7 @@
       </div>
 
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <a href="/admin/registrations" class="btn btn-secondary">📋 Manage Registrations</a>
+        <a href="/admin/registrations" class="btn btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Manage Registrations</a>
         <a href="/admin/registrations/export/excel" class="btn btn-primary"><svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Complete Excel (.xlsx)</a>
       </div>
     </div>
@@ -365,7 +365,7 @@
 
             // If a new registration has arrived
             if (newTotal > lastTotal) {
-              showToastNotification(`🔔 ${newTotal - lastTotal} New Volunteer Registration Recorded!`);
+              showToastNotification(`${newTotal - lastTotal} New Volunteer Registration Recorded!`);
               lastTotal = newTotal;
               updateRecentTable(data.recentRegistrations);
             }
@@ -380,7 +380,7 @@
             toast.style.cssText = 'position: fixed; bottom: 25px; right: 25px; z-index: 999999; background: #002B49; color: #ffffff; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-left: 5px solid #b71c1c; display: flex; align-items: center; gap: 10px; transition: opacity 0.4s ease;';
             document.body.appendChild(toast);
           }
-          toast.innerHTML = `<span>🔔</span><div>${message}</div>`;
+          toast.innerHTML = `<span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg></span><div>${message}</div>`;
           toast.style.opacity = '1';
           setTimeout(function() { toast.style.opacity = '0'; }, 5000);
         }

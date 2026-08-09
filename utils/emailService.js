@@ -138,7 +138,7 @@ async function sendSelectionApprovalEmail(registration) {
       <div style="padding: 30px 25px; color: #1e293b; line-height: 1.6;">
         <div style="text-align: center; margin-bottom: 20px;">
           <span style="background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; display: inline-block;">
-            🎉 APPLICATION APPROVED - VOLUNTEER SELECTED
+            APPLICATION APPROVED - VOLUNTEER SELECTED
           </span>
         </div>
 
@@ -199,7 +199,7 @@ async function sendSelectionApprovalEmail(registration) {
     await transporter.sendMail({
       from: `"PU NSS Wing" <${gmailUser}>`,
       to: registration.email,
-      subject: `🎉 [PU NSS Wing] Congratulations! You are Selected as NSS Volunteer 2026 - ${registration.registration_id}`,
+      subject: `[PU NSS Wing] Congratulations! You are Selected as NSS Volunteer 2026 - ${registration.registration_id}`,
       html: htmlContent
     });
 

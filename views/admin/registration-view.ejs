@@ -46,7 +46,7 @@
       </div>
       <div>
         <a href="/admin/registrations" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem; margin-right: 8px;">← Back to List</a>
-        <a href="/admin/logout" class="btn btn-logout" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px;">🚪 Logout</a>
+        <a href="/admin/logout" class="btn btn-logout" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" /></svg> Logout</a>
       </div>
     </div>
   </header>
@@ -65,14 +65,14 @@
         </div>
 
         <div class="no-print" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button onclick="window.print()" class="btn btn-secondary" style="font-size: 0.85rem;">🖨️ Print Profile</button>
-          <a href="/admin/registrations/<%= registration.id %>/pdf" class="btn btn-primary" style="font-size: 0.85rem;">📄 PDF Slip</a>
-          <a href="/admin/registrations/<%= registration.id %>/edit" class="btn btn-outline" style="font-size: 0.85rem;">✏️ Edit</a>
+          <button onclick="window.print()" class="btn btn-secondary" style="font-size: 0.85rem;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m11.318-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656" /></svg> Print Profile</button>
+          <a href="/admin/registrations/<%= registration.id %>/pdf" class="btn btn-primary" style="font-size: 0.85rem;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg> PDF Slip</a>
+          <a href="/admin/registrations/<%= registration.id %>/edit" class="btn btn-outline" style="font-size: 0.85rem;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg> Edit</a>
           
           <!-- Delete Action -->
           <form action="/admin/registrations/<%= registration.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this volunteer registration?');" style="display: inline;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" class="btn" style="background: #fee2e2; color: #b71c1c; font-size: 0.85rem; padding: 6px 14px;">🗑️ Delete</button>
+            <button type="submit" class="btn" style="background: #fee2e2; color: #b71c1c; font-size: 0.85rem; padding: 6px 14px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> Delete</button>
           </form>
         </div>
       </div>
@@ -139,7 +139,7 @@
         <% if (registration.certificate_path) { %>
           <p style="margin-bottom: 10px;">
             <strong>Uploaded Certificate:</strong> 
-            <a href="/uploads/<%= registration.certificate_path %>" target="_blank" class="btn btn-success btn-sm" style="margin-left: 8px;">📎 Open Certificate / Document</a>
+            <a href="/uploads/<%= registration.certificate_path %>" target="_blank" class="btn btn-success btn-sm" style="margin-left: 8px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32a1.5 1.5 0 01-2.121-2.121l9.9-9.9" /></svg> Open Certificate / Document</a>
           </p>
         <% } %>
 
