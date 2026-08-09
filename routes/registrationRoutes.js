@@ -51,9 +51,18 @@ router.post(
 // Success Confirmation Page
 router.get('/success/:registrationId', registrationController.renderSuccess);
 
+// Middleware to prevent caching of dynamic status tracking pages
+const setNoCache = (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+};
+
 // Volunteer Tracking Routes
-router.get('/track-registration', csrfProtection, trackingController.renderTrackPage);
-router.post('/track-registration', csrfProtection, trackingController.searchRegistration);
-router.get('/track-registration/pdf/:registrationId', trackingController.downloadStudentReceipt);
+router.get('/track-registration', setNoCache, csrfProtection, trackingController.renderTrackPage);
+router.post('/track-registration', setNoCache, csrfProtection, trackingController.searchRegistration);
+router.get('/track-registration/pdf/:registrationId', setNoCache, trackingController.downloadStudentReceipt);
 
 module.exports = router;

@@ -13,8 +13,17 @@ const csrfProtection = csurf({
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
 });
 
-// Protect all /admin routes with authentication middleware
-router.use('/admin', isAuthenticated);
+// Middleware to prevent caching of admin pages in browsers & Vercel CDN
+const setNoCache = (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+};
+
+// Protect all /admin routes with authentication and no-cache middleware
+router.use('/admin', setNoCache, isAuthenticated);
 
 // Admin Dashboard & Registrations Management Routes
 router.get('/admin/dashboard', adminController.renderDashboard);
