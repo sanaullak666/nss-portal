@@ -451,15 +451,16 @@ body.login-page-body::before {
 .login-btn {
   width: 100%;
   padding: var(--space-3) var(--space-6);
-  font-size: var(--font-size-base);
+  font-size: 1.02rem;
   font-weight: 700;
   font-family: var(--font-base);
-  background: var(--color-nss-red);
+  letter-spacing: 0.4px;
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-bounce);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   height: 52px;
@@ -467,18 +468,37 @@ body.login-page-body::before {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  box-shadow: var(--shadow-md), var(--shadow-glow-red);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
   margin-top: var(--space-2);
 }
 
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.login-btn:hover::before {
+  left: 140%;
+  transition: left 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .login-btn:hover {
-  background: var(--color-nss-red-dark);
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow-red);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
 .login-btn:active {
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
 
 /* ---------- Footer & Back Links ---------- */

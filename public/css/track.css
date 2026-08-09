@@ -226,22 +226,48 @@ body.track-page-body::before {
   padding: 0 var(--space-6);
   font-size: var(--font-size-base);
   font-weight: 700;
-  background: var(--color-nss-red);
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-md);
   cursor: pointer;
-  box-shadow: var(--shadow-md), var(--shadow-glow-red);
-  transition: all var(--transition-bounce);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.search-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-btn:hover::before {
+  left: 140%;
+  transition: left 0.75s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-btn:hover {
-  background: var(--color-nss-red-dark);
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+}
+
+.search-btn:active {
+  transform: translateY(1px) scale(0.98);
 }
 
 /* ---------- Result Card ---------- */
@@ -332,23 +358,28 @@ body.track-page-body::before {
 }
 
 .whatsapp-link-btn {
-  background: #25D366;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: white;
   padding: 12px 24px;
   border-radius: var(--radius-md);
   font-weight: 700;
+  letter-spacing: 0.3px;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-  transition: all var(--transition-bounce);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .whatsapp-link-btn:hover {
-  background: #1da851;
+  background: linear-gradient(135deg, #34E075 0%, #0F766E 100%);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
 }
 
 .pdf-download-btn {
@@ -358,18 +389,23 @@ body.track-page-body::before {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--color-nss-red);
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
   color: white;
   font-weight: 700;
+  letter-spacing: 0.3px;
   border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   text-decoration: none;
-  box-shadow: var(--shadow-md), var(--shadow-glow-red);
-  transition: all var(--transition-bounce);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .pdf-download-btn:hover {
-  background: var(--color-nss-red-dark);
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
 /* Responsive */
