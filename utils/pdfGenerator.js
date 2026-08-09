@@ -1,10 +1,10 @@
 const PDFDocument = require('pdfkit');
 
-function generateRegistrationPDF(registration, res) {
+function generateRegistrationPDF(registration, res, dispositionType = 'attachment') {
   const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="NSS_Registration_${registration.registration_id}.pdf"`);
+  res.setHeader('Content-Disposition', `${dispositionType}; filename="NSS_Registration_${registration.registration_id}.pdf"`);
 
   doc.pipe(res);
 

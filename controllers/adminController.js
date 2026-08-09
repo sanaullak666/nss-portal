@@ -250,7 +250,8 @@ exports.downloadPDF = async (req, res) => {
     const registration = await RegistrationModel.findById(req.params.id);
     if (!registration) return res.status(404).render('404');
 
-    generateRegistrationPDF(registration, res);
+    const isInline = req.query.inline === 'true' || req.query.inline === '1';
+    generateRegistrationPDF(registration, res, isInline ? 'inline' : 'attachment');
     await logAudit('DOWNLOAD_PDF', req.session.admin ? req.session.admin.username : 'Admin', `Downloaded PDF for registration ID: ${registration.registration_id}`);
   } catch (err) {
     console.error('PDF Download Error:', err);
