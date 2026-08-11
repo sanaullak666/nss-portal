@@ -1,0 +1,52 @@
+</div>
+  </main>
+
+  <!-- Global Confirmation Modal -->
+  <div id="confirmationModal" class="pu-modal" aria-hidden="true">
+    <div class="pu-modal-overlay" tabindex="-1"></div>
+    <div class="pu-modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="pu-modal-header">
+        <h3 id="modalTitle" class="pu-modal-title">
+          <i class="fa-solid fa-circle-exclamation modal-icon-warn"></i> Confirm Registration Submission
+        </h3>
+      </div>
+      <div class="pu-modal-body">
+        <p class="modal-alert-text">
+          Please confirm that all the information provided is correct. Once submitted, the application cannot be edited.
+        </p>
+        <div class="modal-summary-box" id="modalSummaryBox">
+          <!-- Dynamically populated summary content via form.js -->
+        </div>
+      </div>
+      <div class="pu-modal-footer">
+        <button type="button" class="pu-btn pu-btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button type="button" class="pu-btn pu-btn-primary" id="modalConfirmBtn">
+          <i class="fa-solid fa-paper-plane"></i> Confirm & Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- University Footer -->
+  <footer class="pu-footer">
+    <div class="pu-container footer-container">
+      <div class="footer-info">
+        <p class="footer-title">National Service Scheme (NSS) Cell</p>
+        <p>Pondicherry University, R.V. Nagar, Kalapet, Puducherry - 605014</p>
+        <p>Email: nsscell@pondiuni.edu.in | Phone: +91 (0413) 2654 200</p>
+      </div>
+      <div class="footer-rights">
+        <p>&copy; <%= new Date().getFullYear() %> Pondicherry University. All Rights Reserved.</p>
+        <p class="footer-tagline">NOT ME BUT YOU | Registration Portal v1.0</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Frontend Scripts -->
+  <script src="/js/script.js"></script>
+  <script src="/js/validation.js"></script>
+  <script src="/js/form.js"></script>
+  <script src="/js/admin.js"></script>
+
+</body>
+</html>

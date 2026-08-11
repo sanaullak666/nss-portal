@@ -1,0 +1,205 @@
+<%- include('../partials/header') %>
+
+<div class="pu-admin-registrations-wrapper">
+  
+  <div class="pu-admin-header-bar">
+    <div>
+      <h2 class="pu-page-title"><i class="fa-solid fa-users"></i> Volunteer Registrations Directory</h2>
+      <p class="pu-page-subtitle">Filter, search, view, and export student applications</p>
+    </div>
+    <div class="pu-admin-header-actions">
+      <a href="/admin/registrations/export/csv?<%= new URLSearchParams(filters).toString() %>" class="pu-btn pu-btn-outline">
+        <i class="fa-solid fa-file-csv"></i> Export CSV
+      </a>
+      <a href="/admin/registrations/export/excel?<%= new URLSearchParams(filters).toString() %>" class="pu-btn pu-btn-success">
+        <i class="fa-solid fa-file-excel"></i> Export Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="pu-card pu-filter-card">
+    <div class="pu-card-body">
+      <form action="/admin/registrations" method="GET" class="pu-filter-form" id="filterForm">
+        <div class="pu-form-grid">
+          
+          <!-- Search Field -->
+          <div class="pu-form-group pu-col-4">
+            <label for="search" class="pu-label"><i class="fa-solid fa-magnifying-glass"></i> Search Student</label>
+            <input 
+              type="text" 
+              id="search" 
+              name="search" 
+              class="pu-input" 
+              value="<%= filters.search || '' %>" 
+              placeholder="Name, Reg No, Email, ID..."
+            >
+          </div>
+
+          <!-- Unit Filter -->
+          <div class="pu-form-group pu-col-2">
+            <label for="unit" class="pu-label">NSS Unit</label>
+            <select id="unit" name="unit" class="pu-select">
+              <option value="">All Units</option>
+              <option value="UNIT 1" <%= filters.unit === 'UNIT 1' ? 'selected' : '' %>>UNIT 1</option>
+              <option value="UNIT 2" <%= filters.unit === 'UNIT 2' ? 'selected' : '' %>>UNIT 2</option>
+              <option value="UNIT 5" <%= filters.unit === 'UNIT 5' ? 'selected' : '' %>>UNIT 5</option>
+              <option value="UNIT 6" <%= filters.unit === 'UNIT 6' ? 'selected' : '' %>>UNIT 6</option>
+            </select>
+          </div>
+
+          <!-- Department Filter -->
+          <div class="pu-form-group pu-col-3">
+            <label for="department" class="pu-label">Department</label>
+            <select id="department" name="department" class="pu-select">
+              <option value="">All Departments</option>
+              <% Object.keys(departmentMapping).forEach(function(unitKey) { %>
+                <optgroup label="<%= unitKey %>">
+                  <% departmentMapping[unitKey].forEach(function(dept) { %>
+                    <option value="<%= dept %>" <%= filters.department === dept ? 'selected' : '' %>><%= dept %></option>
+                  <% }); %>
+                </optgroup>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- Course Filter -->
+          <div class="pu-form-group pu-col-3">
+            <label for="course" class="pu-label">Course</label>
+            <select id="course" name="course" class="pu-select">
+              <option value="">All Courses</option>
+              <% courses.forEach(function(c) { %>
+                <option value="<%= c %>" <%= filters.course === c ? 'selected' : '' %>><%= c %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- Year Filter -->
+          <div class="pu-form-group pu-col-3">
+            <label for="year" class="pu-label">Year of Study</label>
+            <select id="year" name="year" class="pu-select">
+              <option value="">All Years</option>
+              <option value="First Year" <%= filters.year === 'First Year' ? 'selected' : '' %>>First Year</option>
+              <option value="Second Year" <%= filters.year === 'Second Year' ? 'selected' : '' %>>Second Year</option>
+              <option value="Third Year" <%= filters.year === 'Third Year' ? 'selected' : '' %>>Third Year</option>
+            </select>
+          </div>
+
+          <!-- Filter Submit & Clear Actions -->
+          <div class="pu-form-group pu-col-9 pu-filter-actions">
+            <button type="submit" class="pu-btn pu-btn-primary"><i class="fa-solid fa-filter"></i> Apply Filters</button>
+            <a href="/admin/registrations" class="pu-btn pu-btn-secondary"><i class="fa-solid fa-rotate-left"></i> Reset</a>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REGISTRATIONS TABLE CARD -->
+  <div class="pu-card margin-top-md">
+    <div class="pu-card-header pu-flex-between">
+      <h3 class="pu-card-title">
+        <i class="fa-solid fa-table-list"></i> Showing Records 
+        <span class="pu-badge pu-badge-primary"><%= total %> Found</span>
+      </h3>
+    </div>
+    
+    <div class="pu-card-body pu-card-body-table">
+      <% if (registrations && registrations.length > 0) { %>
+        <div class="pu-table-responsive">
+          <table class="pu-table pu-table-striped pu-table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Registration ID</th>
+                <th>NSS Unit</th>
+                <th>Applicant Name</th>
+                <th>Univ Reg No</th>
+                <th>Department</th>
+                <th>Course & Year</th>
+                <th>Contact</th>
+                <th>Media</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% registrations.forEach(function(reg, index) { %>
+                <tr>
+                  <td><%= ((currentPage - 1) * 15) + index + 1 %></td>
+                  <td><strong class="pu-text-mono"><%= reg.registration_id %></strong></td>
+                  <td><span class="pu-badge pu-badge-outline"><%= reg.unit_number %></span></td>
+                  <td><strong><%= reg.applicant_name %></strong></td>
+                  <td><span class="pu-text-mono"><%= reg.univ_reg_no %></span></td>
+                  <td title="<%= reg.department %>"><%= reg.department.length > 25 ? reg.department.substring(0,25) + '...' : reg.department %></td>
+                  <td><%= reg.course %> (<%= reg.year_of_study.split(' ')[0] %>)</td>
+                  <td><%= reg.contact_number %></td>
+                  <td>
+                    <% if (reg.interested_in_media === 'Yes') { %>
+                      <span class="pu-badge pu-badge-success" title="Media Team Interested"><i class="fa-solid fa-camera"></i> Yes</span>
+                    <% } else { %>
+                      <span class="pu-badge pu-badge-secondary">No</span>
+                    <% } %>
+                  </td>
+                  <td><%= formatDateReadable(reg.created_at) %></td>
+                  <td>
+                    <a href="/admin/registrations/<%= reg.id %>" class="pu-btn pu-btn-xs pu-btn-primary" title="View Details">
+                      <i class="fa-regular fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        <% if (totalPages > 1) { %>
+          <div class="pu-pagination-wrapper">
+            <div class="pu-pagination-info">
+              Showing Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong>
+            </div>
+            <ul class="pu-pagination">
+              <% if (currentPage > 1) { %>
+                <li class="pu-page-item">
+                  <a class="pu-page-link" href="/admin/registrations?<%= new URLSearchParams({...filters, page: currentPage - 1}).toString() %>">
+                    <i class="fa-solid fa-chevron-left"></i> Prev
+                  </a>
+                </li>
+              <% } %>
+
+              <% for(let p = 1; p <= totalPages; p++) { %>
+                <% if (p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)) { %>
+                  <li class="pu-page-item <%= p === currentPage ? 'active' : '' %>">
+                    <a class="pu-page-link" href="/admin/registrations?<%= new URLSearchParams({...filters, page: p}).toString() %>"><%= p %></a>
+                  </li>
+                <% } else if (p === currentPage - 3 || p === currentPage + 3) { %>
+                  <li class="pu-page-item disabled"><span class="pu-page-link">...</span></li>
+                <% } %>
+              <% } %>
+
+              <% if (currentPage < totalPages) { %>
+                <li class="pu-page-item">
+                  <a class="pu-page-link" href="/admin/registrations?<%= new URLSearchParams({...filters, page: currentPage + 1}).toString() %>">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                  </a>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+        <% } %>
+
+      <% } else { %>
+        <div class="pu-empty-state">
+          <i class="fa-solid fa-folder-open"></i>
+          <h4>No matching registration records found</h4>
+          <p>Try adjusting your search query or clear existing filter criteria.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

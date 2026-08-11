@@ -210,7 +210,171 @@ async function sendSelectionApprovalEmail(registration) {
   }
 }
 
-module.exports = { sendOTPEmail, sendSelectionApprovalEmail };
+/**
+ * Send Login Verification OTP Email to Admin
+ * @param {string} toEmail 
+ * @param {string} otpCode 
+ * @param {string} username 
+ */
+async function sendLoginOTPEmail(toEmail, otpCode, username = 'Admin') {
+  try {
+    require('dotenv').config();
+  } catch (e) {}
+
+  console.log(`\n==================================================`);
+  console.log(`[PU NSS PORTAL] LOGIN 2FA OTP GENERATED`);
+  console.log(`Recipient Email: ${toEmail}`);
+  console.log(`Username: ${username}`);
+  console.log(`OTP Code: ${otpCode}`);
+  console.log(`Validity: 10 Minutes`);
+  console.log(`==================================================\n`);
+
+  const gmailUser = process.env.GMAIL_USER || 'nsspondiuni2409@gmail.com';
+  const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS || 'qikdszaasapkypzu';
+
+  if (!gmailPass || !nodemailer) {
+    console.error('[LOGIN OTP SKIPPED] Nodemailer or SMTP pass missing.');
+    throw new Error('Email service configuration missing.');
+  }
+
+  const transporter = nodemailer.createTransport(
+    process.env.SMTP_HOST ? {
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER || gmailUser,
+        pass: gmailPass
+      }
+    } : {
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: gmailPass
+      }
+    }
+  );
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      <div style="background-color: #002B49; color: #ffffff; padding: 22px; text-align: center;">
+        <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Pondicherry University - NSS Portal</h2>
+        <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: #e2e8f0;">Admin Login Verification Code (2FA)</p>
+      </div>
+      <div style="padding: 30px; color: #333333; line-height: 1.6;">
+        <p style="font-size: 15px; font-weight: 600; color: #002B49;">Hello Admin (${username}),</p>
+        <p style="font-size: 14px; color: #475569;">A login attempt was made to access the PU NSS Admin Portal.</p>
+        <p style="font-size: 14px; color: #475569;">Please use the following 6-digit One-Time Password (OTP) to complete your login:</p>
+        <div style="text-align: center; margin: 25px 0;">
+          <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #b71c1c; background-color: #fee2e2; padding: 12px 28px; border-radius: 8px; border: 2px dashed #b71c1c; display: inline-block;">
+            ${otpCode}
+          </span>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b;">This OTP is valid for <strong>10 minutes</strong>. Never share this security code with anyone.</p>
+        <p style="font-size: 0.85rem; color: #94a3b8;">If you did not initiate this login request, please secure your admin account immediately.</p>
+      </div>
+      <div style="background-color: #f8fafc; padding: 15px; text-align: center; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        &copy; 2026 National Service Scheme - Pondicherry University
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"PU NSS Portal Security" <${gmailUser}>`,
+      to: toEmail,
+      subject: `[PU NSS Portal] Admin Login Verification OTP: ${otpCode}`,
+      html: htmlContent
+    });
+
+    console.log(`[LOGIN OTP EMAIL SENT SUCCESSFULLY] Delivered to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.error('[LOGIN OTP EMAIL FAILURE]', err.message);
+    throw new Error(`Gmail delivery failed: ${err.message}`);
+  }
+}
+
+/**
+ * Send Login Notification Security Alert Email to Admin
+ * @param {string} toEmail 
+ * @param {object} details 
+ */
+async function sendLoginNotificationEmail(toEmail, details = {}) {
+  try {
+    require('dotenv').config();
+  } catch (e) {}
+
+  const gmailUser = process.env.GMAIL_USER || 'nsspondiuni2409@gmail.com';
+  const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS || 'qikdszaasapkypzu';
+
+  if (!gmailPass || !nodemailer) return false;
+
+  const transporter = nodemailer.createTransport(
+    process.env.SMTP_HOST ? {
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER || gmailUser,
+        pass: gmailPass
+      }
+    } : {
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: gmailPass
+      }
+    }
+  );
+
+  const { username = 'Admin', ip = 'Unknown IP', userAgent = 'Unknown Browser', time = new Date().toLocaleString() } = details;
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      <div style="background-color: #166534; color: #ffffff; padding: 20px; text-align: center;">
+        <h2 style="margin: 0; font-size: 20px;">PU NSS Admin Portal - Security Alert</h2>
+        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #dcfce7;">Successful Admin Login Notification</p>
+      </div>
+      <div style="padding: 25px; color: #333333; line-height: 1.6;">
+        <p style="font-size: 15px; font-weight: 600; color: #166534;">Successful Login Detected</p>
+        <p style="font-size: 14px; color: #475569;">Admin user <strong>${username}</strong> has successfully logged into the PU NSS Admin Control Center.</p>
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; padding: 14px; border-radius: 6px; margin: 18px 0; font-size: 13px;">
+          <p style="margin: 3px 0;"><strong>Username:</strong> ${username}</p>
+          <p style="margin: 3px 0;"><strong>Timestamp:</strong> ${time}</p>
+          <p style="margin: 3px 0;"><strong>IP Address:</strong> ${ip}</p>
+          <p style="margin: 3px 0;"><strong>Browser/Device:</strong> ${userAgent}</p>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b;">If this was you, no action is needed. If you did not log in, please change your password immediately.</p>
+      </div>
+      <div style="background-color: #f8fafc; padding: 12px; text-align: center; font-size: 0.75rem; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        &copy; 2026 National Service Scheme - Pondicherry University
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"PU NSS Portal Security" <${gmailUser}>`,
+      to: toEmail,
+      subject: `[SECURITY ALERT] Admin Logged In: ${username}`,
+      html: htmlContent
+    });
+    console.log(`[LOGIN ALERT SENT] Security alert sent to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`[LOGIN ALERT ERROR]`, err.message);
+    return false;
+  }
+}
+
+module.exports = { 
+  sendOTPEmail, 
+  sendSelectionApprovalEmail,
+  sendLoginOTPEmail,
+  sendLoginNotificationEmail
+};
+
 
 
 

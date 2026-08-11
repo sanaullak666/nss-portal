@@ -2,14 +2,20 @@ const bcrypt = require('bcryptjs');
 const AdminModel = require('../models/adminModel');
 const { logAudit } = require('../utils/auditLogger');
 
+const { sendOTPEmail, sendLoginOTPEmail, sendLoginNotificationEmail } = require('../utils/emailService');
+
 exports.renderLogin = (req, res) => {
   if (req.session && req.session.admin) {
     return res.redirect('/admin/dashboard');
   }
+  if (req.session && req.session.pendingLogin) {
+    return res.redirect('/admin/verify-login-otp');
+  }
   res.render('admin/login', {
     title: 'Admin Login - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    error: req.query.error || null
+    error: req.query.error || null,
+    success: req.query.success || null
   });
 };
 
@@ -46,18 +52,28 @@ exports.handleLogin = async (req, res) => {
       });
     }
 
-    await AdminModel.updateLastLogin(admin.id);
+    // Generate 6-digit OTP for 2FA Login Verification
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Valid for 10 minutes
+    const targetEmail = 'nsspondiuni2409@gmail.com';
 
-    req.session.admin = {
-      id: admin.id,
+    // Save OTP to DB
+    await AdminModel.saveOTP(admin.id, targetEmail, otpCode, expiresAt);
+
+    // Save pending login state in session
+    req.session.pendingLogin = {
+      adminId: admin.id,
       username: admin.username,
       fullName: admin.full_name || admin.username,
-      email: admin.email,
+      email: admin.email || targetEmail,
+      targetEmail: targetEmail,
       role: admin.role || 'admin'
     };
-    req.session.lastActivity = Date.now();
 
-    req.session.save(async (err) => {
+    // Send 2FA Login OTP Email
+    await sendLoginOTPEmail(targetEmail, otpCode, admin.username);
+
+    req.session.save((err) => {
       if (err) {
         return res.render('admin/login', {
           title: 'Admin Login - PU NSS Portal',
@@ -65,18 +81,8 @@ exports.handleLogin = async (req, res) => {
           error: 'Session initialization failed. Please try again.'
         });
       }
-
-      try {
-        await AdminModel.invalidateOtherSessions(req.sessionID, admin.username);
-      } catch (sErr) {}
-
-      try {
-        await logAudit('LOGIN', admin.username, 'Admin logged in successfully');
-      } catch (aErr) {}
-
-      res.redirect('/admin/dashboard');
+      res.redirect('/admin/verify-login-otp');
     });
-
 
   } catch (err) {
     console.error('Login Error:', err);
@@ -85,6 +91,133 @@ exports.handleLogin = async (req, res) => {
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       error: `Server error during login: ${err.message || 'Please try again.'}`
     });
+  }
+};
+
+exports.renderVerifyLoginOTP = (req, res) => {
+  if (!req.session || !req.session.pendingLogin) {
+    return res.redirect('/admin/login');
+  }
+  const pending = req.session.pendingLogin;
+  res.render('admin/verify-login-otp', {
+    title: '2FA Login Verification - PU NSS Portal',
+    csrfToken: req.csrfToken ? req.csrfToken() : '',
+    email: pending.targetEmail || 'nsspondiuni2409@gmail.com',
+    error: req.query.error || null,
+    success: req.query.success || `A 6-digit login verification OTP has been sent to ${pending.targetEmail || 'nsspondiuni2409@gmail.com'}.`
+  });
+};
+
+exports.handleVerifyLoginOTP = async (req, res) => {
+  if (!req.session || !req.session.pendingLogin) {
+    return res.redirect('/admin/login?error=Login+session+expired.+Please+log+in+again.');
+  }
+
+  const { otp_code } = req.body || {};
+  const pending = req.session.pendingLogin;
+  const targetEmail = pending.targetEmail || 'nsspondiuni2409@gmail.com';
+
+  if (!otp_code || otp_code.trim().length !== 6) {
+    return res.render('admin/verify-login-otp', {
+      title: '2FA Login Verification - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: targetEmail,
+      error: 'Please enter the 6-digit OTP code sent to your email.',
+      success: null
+    });
+  }
+
+  try {
+    const validOtp = await AdminModel.verifyOTP(targetEmail, otp_code.trim());
+
+    if (!validOtp) {
+      return res.render('admin/verify-login-otp', {
+        title: '2FA Login Verification - PU NSS Portal',
+        csrfToken: req.csrfToken ? req.csrfToken() : '',
+        email: targetEmail,
+        error: 'Invalid or expired OTP code. Please check your email or click Resend Login OTP.',
+        success: null
+      });
+    }
+
+    // Mark OTP as used
+    await AdminModel.markOTPUsed(validOtp.id);
+
+    // Promote pending login to full active admin session
+    req.session.admin = {
+      id: pending.adminId,
+      username: pending.username,
+      fullName: pending.fullName,
+      email: pending.email,
+      role: pending.role
+    };
+    req.session.lastActivity = Date.now();
+    delete req.session.pendingLogin;
+
+    req.session.save(async (err) => {
+      if (err) {
+        return res.render('admin/verify-login-otp', {
+          title: '2FA Login Verification - PU NSS Portal',
+          csrfToken: req.csrfToken ? req.csrfToken() : '',
+          email: targetEmail,
+          error: 'Session initialization failed. Please try again.',
+          success: null
+        });
+      }
+
+      try {
+        await AdminModel.updateLastLogin(pending.adminId);
+        await AdminModel.invalidateOtherSessions(req.sessionID, pending.username);
+        await logAudit('LOGIN_2FA_SUCCESS', pending.username, 'Admin logged in via 2FA Email OTP');
+
+        // Send Security Alert Email Notification in background
+        const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown IP';
+        const clientIp = rawIp.split(',')[0].trim();
+        const userAgent = req.headers['user-agent'] || 'Unknown Browser';
+        
+        sendLoginNotificationEmail(targetEmail, {
+          username: pending.username,
+          ip: clientIp,
+          userAgent: userAgent,
+          time: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+        }).catch(() => {});
+
+      } catch (e) {}
+
+      res.redirect('/admin/dashboard');
+    });
+
+  } catch (err) {
+    console.error('Verify Login OTP Error:', err);
+    res.render('admin/verify-login-otp', {
+      title: '2FA Login Verification - PU NSS Portal',
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      email: targetEmail,
+      error: `Verification error: ${err.message || 'Please try again.'}`,
+      success: null
+    });
+  }
+};
+
+exports.handleResendLoginOTP = async (req, res) => {
+  if (!req.session || !req.session.pendingLogin) {
+    return res.redirect('/admin/login?error=Session+expired.+Please+log+in+again.');
+  }
+
+  const pending = req.session.pendingLogin;
+  const targetEmail = pending.targetEmail || 'nsspondiuni2409@gmail.com';
+
+  try {
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await AdminModel.saveOTP(pending.adminId, targetEmail, otpCode, expiresAt);
+    await sendLoginOTPEmail(targetEmail, otpCode, pending.username);
+
+    res.redirect('/admin/verify-login-otp?success=A+new+6-digit+login+OTP+has+been+sent+to+' + encodeURIComponent(targetEmail));
+  } catch (err) {
+    console.error('Resend Login OTP Error:', err);
+    res.redirect('/admin/verify-login-otp?error=Failed+to+resend+OTP.+Please+try+again.');
   }
 };
 
@@ -106,7 +239,6 @@ exports.handleLogout = (req, res) => {
 
 // --- ADMIN PASSWORD RESET VIA EMAIL OTP ---
 
-const { sendOTPEmail } = require('../utils/emailService');
 
 exports.renderForgotPassword = (req, res) => {
   res.render('admin/forgot-password', {

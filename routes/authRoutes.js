@@ -16,6 +16,12 @@ const csrfProtection = csurf({
 
 router.get('/admin/login', isGuest, csrfProtection, authController.renderLogin);
 router.post('/admin/login', isGuest, loginLimiter, csrfProtection, authController.handleLogin);
+
+// Admin 2FA Email OTP Login Routes
+router.get('/admin/verify-login-otp', isGuest, csrfProtection, authController.renderVerifyLoginOTP);
+router.post('/admin/verify-login-otp', isGuest, csrfProtection, authController.handleVerifyLoginOTP);
+router.post('/admin/resend-login-otp', isGuest, csrfProtection, authController.handleResendLoginOTP);
+
 router.get('/admin/logout', authController.handleLogout);
 router.post('/admin/logout', authController.handleLogout);
 

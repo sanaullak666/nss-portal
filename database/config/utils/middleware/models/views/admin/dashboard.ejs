@@ -1,0 +1,166 @@
+<%- include('../partials/header') %>
+
+<div class="pu-admin-dashboard-wrapper">
+  
+  <div class="pu-admin-header-bar">
+    <div>
+      <h2 class="pu-page-title"><i class="fa-solid fa-chart-line"></i> Administrative Overview Dashboard</h2>
+      <p class="pu-page-subtitle">Real-time Registration Metrics & System Management</p>
+    </div>
+    <div class="pu-admin-header-actions">
+      <a href="/admin/registrations" class="pu-btn pu-btn-primary">
+        <i class="fa-solid fa-list-check"></i> Manage All Registrations
+      </a>
+      <a href="/admin/registrations/export/excel" class="pu-btn pu-btn-success">
+        <i class="fa-solid fa-file-excel"></i> Export All (Excel)
+      </a>
+    </div>
+  </div>
+
+  <!-- SUMMARY STATS CARDS GRID -->
+  <div class="pu-stats-grid">
+    
+    <!-- Total Registrations Card -->
+    <div class="pu-stat-card pu-stat-card-blue">
+      <div class="pu-stat-icon">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div class="pu-stat-details">
+        <span class="pu-stat-title">Total Registrations</span>
+        <h3 class="pu-stat-value"><%= stats.totalRegistrations %></h3>
+        <span class="pu-stat-subtext"><i class="fa-solid fa-layer-group"></i> Cumulative Applications</span>
+      </div>
+    </div>
+
+    <!-- Today's Registrations Card -->
+    <div class="pu-stat-card pu-stat-card-green">
+      <div class="pu-stat-icon">
+        <i class="fa-solid fa-calendar-day"></i>
+      </div>
+      <div class="pu-stat-details">
+        <span class="pu-stat-title">Today's Registrations</span>
+        <h3 class="pu-stat-value"><%= stats.todayRegistrations %></h3>
+        <span class="pu-stat-subtext"><i class="fa-solid fa-clock-rotate-left"></i> Recorded Today</span>
+      </div>
+    </div>
+
+    <!-- Unit 1 & Unit 2 Summary Card -->
+    <div class="pu-stat-card pu-stat-card-orange">
+      <div class="pu-stat-icon">
+        <i class="fa-solid fa-sitemap"></i>
+      </div>
+      <div class="pu-stat-details">
+        <span class="pu-stat-title">Unit 1 & Unit 2 Count</span>
+        <h3 class="pu-stat-value"><%= (stats.unitCounts['UNIT 1'] || 0) + (stats.unitCounts['UNIT 2'] || 0) %></h3>
+        <span class="pu-stat-subtext">Unit 1: <%= stats.unitCounts['UNIT 1'] || 0 %> | Unit 2: <%= stats.unitCounts['UNIT 2'] || 0 %></span>
+      </div>
+    </div>
+
+    <!-- Unit 5 & Unit 6 Summary Card -->
+    <div class="pu-stat-card pu-stat-card-purple">
+      <div class="pu-stat-icon">
+        <i class="fa-solid fa-diagram-project"></i>
+      </div>
+      <div class="pu-stat-details">
+        <span class="pu-stat-title">Unit 5 & Unit 6 Count</span>
+        <h3 class="pu-stat-value"><%= (stats.unitCounts['UNIT 5'] || 0) + (stats.unitCounts['UNIT 6'] || 0) %></h3>
+        <span class="pu-stat-subtext">Unit 5: <%= stats.unitCounts['UNIT 5'] || 0 %> | Unit 6: <%= stats.unitCounts['UNIT 6'] || 0 %></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NSS UNIT-WISE BREAKDOWN & RECENT REGISTRATIONS -->
+  <div class="pu-dashboard-grid margin-top-lg">
+
+    <!-- Unit Breakdown Card -->
+    <div class="pu-card pu-col-4">
+      <div class="pu-card-header">
+        <h3 class="pu-card-title"><i class="fa-solid fa-chart-pie"></i> NSS Unit Distribution</h3>
+      </div>
+      <div class="pu-card-body">
+        <ul class="pu-unit-breakdown-list">
+          <li class="pu-unit-item">
+            <div class="pu-unit-label">
+              <span class="pu-badge pu-badge-unit1">UNIT 1</span>
+              <span>Sciences & Technology</span>
+            </div>
+            <strong class="pu-unit-count"><%= stats.unitCounts['UNIT 1'] || 0 %></strong>
+          </li>
+          <li class="pu-unit-item">
+            <div class="pu-unit-label">
+              <span class="pu-badge pu-badge-unit2">UNIT 2</span>
+              <span>Humanities & Social Sciences</span>
+            </div>
+            <strong class="pu-unit-count"><%= stats.unitCounts['UNIT 2'] || 0 %></strong>
+          </li>
+          <li class="pu-unit-item">
+            <div class="pu-unit-label">
+              <span class="pu-badge pu-badge-unit5">UNIT 5</span>
+              <span>Management & Commerce</span>
+            </div>
+            <strong class="pu-unit-count"><%= stats.unitCounts['UNIT 5'] || 0 %></strong>
+          </li>
+          <li class="pu-unit-item">
+            <div class="pu-unit-label">
+              <span class="pu-badge pu-badge-unit6">UNIT 6</span>
+              <span>Education, Law & Languages</span>
+            </div>
+            <strong class="pu-unit-count"><%= stats.unitCounts['UNIT 6'] || 0 %></strong>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Recent Registrations Card -->
+    <div class="pu-card pu-col-8">
+      <div class="pu-card-header pu-flex-between">
+        <h3 class="pu-card-title"><i class="fa-solid fa-clock"></i> Recent Submissions</h3>
+        <a href="/admin/registrations" class="pu-link-btn">View All <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      <div class="pu-card-body pu-card-body-table">
+        <% if (stats.recentRegistrations && stats.recentRegistrations.length > 0) { %>
+          <div class="pu-table-responsive">
+            <table class="pu-table pu-table-hover">
+              <thead>
+                <tr>
+                  <th>Reg ID</th>
+                  <th>Applicant Name</th>
+                  <th>NSS Unit</th>
+                  <th>Course</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% stats.recentRegistrations.forEach(function(reg) { %>
+                  <tr>
+                    <td><strong class="pu-text-mono"><%= reg.registration_id %></strong></td>
+                    <td><%= reg.applicant_name %></td>
+                    <td><span class="pu-badge pu-badge-outline"><%= reg.unit_number %></span></td>
+                    <td><%= reg.course %></td>
+                    <td><%= formatDateReadable(reg.created_at) %></td>
+                    <td>
+                      <a href="/admin/registrations/<%= reg.id %>" class="pu-btn pu-btn-xs pu-btn-outline" title="View Full Profile">
+                        <i class="fa-regular fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="pu-empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No volunteer registrations recorded yet.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>
