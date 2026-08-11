@@ -267,8 +267,6 @@ exports.handleLogout = (req, res) => {
 
     res.clearCookie('nss_session_id', cookieOptions);
     res.clearCookie('nss_session_id', { path: '/' });
-    res.clearCookie('nss_trusted_device', cookieOptions);
-    res.clearCookie('nss_trusted_device', { path: '/' });
     res.clearCookie('connect.sid', cookieOptions);
     res.clearCookie('connect.sid', { path: '/' });
 

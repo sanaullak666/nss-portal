@@ -36,8 +36,6 @@ exports.isAuthenticated = (req, res, next) => {
       const cookieOptions = { path: '/', httpOnly: true, secure: process.env.COOKIE_SECURE === 'true', sameSite: 'lax' };
       res.clearCookie('nss_session_id', cookieOptions);
       res.clearCookie('nss_session_id', { path: '/' });
-      res.clearCookie('nss_trusted_device', cookieOptions);
-      res.clearCookie('nss_trusted_device', { path: '/' });
       res.clearCookie('connect.sid', cookieOptions);
       res.clearCookie('connect.sid', { path: '/' });
       res.redirect('/admin/login?error=Session+expired+due+to+inactivity.+Please+log+in+again.');
