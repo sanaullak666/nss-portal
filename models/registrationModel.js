@@ -278,9 +278,12 @@ class RegistrationModel {
     const totalCount = parseInt(countRows[0]?.totalCount || countRows[0]?.totalcount || 0, 10);
     const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
 
-    const [selectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected'");
-    const [rejectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Rejected'");
-    const [activeRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'");
+    let unitWhereClause = unit ? ' AND unit_number = ?' : '';
+    let unitParams = unit ? [unit] : [];
+
+    const [selectedRows] = await db.query(`SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected'${unitWhereClause}`, unitParams);
+    const [rejectedRows] = await db.query(`SELECT COUNT(*) as count FROM registrations WHERE status = 'Rejected'${unitWhereClause}`, unitParams);
+    const [activeRows] = await db.query(`SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'${unitWhereClause}`, unitParams);
 
     return {
       registrations,
