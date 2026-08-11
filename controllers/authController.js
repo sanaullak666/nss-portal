@@ -253,17 +253,40 @@ exports.handleResendLoginOTP = async (req, res) => {
 
 exports.handleLogout = (req, res) => {
   const username = req.session && req.session.admin ? req.session.admin.username : 'Unknown';
+  const cookieOptions = {
+    path: '/',
+    httpOnly: true,
+    secure: process.env.COOKIE_SECURE === 'true',
+    sameSite: 'lax'
+  };
+
+  const doClearAndRedirect = async () => {
+    try {
+      await logAudit('LOGOUT', username, 'Admin logged out');
+    } catch (aErr) {}
+
+    res.clearCookie('nss_session_id', cookieOptions);
+    res.clearCookie('nss_session_id', { path: '/' });
+    res.clearCookie('nss_trusted_device', cookieOptions);
+    res.clearCookie('nss_trusted_device', { path: '/' });
+    res.clearCookie('connect.sid', cookieOptions);
+    res.clearCookie('connect.sid', { path: '/' });
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.redirect('/admin/login?success=Logged+out+successfully.');
+  };
+
   if (req.session) {
-    req.session.destroy(async () => {
-      try {
-        await logAudit('LOGOUT', username, 'Admin logged out');
-      } catch (aErr) {}
-      res.clearCookie('nss_session_id', { path: '/' });
-      res.clearCookie('connect.sid', { path: '/' });
-      res.redirect('/admin/login?success=Logged+out+successfully.');
+    delete req.session.admin;
+    delete req.session.pendingLogin;
+    req.session.destroy(() => {
+      doClearAndRedirect();
     });
   } else {
-    res.redirect('/admin/login');
+    doClearAndRedirect();
   }
 };
 
