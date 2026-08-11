@@ -228,7 +228,7 @@ class RegistrationModel {
     if (interested_in_media) { whereClauses.push('interested_in_media = ?'); queryParams.push(interested_in_media); }
 
     if (search && search.trim()) {
-      whereClauses.push('(applicant_name LIKE ? OR univ_reg_no LIKE ? OR registration_id LIKE ? OR email LIKE ? OR contact_number LIKE ? OR aadhaar_number LIKE ? OR department LIKE ? OR extra_curricular_skills LIKE ?)');
+      whereClauses.push('(applicant_name ILIKE ? OR univ_reg_no ILIKE ? OR registration_id ILIKE ? OR email ILIKE ? OR contact_number ILIKE ? OR aadhaar_number ILIKE ? OR department ILIKE ? OR extra_curricular_skills ILIKE ?)');
       const term = `%${search.trim()}%`;
       queryParams.push(term, term, term, term, term, term, term, term);
     }
@@ -267,7 +267,7 @@ class RegistrationModel {
     if (course) { whereClauses.push('course = ?'); queryParams.push(course); }
 
     if (search && search.trim()) {
-      whereClauses.push('(applicant_name LIKE ? OR univ_reg_no LIKE ? OR registration_id LIKE ? OR email LIKE ? OR contact_number LIKE ? OR department LIKE ?)');
+      whereClauses.push('(applicant_name ILIKE ? OR univ_reg_no ILIKE ? OR registration_id ILIKE ? OR email ILIKE ? OR contact_number ILIKE ? OR department ILIKE ?)');
       const term = `%${search.trim()}%`;
       queryParams.push(term, term, term, term, term, term);
     }
