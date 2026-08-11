@@ -92,6 +92,42 @@ class AdminModel {
       } catch (e) {}
     }
   }
+
+  static async saveTrustedDevice(adminId, deviceToken, expiresAt) {
+    try {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS trusted_devices (
+          id SERIAL PRIMARY KEY,
+          admin_id INT NOT NULL,
+          device_token VARCHAR(255) NOT NULL,
+          expires_at TIMESTAMP NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    } catch (e) {}
+
+    const query = `
+      INSERT INTO trusted_devices (admin_id, device_token, expires_at)
+      VALUES (?, ?, ?)
+    `;
+    const [result] = await db.query(query, [adminId, deviceToken, expiresAt]);
+    return result ? result.insertId : null;
+  }
+
+  static async isDeviceTrusted(adminId, deviceToken) {
+    if (!deviceToken) return false;
+    try {
+      const [rows] = await db.query(
+        `SELECT * FROM trusted_devices 
+         WHERE admin_id = ? AND device_token = ? AND expires_at > CURRENT_TIMESTAMP 
+         ORDER BY created_at DESC LIMIT 1`,
+        [adminId, deviceToken]
+      );
+      return rows && rows.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 module.exports = AdminModel;

@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const AdminModel = require('../models/adminModel');
 const { logAudit } = require('../utils/auditLogger');
 
@@ -49,6 +50,39 @@ exports.handleLogin = async (req, res) => {
         title: 'Admin Login - PU NSS Portal',
         csrfToken: req.csrfToken ? req.csrfToken() : '',
         error: 'Invalid username or password.'
+      });
+    }
+
+    // Check if this device is trusted for 24 hours
+    const deviceToken = req.cookies ? req.cookies.nss_trusted_device : null;
+    const isTrusted = await AdminModel.isDeviceTrusted(admin.id, deviceToken);
+
+    if (isTrusted) {
+      req.session.admin = {
+        id: admin.id,
+        username: admin.username,
+        fullName: admin.full_name || admin.username,
+        email: admin.email || 'nsspondiuni2409@gmail.com',
+        role: admin.role || 'admin'
+      };
+      req.session.lastActivity = Date.now();
+
+      return req.session.save(async (err) => {
+        if (err) {
+          return res.render('admin/login', {
+            title: 'Admin Login - PU NSS Portal',
+            csrfToken: req.csrfToken ? req.csrfToken() : '',
+            error: 'Session initialization failed. Please try again.'
+          });
+        }
+
+        try {
+          await AdminModel.updateLastLogin(admin.id);
+          await AdminModel.invalidateOtherSessions(req.sessionID, admin.username);
+          await logAudit('LOGIN_TRUSTED_DEVICE', admin.username, 'Admin logged in via 24-hour trusted device (OTP bypassed)');
+        } catch (e) {}
+
+        res.redirect('/admin/dashboard');
       });
     }
 
@@ -149,6 +183,21 @@ exports.handleVerifyLoginOTP = async (req, res) => {
     };
     req.session.lastActivity = Date.now();
     delete req.session.pendingLogin;
+
+    // Issue 24-hour trusted device token cookie for this device
+    const newDeviceToken = crypto.randomBytes(32).toString('hex');
+    const deviceExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours
+    try {
+      await AdminModel.saveTrustedDevice(pending.adminId, newDeviceToken, deviceExpiresAt);
+      res.cookie('nss_trusted_device', newDeviceToken, {
+        maxAge: 24 * 60 * 60 * 1000, // 24 Hours
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.COOKIE_SECURE === 'true'
+      });
+    } catch (dErr) {
+      console.error('Error saving trusted device token:', dErr);
+    }
 
     req.session.save(async (err) => {
       if (err) {
