@@ -52,10 +52,9 @@
           </div>
         <% } %>
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px; text-align: center;">
-          <div style="font-size: 0.88rem; color: #475569;">A 6-digit login security OTP has been sent to:</div>
-          <div style="font-size: 1.05rem; font-weight: 700; color: #002B49; margin-top: 4px; word-break: break-all;"><%= email %></div>
-          <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">(OTP valid for 10 minutes)</div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 24px; text-align: center;">
+          <div style="font-size: 0.88rem; color: #475569; font-weight: 500;">A 6-digit login security OTP has been sent to your registered admin email.</div>
+          <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">(OTP code valid for 10 minutes)</div>
         </div>
 
         <form action="/admin/verify-login-otp" method="POST" class="login-form">
