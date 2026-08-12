@@ -241,14 +241,12 @@ body.dashboard-body::before {
 
 .table-responsive {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 900px;
 }
 
 .data-table th {
@@ -258,19 +256,16 @@ body.dashboard-body::before {
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   text-align: left;
   border-bottom: 3px solid var(--color-nss-red) !important;
-  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 14px 16px;
+  padding: 14px;
   border-bottom: 1px solid var(--color-border);
   font-size: 0.9rem;
   color: var(--color-text-secondary);
-  vertical-align: middle;
-  white-space: nowrap;
 }
 
 .data-table tbody tr {
