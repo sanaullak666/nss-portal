@@ -5,7 +5,7 @@ const registrationController = require('../controllers/registrationController');
 const trackingController = require('../controllers/trackingController');
 const upload = require('../middleware/uploadMiddleware');
 const { validateRegistration } = require('../middleware/validationMiddleware');
-const { registrationLimiter } = require('../middleware/rateLimiter');
+const { registrationLimiter, trackingLimiter, pdfLimiter } = require('../middleware/rateLimiter');
 const constants = require('../config/constants');
 
 const csrfProtection = csurf({ 
@@ -62,7 +62,7 @@ const setNoCache = (req, res, next) => {
 
 // Volunteer Tracking Routes
 router.get('/track-registration', setNoCache, csrfProtection, trackingController.renderTrackPage);
-router.post('/track-registration', setNoCache, csrfProtection, trackingController.searchRegistration);
-router.get('/track-registration/pdf/:registrationId', setNoCache, trackingController.downloadStudentReceipt);
+router.post('/track-registration', setNoCache, trackingLimiter, csrfProtection, trackingController.searchRegistration);
+router.get('/track-registration/pdf/:registrationId', setNoCache, pdfLimiter, trackingController.downloadStudentReceipt);
 
 module.exports = router;

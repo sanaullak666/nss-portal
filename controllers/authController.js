@@ -391,13 +391,14 @@ exports.handleVerifyOTP = async (req, res) => {
     });
   }
 
-  if (new_password.length < 6) {
+  const isStrongPassword = new_password.length >= 8 && /[A-Z]/.test(new_password) && /[a-z]/.test(new_password) && /[0-9]/.test(new_password);
+  if (!isStrongPassword) {
     return res.render('admin/verify-otp', {
       title: 'Verify OTP & Change Password - PU NSS Portal',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
       email: cleanEmail,
       otpCode: otp_code,
-      error: 'New password must be at least 6 characters long.',
+      error: 'New password must be at least 8 characters long and contain uppercase letters, lowercase letters, and numbers.',
       success: null
     });
   }

@@ -95,10 +95,22 @@ app.use(
 // Inject Session Data Globally to View Templates
 app.use(attachSessionLocals);
 
-// Dynamic Certificate Uploads Route (Fetches certificate from MySQL Blob first, then static fallbacks)
+// Dynamic Certificate Uploads Route (Requires Admin Session or Verified Student Tracking Session)
 app.get('/uploads/:filename', async (req, res) => {
+  const filename = path.basename(req.params.filename);
+  if (!filename || filename === '.' || filename === '..') {
+    return res.status(400).send('Invalid filename request.');
+  }
+
+  // Authorization check: Must be an authenticated admin OR a student tracking their verified registration
+  const isAdmin = req.session && req.session.admin;
+  const isVerifiedStudent = req.session && req.session.verifiedCertificates && req.session.verifiedCertificates.includes(filename);
+
+  if (!isAdmin && !isVerifiedStudent) {
+    return res.status(403).send('Access Denied: Authentication or verified tracking session required to view certificate.');
+  }
+
   try {
-    const filename = req.params.filename;
     const [rows] = await db.query(
       'SELECT certificate_data, certificate_mimetype FROM registrations WHERE certificate_path = ? LIMIT 1',
       [filename]
@@ -112,11 +124,11 @@ app.get('/uploads/:filename', async (req, res) => {
     console.error('Database certificate retrieval error:', e.message);
   }
 
-  const localFile = path.join(__dirname, 'uploads', req.params.filename);
+  const localFile = path.join(__dirname, 'uploads', filename);
   if (fs.existsSync(localFile)) {
     return res.sendFile(localFile);
   }
-  const tmpFile = path.join(os.tmpdir(), req.params.filename);
+  const tmpFile = path.join(os.tmpdir(), filename);
   if (fs.existsSync(tmpFile)) {
     return res.sendFile(tmpFile);
   }
@@ -124,10 +136,8 @@ app.get('/uploads/:filename', async (req, res) => {
   res.status(404).send('Certificate file not found');
 });
 
-// Static Asset Directories (Serve uploaded files from both local uploads/ and OS /tmp for Vercel)
+// Static Asset Directories (Public assets only - uploads are protected via dynamic route above)
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads', express.static(os.tmpdir()));
 
 // View Engine Setup
 app.set('view engine', 'ejs');
@@ -251,15 +261,18 @@ async function autoMigrate(connection) {
     );
   `);
 
-  // Seed default admin user
-  const adminHash = await bcrypt.hash('Admin@NSS2026', 10);
-  await connection.query(
-    `INSERT INTO admins (username, password_hash, full_name, email, role) 
-     VALUES (?, ?, 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin') 
-     ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = 'nsspondiuni2409@gmail.com'`,
-    ['admin', adminHash]
-  );
-
+  // Seed default admin user ONLY if admin account does not exist (preserves custom admin password changes)
+  const [existingAdmins] = await connection.query("SELECT id FROM admins WHERE username = 'admin' LIMIT 1");
+  if (!existingAdmins || existingAdmins.length === 0) {
+    const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@NSS2026';
+    const adminHash = await bcrypt.hash(defaultPassword, 10);
+    await connection.query(
+      `INSERT INTO admins (username, password_hash, full_name, email, role) 
+       VALUES (?, ?, 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin') 
+       ON CONFLICT (username) DO NOTHING`,
+      ['admin', adminHash]
+    );
+  }
 }
 
 // Database Auto-Initialization

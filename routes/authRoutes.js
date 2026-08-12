@@ -3,7 +3,7 @@ const router = express.Router();
 const csurf = require('csurf');
 const authController = require('../controllers/authController');
 const { isGuest } = require('../middleware/authMiddleware');
-const { loginLimiter } = require('../middleware/rateLimiter');
+const { loginLimiter, otpLimiter } = require('../middleware/rateLimiter');
 
 const csrfProtection = csurf({ 
   cookie: {
@@ -19,16 +19,16 @@ router.post('/admin/login', isGuest, loginLimiter, csrfProtection, authControlle
 
 // Admin 2FA Email OTP Login Routes
 router.get('/admin/verify-login-otp', isGuest, csrfProtection, authController.renderVerifyLoginOTP);
-router.post('/admin/verify-login-otp', isGuest, csrfProtection, authController.handleVerifyLoginOTP);
-router.post('/admin/resend-login-otp', isGuest, csrfProtection, authController.handleResendLoginOTP);
+router.post('/admin/verify-login-otp', isGuest, otpLimiter, csrfProtection, authController.handleVerifyLoginOTP);
+router.post('/admin/resend-login-otp', isGuest, otpLimiter, csrfProtection, authController.handleResendLoginOTP);
 
 router.get('/admin/logout', authController.handleLogout);
 router.post('/admin/logout', authController.handleLogout);
 
 // Admin Password Reset via Email OTP
 router.get('/admin/forgot-password', isGuest, csrfProtection, authController.renderForgotPassword);
-router.post('/admin/send-otp', isGuest, csrfProtection, authController.handleSendOTP);
+router.post('/admin/send-otp', isGuest, otpLimiter, csrfProtection, authController.handleSendOTP);
 router.get('/admin/verify-otp', isGuest, csrfProtection, authController.renderVerifyOTP);
-router.post('/admin/verify-otp', isGuest, csrfProtection, authController.handleVerifyOTP);
+router.post('/admin/verify-otp', isGuest, otpLimiter, csrfProtection, authController.handleVerifyOTP);
 
 module.exports = router;
