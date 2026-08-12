@@ -188,13 +188,13 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Reg ID</th>
-              <th>Applicant Name</th>
-              <th>Univ Reg No</th>
-              <th>Course</th>
-              <th>Unit</th>
-              <th>Status</th>
-              <th style="text-align: center;">Selection Actions</th>
+              <th style="white-space: nowrap; min-width: 90px;">Reg ID</th>
+              <th style="white-space: nowrap; min-width: 160px;">Applicant Name</th>
+              <th style="white-space: nowrap; min-width: 120px;">Univ Reg No</th>
+              <th style="white-space: nowrap; min-width: 140px;">Course</th>
+              <th style="white-space: nowrap; min-width: 110px; text-align: center;">Unit</th>
+              <th style="white-space: nowrap; min-width: 130px; text-align: center;">Status</th>
+              <th style="white-space: nowrap; min-width: 200px; text-align: center;">Selection Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -203,18 +203,18 @@
             <% } else { %>
               <% registrations.forEach(function(reg) { %>
                 <tr>
-                  <td><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
-                  <td><strong><%= reg.applicant_name %></strong></td>
-                  <td><%= reg.univ_reg_no %></td>
-                  <td><%= reg.course %></td>
-                  <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
-                  <td>
+                  <td style="white-space: nowrap;"><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
+                  <td style="white-space: nowrap;"><strong><%= reg.applicant_name %></strong></td>
+                  <td style="white-space: nowrap;"><%= reg.univ_reg_no %></td>
+                  <td style="white-space: nowrap;"><%= reg.course %></td>
+                  <td style="white-space: nowrap; text-align: center;"><span class="badge badge-submitted" style="display: inline-flex; align-items: center; justify-content: center; min-width: 75px; text-align: center;"><%= reg.unit_number %></span></td>
+                  <td style="white-space: nowrap; text-align: center;">
                     <% if (reg.status === 'Selected') { %>
-                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #16a34a;"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l4.004-5.606z" clip-rule="evenodd" /></svg> Selected</span>
+                      <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 12px;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: #16a34a;"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l4.004-5.606z" clip-rule="evenodd" /></svg> Selected</span>
                     <% } else if (reg.status === 'Rejected') { %>
-                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #dc2626;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" /></svg> Rejected</span>
+                      <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 12px;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: #dc2626;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" /></svg> Rejected</span>
                     <% } else { %>
-                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:3px; color: #0284c7;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .2.079.39.22.53l3.5 3.5a.75.75 0 001.06-1.06l-3.28-3.28V6z" clip-rule="evenodd" /></svg> Active</span>
+                      <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 12px;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: #0284c7;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .2.079.39.22.53l3.5 3.5a.75.75 0 001.06-1.06l-3.28-3.28V6z" clip-rule="evenodd" /></svg> Active</span>
                     <% } %>
                   </td>
                   <td>
