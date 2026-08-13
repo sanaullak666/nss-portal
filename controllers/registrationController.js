@@ -102,6 +102,10 @@ exports.handleRegistration = async (req, res) => {
 
     await RegistrationModel.create(registrationData);
 
+    if (req.session) {
+      req.session.verifiedStudentRegId = registrationId;
+    }
+
     try {
       await logAudit('REGISTRATION', 'STUDENT', `New volunteer registered with ID: ${registrationId}`);
     } catch (aErr) {}
@@ -144,6 +148,10 @@ exports.renderSuccess = async (req, res) => {
 
     if (!registration) {
       return res.status(404).render('404');
+    }
+
+    if (req.session) {
+      req.session.verifiedStudentRegId = registration.registration_id;
     }
 
     res.render('success', {
