@@ -24,8 +24,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 1. Mobile Navigation Toggle
   if (navToggle && mainNav) {
-    navToggle.addEventListener('click', function () {
+    navToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
       mainNav.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function (e) {
+      if (mainNav.classList.contains('open') && !mainNav.contains(e.target) && !navToggle.contains(e.target)) {
+        mainNav.classList.remove('open');
+      }
     });
   }
 

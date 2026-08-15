@@ -237,6 +237,20 @@ body::before {
   transition: transform var(--transition-bounce);
 }
 
+.register-header .logo-wrapper img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.register-header .logo-wrapper .logo-40yrs {
+  border-radius: 4px;
+}
+
+.register-header .logo-wrapper .logo-nss {
+  border-radius: 50%;
+}
+
 .register-header .logo-wrapper:hover {
   transform: scale(1.03);
 }
@@ -627,12 +641,180 @@ textarea.form-control {
   box-shadow: 0 6px 20px rgba(15, 32, 66, 0.25);
 }
 
-/* Responsive */
+/* Responsive Grid Classes for Form */
+.register-dob-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.register-languages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.register-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.declaration-box {
+  background: rgba(255, 248, 248, 0.95);
+  border: 1px solid #fecaca;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  margin-top: 30px;
+  margin-bottom: 25px;
+}
+
+/* Responsive Media Queries */
 @media (max-width: 768px) {
   .register-card {
-    padding: var(--space-6) var(--space-4);
+    padding: 28px 20px;
+    border-radius: var(--radius-lg);
   }
+
   .form-row {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .register-dob-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .register-header h1 {
+    font-size: 1.45rem;
+  }
+
+  .register-header .subtitle {
+    font-size: 0.88rem;
+  }
+
+  .form-control,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 576px) {
+  .register-wrapper {
+    padding: 10px 0;
+  }
+
+  .register-card {
+    padding: 20px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .register-header .logo-wrapper {
+    padding: 4px 8px;
+    gap: 8px;
+  }
+
+  .register-header .logo-wrapper img {
+    height: 38px !important;
+  }
+
+  .register-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .register-header .motto {
+    font-size: 0.72rem;
+    padding: 2px 10px;
+  }
+
+  .register-languages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .register-media-grid {
+    grid-template-columns: 1fr;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .declaration-box {
+    padding: 14px 12px;
+  }
+
+  .btn {
+    font-size: 0.95rem;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-header .logo-wrapper img {
+    height: 32px !important;
+  }
+
+  .register-header h1 {
+    font-size: 1.15rem;
+  }
+
+  .register-languages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .register-card {
+    padding: 14px 10px;
+  }
+
+  .register-header .logo-wrapper {
+    padding: 3px 6px;
+    gap: 5px;
+  }
+
+  .register-header .logo-wrapper img {
+    height: 26px !important;
+  }
+
+  .register-header h1 {
+    font-size: 1.05rem;
+  }
+
+  .register-header .subtitle {
+    font-size: 0.75rem;
+  }
+
+  .register-languages-grid {
+    grid-template-columns: 1fr 1fr;
+    padding: 8px 6px;
+    gap: 6px;
+  }
+
+  .custom-check span {
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    font-size: 0.88rem;
+    padding: 10px 8px;
   }
 }

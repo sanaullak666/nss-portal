@@ -201,6 +201,7 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 .header-logo-group {
@@ -212,6 +213,7 @@ a:hover {
     border-radius: 8px;
     border: 1px solid #dee2e6;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex-shrink: 0;
 }
 
 .header-logo-group img {
@@ -220,11 +222,21 @@ a:hover {
     object-fit: contain;
 }
 
+.header-logo-group .logo-40yrs {
+    border-radius: 4px;
+}
+
+.header-logo-group .logo-nss {
+    border-radius: 50%;
+}
+
 .logo-text {
     color: white;
     font-weight: 700;
     font-size: 1.1rem;
     line-height: 1.25;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .logo-text small {
@@ -232,6 +244,98 @@ a:hover {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.85);
     font-weight: 500;
+}
+
+.motto-email-link {
+    color: white;
+    font-weight: 700;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+.site-footer {
+    background: var(--nss-primary-dark);
+    color: white;
+    padding: 40px 0 25px;
+    margin-top: auto;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-brand-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.footer-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 4px 10px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.footer-logo-group img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
+.footer-logo-group .logo-40yrs {
+    border-radius: 4px;
+}
+
+.footer-logo-group .logo-nss {
+    border-radius: 50%;
+}
+
+.footer-contact-wrap {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.footer-contact-box {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: var(--nss-radius);
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.footer-email-link {
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: underline;
+    margin-left: 6px;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+.brand-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--nss-warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .nss-tagline-header {
@@ -337,6 +441,23 @@ a:hover {
     border: 1px solid #e9ecef;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-bottom: 1rem;
+}
+
+.register-header .logo-wrapper img,
+.track-logo-group img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+
+.register-header .logo-wrapper .logo-40yrs,
+.track-logo-group .logo-40yrs {
+    border-radius: 4px;
+}
+
+.register-header .logo-wrapper .logo-nss,
+.track-logo-group .logo-nss {
+    border-radius: 50%;
 }
 
 .register-header h1 {
@@ -1083,13 +1204,30 @@ a:hover {
 .delay-4 { animation-delay: 0.4s; }
 
 /* ========================================
-   RESPONSIVE
+   RESPONSIVE MEDIA QUERIES
    ======================================== */
+@media (max-width: 992px) {
+    .nss-tagline-header {
+        display: none;
+    }
+    
+    .site-header,
+    .navbar-custom {
+        padding: 0.65rem 1rem;
+    }
+    
+    .logo-text {
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .nss-motto-banner {
         flex-direction: column;
         gap: 4px;
         text-align: center;
+        padding: 6px 12px;
+        font-size: 0.75rem;
     }
 
     .nav-toggle {
@@ -1107,6 +1245,7 @@ a:hover {
         padding: 1rem;
         border-top: 1px solid rgba(255,255,255,0.1);
         box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 1060;
     }
 
     .main-nav.open {
@@ -1136,6 +1275,7 @@ a:hover {
     .filter-bar-custom button,
     .filter-bar-custom a {
         width: 100%;
+        min-width: 0;
     }
 
     input[type="text"],
@@ -1148,18 +1288,115 @@ a:hover {
         font-size: 16px !important; /* iOS Safari Auto-Zoom Guard */
         min-height: 44px;
     }
+
+    .footer-brand {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .footer-brand-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-contact-wrap {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 6px;
+    }
 }
 
 @media (max-width: 576px) {
+    .site-header,
+    .navbar-custom {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .header-logo-group {
+        padding: 3px 6px;
+        gap: 6px;
+    }
+
     .header-logo-group img {
         height: 32px;
     }
+
     .logo-text {
-        font-size: 0.88rem;
+        font-size: 0.85rem;
     }
+
+    .logo-text small {
+        font-size: 0.7rem;
+    }
+
     .container {
         padding-left: 0.75rem;
         padding-right: 0.75rem;
+    }
+
+    .footer-logo-group img {
+        height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-logo-group {
+        padding: 2px 4px;
+        gap: 4px;
+    }
+
+    .header-logo-group img {
+        height: 28px;
+    }
+
+    .logo-area {
+        gap: 8px;
+    }
+
+    .logo-text {
+        font-size: 0.78rem;
+    }
+
+    .logo-text small {
+        display: none;
+    }
+
+    .btn {
+        padding: 0.65rem 1.2rem;
+        font-size: 0.92rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .site-header,
+    .navbar-custom {
+        padding: 0.4rem 0.5rem;
+    }
+
+    .header-logo-group {
+        padding: 2px 3px;
+        gap: 3px;
+    }
+
+    .header-logo-group img {
+        height: 24px;
+    }
+
+    .logo-text {
+        font-size: 0.72rem;
+    }
+
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
     }
 }
 
