@@ -179,20 +179,6 @@ body.track-page-body::before {
   margin-bottom: var(--space-4);
 }
 
-.track-logo-group img {
-  height: 48px;
-  width: auto;
-  object-fit: contain;
-}
-
-.track-logo-group .logo-40yrs {
-  border-radius: 4px;
-}
-
-.track-logo-group .logo-nss {
-  border-radius: 50%;
-}
-
 .track-header h1 {
   font-size: var(--font-size-2xl);
   font-weight: 800;
@@ -215,8 +201,7 @@ body.track-page-body::before {
 
 .search-input {
   flex: 1;
-  min-width: 0;
-  width: 100%;
+  min-width: 240px;
   height: 52px;
   padding: 0 var(--space-4);
   font-size: var(--font-size-base);
@@ -311,15 +296,11 @@ body.track-page-body::before {
   font-weight: 800;
   color: var(--color-navy);
   margin: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .reg-id-badge {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  overflow-wrap: anywhere;
-  word-break: break-all;
 }
 
 .reg-id-badge strong {
@@ -347,26 +328,12 @@ body.track-page-body::before {
   margin-bottom: var(--space-6);
 }
 
-.detail-item {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
+.details-item {
+  color: var(--color-text-secondary);
 }
 
-.detail-label {
-  color: var(--color-text-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.detail-value {
+.details-item strong {
   color: var(--color-navy);
-  font-weight: 700;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 /* WhatsApp Instructions Box */
@@ -391,19 +358,17 @@ body.track-page-body::before {
 }
 
 .whatsapp-link-btn {
-  flex: 1 1 220px;
-  height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #25D366 0%, #059669 100%);
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: white;
   padding: 12px 24px;
   border-radius: var(--radius-md);
   font-weight: 700;
   letter-spacing: 0.3px;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -418,7 +383,7 @@ body.track-page-body::before {
 }
 
 .pdf-download-btn {
-  flex: 1 1 220px;
+  flex: 1;
   height: 48px;
   display: inline-flex;
   align-items: center;
@@ -443,90 +408,15 @@ body.track-page-body::before {
   box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
-/* Responsive Media Queries */
-@media (max-width: 768px) {
-  .track-card {
-    padding: 28px 20px;
-  }
-
-  .track-header h1 {
-    font-size: 1.45rem;
-  }
-
-  .details-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .search-input {
-    font-size: 16px !important;
-  }
-}
-
+/* Responsive */
 @media (max-width: 600px) {
+  .track-card {
+    padding: var(--space-6) var(--space-4);
+  }
   .search-box-group {
     flex-direction: column;
   }
-
   .search-btn {
     width: 100%;
-  }
-
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .whatsapp-link-btn,
-  .pdf-download-btn {
-    width: 100%;
-    flex: 1 1 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .track-card {
-    padding: 20px 14px;
-    border-radius: var(--radius-md);
-  }
-
-  .track-header .track-logo-group img {
-    height: 32px !important;
-  }
-
-  .track-header h1 {
-    font-size: 1.25rem;
-  }
-
-  .result-card {
-    padding: 14px 10px;
-  }
-
-  .applicant-title {
-    font-size: 1.15rem;
-  }
-}
-
-@media (max-width: 380px) {
-  .track-card {
-    padding: 14px 10px;
-  }
-
-  .track-header .track-logo-group {
-    padding: 3px 6px;
-    gap: 5px;
-  }
-
-  .track-header .track-logo-group img {
-    height: 26px !important;
-  }
-
-  .track-header h1 {
-    font-size: 1.05rem;
-  }
-
-  .search-input,
-  .search-btn {
-    height: 46px;
-    font-size: 0.88rem;
   }
 }
