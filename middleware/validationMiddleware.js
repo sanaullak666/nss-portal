@@ -94,7 +94,7 @@ exports.validateRegistration = async (req, res, next) => {
     }
   }
 
-  // 12. Course Validation (Must match 22 options)
+  // 12. Course Validation
   if (!body.course || !constants.COURSES.includes(body.course)) {
     errors.push({ param: 'course', msg: 'Please select a valid Course / Programme.' });
   }

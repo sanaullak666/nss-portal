@@ -77,6 +77,7 @@ const COURSES = [
   'B.A.B.Ed',
   'B.Sc. (Hons)',
   'B.Com (Hons.)',
+  'BBA (Hons.)',
   'B.V.A',
   'B.Tech',
   'B.Tech MBA (CSBS)',
