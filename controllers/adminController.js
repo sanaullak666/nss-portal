@@ -13,6 +13,8 @@ exports.renderDashboard = async (req, res) => {
   try {
     const data = await RegistrationModel.getDashboardStats();
     const isAccepting = await SettingsModel.isAcceptingRegistrations();
+    const successMsg = req.query.msg || null;
+    const errorMsg = req.query.error || null;
 
     res.render('admin/dashboard', {
       title: 'Admin Analytics & Dashboard - PU NSS Portal',
@@ -22,7 +24,9 @@ exports.renderDashboard = async (req, res) => {
       chartData: data.chartData || {},
       recentRegistrations: data.recentRegistrations || [],
       selectionStats: data.selectionStats || {},
-      acceptingRegistrations: isAccepting
+      acceptingRegistrations: isAccepting,
+      successMsg,
+      errorMsg
     });
   } catch (err) {
     console.error('Dashboard Render Error:', err);
@@ -451,43 +455,33 @@ exports.exportSelectedToExcel = async (req, res) => {
   }
 };
 
-exports.togglePortalStatus = async (req, res) => {
+exports.updatePortalStatusForm = async (req, res) => {
   try {
     const { status } = req.body;
-    let newStatus;
-    if (typeof status !== 'undefined') {
-      newStatus = status === true || status === 'true' || status === '1' || status === 1;
-    } else {
-      const current = await SettingsModel.isAcceptingRegistrations();
-      newStatus = !current;
-    }
+    const isAccepting = (status === 'open' || status === 'true' || status === '1');
 
-    await SettingsModel.setAcceptingRegistrations(newStatus);
+    await SettingsModel.setAcceptingRegistrations(isAccepting);
 
     const adminUser = (req.session && req.session.admin && req.session.admin.username) ? req.session.admin.username : 'admin';
     try {
       await logAudit(
         'PORTAL_STATUS_CHANGE',
         adminUser,
-        `Registration portal status changed to: ${newStatus ? 'OPEN (Accepting Responses)' : 'CLOSED (Responses Paused)'}`
+        `Registration portal status changed to: ${isAccepting ? 'OPEN (Accepting Responses)' : 'CLOSED (Responses Paused)'}`
       );
     } catch (e) {}
 
-    return res.json({
-      success: true,
-      acceptingRegistrations: newStatus,
-      message: newStatus
-        ? 'Portal is now accepting new volunteer registrations.'
-        : 'Portal registration is now closed. No new responses will be accepted.'
-    });
+    const message = isAccepting 
+      ? 'Registration portal status updated: OPEN (Accepting Responses)'
+      : 'Registration portal status updated: CLOSED (Responses Stopped)';
+
+    res.redirect('/admin/dashboard?msg=' + encodeURIComponent(message));
   } catch (err) {
-    console.error('Toggle Portal Status Error:', err.message);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to update portal registration status.'
-    });
+    console.error('Update Portal Status Form Error:', err.message);
+    res.redirect('/admin/dashboard?error=' + encodeURIComponent('Failed to update portal status.'));
   }
 };
+
 
 
 

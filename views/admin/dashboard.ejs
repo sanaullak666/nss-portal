@@ -123,6 +123,20 @@
 
   <main class="container" style="flex: 1; padding-top: 30px; padding-bottom: 60px;">
     
+    <% if (typeof successMsg !== 'undefined' && successMsg) { %>
+      <div style="margin-bottom: 20px; display: flex; align-items: center; border-left: 5px solid #16A34A; background: #ecfdf5; color: #065f46; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; box-shadow: var(--shadow-sm); gap: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span><%= successMsg %></span>
+      </div>
+    <% } %>
+
+    <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+      <div style="margin-bottom: 20px; display: flex; align-items: center; border-left: 5px solid #b71c1c; background: #fef2f2; color: #991b1b; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; box-shadow: var(--shadow-sm); gap: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+        <span><%= errorMsg %></span>
+      </div>
+    <% } %>
+
     <!-- Header Banner -->
     <div class="dashboard-title-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
       <div>
@@ -131,26 +145,32 @@
       </div>
 
       <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <!-- Portal Responses 2-Option Selector (ON / OFF) -->
-        <div class="portal-status-control" id="portalStatusBox" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm);">
+        <!-- Option 2: Portal Registration Controls Form (Dropdown + Save Button) -->
+        <form action="/admin/portal-status" method="POST" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm); flex-wrap: wrap; margin: 0;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          
           <div style="display: flex; flex-direction: column; user-select: none;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; color: var(--color-text-muted);">Responses</span>
-            <span id="portalStatusLabel" style="font-size: 0.82rem; font-weight: 800; color: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>; display: flex; align-items: center; gap: 5px;">
-              <span id="portalStatusDot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>;"></span>
-              <span id="portalStatusText"><%= acceptingRegistrations ? 'Accepting Responses' : 'Responses Stopped' %></span>
+            <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; color: var(--color-text-muted);">Responses Status</span>
+            <span id="portalCurrentStatusLabel" style="font-size: 0.82rem; font-weight: 800; color: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>; display: flex; align-items: center; gap: 5px;">
+              <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>;"></span>
+              <span><%= acceptingRegistrations ? 'Active' : 'Closed' %></span>
             </span>
           </div>
 
-          <!-- Two Option Buttons: ON / OFF -->
-          <div style="display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 8px; gap: 4px;">
-            <button type="button" id="btnStatusOn" onclick="setPortalStatus(true)" style="padding: 5px 14px; font-size: 0.82rem; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; background: <%= acceptingRegistrations ? '#16A34A' : 'transparent' %>; color: <%= acceptingRegistrations ? '#ffffff' : '#475569' %>; box-shadow: <%= acceptingRegistrations ? '0 2px 4px rgba(22, 163, 74, 0.25)' : 'none' %>;">
-              ON
-            </button>
-            <button type="button" id="btnStatusOff" onclick="setPortalStatus(false)" style="padding: 5px 14px; font-size: 0.82rem; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; background: <%= !acceptingRegistrations ? '#b71c1c' : 'transparent' %>; color: <%= !acceptingRegistrations ? '#ffffff' : '#475569' %>; box-shadow: <%= !acceptingRegistrations ? '0 2px 4px rgba(183, 28, 28, 0.25)' : 'none' %>;">
-              OFF
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <select name="status" style="padding: 6px 10px; font-size: 0.82rem; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: #ffffff; color: var(--color-navy); cursor: pointer; outline: none; font-family: inherit;">
+              <option value="open" <%= acceptingRegistrations ? 'selected' : '' %>>Open (Accepting Responses)</option>
+              <option value="closed" <%= !acceptingRegistrations ? 'selected' : '' %>>Closed (Stop Responses)</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              Save Status
             </button>
           </div>
-        </div>
+        </form>
 
         <a href="/admin/registrations" class="btn btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Manage Registrations</a>
         <a href="/admin/registrations/export/excel" class="btn btn-primary"><svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Complete Excel (.xlsx)</a>
@@ -297,8 +317,6 @@
   <%- include('../partials/footer') %>
 
   <script>
-    let currentPortalStatus = <%= acceptingRegistrations ? 'true' : 'false' %>;
-
     window.showToastNotification = function(message) {
       let toast = document.getElementById('liveToastBox');
       if (!toast) {
@@ -311,89 +329,6 @@
       toast.style.opacity = '1';
       setTimeout(function() { toast.style.opacity = '0'; }, 5000);
     };
-
-    window.updatePortalUI = function(active) {
-      currentPortalStatus = !!active;
-      const box = document.getElementById('portalStatusBox');
-      const btnOn = document.getElementById('btnStatusOn');
-      const btnOff = document.getElementById('btnStatusOff');
-      const label = document.getElementById('portalStatusLabel');
-      const dot = document.getElementById('portalStatusDot');
-      const text = document.getElementById('portalStatusText');
-
-      if (box) box.setAttribute('data-status', active ? 'true' : 'false');
-
-      if (btnOn) {
-        if (active) {
-          btnOn.style.background = '#16A34A';
-          btnOn.style.color = '#ffffff';
-          btnOn.style.boxShadow = '0 2px 4px rgba(22, 163, 74, 0.3)';
-        } else {
-          btnOn.style.background = 'transparent';
-          btnOn.style.color = '#475569';
-          btnOn.style.boxShadow = 'none';
-        }
-      }
-
-      if (btnOff) {
-        if (!active) {
-          btnOff.style.background = '#b71c1c';
-          btnOff.style.color = '#ffffff';
-          btnOff.style.boxShadow = '0 2px 4px rgba(183, 28, 28, 0.3)';
-        } else {
-          btnOff.style.background = 'transparent';
-          btnOff.style.color = '#475569';
-          btnOff.style.boxShadow = 'none';
-        }
-      }
-
-      if (label) label.style.color = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
-      if (dot) dot.style.background = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
-      if (text) text.textContent = active ? 'Accepting Responses' : 'Responses Stopped';
-    };
-
-    window.setPortalStatus = async function(targetStatus) {
-      const box = document.getElementById('portalStatusBox');
-      if (box && box.dataset.loading === 'true') return;
-      if (box) box.dataset.loading = 'true';
-
-      const previousStatus = currentPortalStatus;
-      const newStatus = !!targetStatus;
-
-      // Immediate optimistic UI update
-      window.updatePortalUI(newStatus);
-
-      try {
-        const response = await fetch('/admin/api/toggle-portal-status', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ status: newStatus })
-        });
-
-        const data = await response.json();
-
-        if (data && data.success) {
-          window.updatePortalUI(data.acceptingRegistrations);
-          window.showToastNotification(data.message || (data.acceptingRegistrations ? 'Portal is now accepting responses.' : 'Portal responses have been stopped.'));
-        } else {
-          window.updatePortalUI(previousStatus);
-          window.showToastNotification((data && data.error) ? data.error : 'Failed to update portal status.');
-        }
-      } catch (err) {
-        console.error('Set status error:', err);
-        window.updatePortalUI(previousStatus);
-        window.showToastNotification('An error occurred while updating portal status.');
-      } finally {
-        if (box) box.dataset.loading = 'false';
-      }
-    };
-    window.triggerPortalToggle = function() {
-      window.setPortalStatus(!currentPortalStatus);
-    };
-    window.handlePortalStatusToggle = window.triggerPortalToggle;
 
     document.addEventListener('DOMContentLoaded', function() {
       // Unit Distribution Chart
@@ -478,14 +413,6 @@
               numbers[3].textContent = data.stats.totalLeadershipInterested || 0;
               numbers[4].textContent = data.stats.totalMediaInterested;
               numbers[5].textContent = data.stats.totalPreviousVolunteers;
-            }
-
-            // Sync portal response status toggle if updated externally
-            if (typeof data.acceptingRegistrations === 'boolean') {
-              const box = document.getElementById('portalStatusBox');
-              if (box && box.dataset.loading !== 'true') {
-                window.updatePortalUI(data.acceptingRegistrations);
-              }
             }
 
             // If a new registration has arrived

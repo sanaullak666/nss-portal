@@ -27,8 +27,8 @@ router.use('/admin', setNoCache, isAuthenticated);
 
 // Admin Dashboard & Registrations Management Routes
 router.get('/admin/dashboard', csrfProtection, adminController.renderDashboard);
+router.post('/admin/portal-status', csrfProtection, adminController.updatePortalStatusForm);
 router.get('/admin/api/live-stats', adminController.getLiveDashboardStats);
-router.post('/admin/api/toggle-portal-status', adminController.togglePortalStatus);
 router.get('/admin/registrations', csrfProtection, adminController.renderRegistrationsList);
 router.get('/admin/registrations/export/excel', adminController.exportExcel);
 router.get('/admin/registrations/:id', csrfProtection, adminController.renderRegistrationView);
