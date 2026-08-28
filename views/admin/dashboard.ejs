@@ -131,24 +131,26 @@
       </div>
 
       <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <!-- Portal Responses Toggle Switch -->
-        <button type="button" class="portal-status-control" id="portalToggleBtn" onclick="triggerPortalToggle(event)" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 8px 14px; display: inline-flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); cursor: pointer; text-align: left; font-family: inherit; transition: box-shadow 0.2s, transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='none'" title="Click to toggle registration portal status">
+        <!-- Portal Responses 2-Option Selector (ON / OFF) -->
+        <div class="portal-status-control" id="portalStatusBox" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; flex-direction: column; user-select: none;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; color: var(--color-text-muted);">Portal Responses</span>
-            <span id="portalStatusBadge" style="font-size: 0.84rem; font-weight: 800; color: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>; display: flex; align-items: center; gap: 6px;">
-              <span class="status-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>;"></span>
-              <span id="portalStatusLabel"><%= acceptingRegistrations ? 'Accepting Responses' : 'Responses Stopped' %></span>
+            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; color: var(--color-text-muted);">Responses</span>
+            <span id="portalStatusLabel" style="font-size: 0.82rem; font-weight: 800; color: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>; display: flex; align-items: center; gap: 5px;">
+              <span id="portalStatusDot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: <%= acceptingRegistrations ? 'var(--color-emerald)' : 'var(--color-nss-red)' %>;"></span>
+              <span id="portalStatusText"><%= acceptingRegistrations ? 'Accepting Responses' : 'Responses Stopped' %></span>
             </span>
           </div>
 
-          <!-- Switch Slider Visual -->
-          <div class="switch-toggle" style="position: relative; display: inline-block; width: 44px; height: 24px; margin: 0; pointer-events: none;">
-            <input type="checkbox" id="portalStatusToggle" <%= acceptingRegistrations ? 'checked' : '' %> style="display: none;">
-            <span class="switch-slider" id="portalSwitchSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: <%= acceptingRegistrations ? '#16A34A' : '#94A3B8' %>; transition: 0.3s; border-radius: 24px;">
-              <span class="switch-knob" id="portalSwitchKnob" style="position: absolute; height: 18px; width: 18px; left: <%= acceptingRegistrations ? '23px' : '3px' %>; bottom: 3px; background-color: #ffffff; transition: 0.3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></span>
-            </span>
+          <!-- Two Option Buttons: ON / OFF -->
+          <div style="display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 8px; gap: 4px;">
+            <button type="button" id="btnStatusOn" onclick="setPortalStatus(true)" style="padding: 5px 14px; font-size: 0.82rem; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; background: <%= acceptingRegistrations ? '#16A34A' : 'transparent' %>; color: <%= acceptingRegistrations ? '#ffffff' : '#475569' %>; box-shadow: <%= acceptingRegistrations ? '0 2px 4px rgba(22, 163, 74, 0.25)' : 'none' %>;">
+              ON
+            </button>
+            <button type="button" id="btnStatusOff" onclick="setPortalStatus(false)" style="padding: 5px 14px; font-size: 0.82rem; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; background: <%= !acceptingRegistrations ? '#b71c1c' : 'transparent' %>; color: <%= !acceptingRegistrations ? '#ffffff' : '#475569' %>; box-shadow: <%= !acceptingRegistrations ? '0 2px 4px rgba(183, 28, 28, 0.25)' : 'none' %>;">
+              OFF
+            </button>
           </div>
-        </button>
+        </div>
 
         <a href="/admin/registrations" class="btn btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Manage Registrations</a>
         <a href="/admin/registrations/export/excel" class="btn btn-primary"><svg style="display:inline-block; vertical-align:-2px; margin-right:6px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Complete Excel (.xlsx)</a>
@@ -309,36 +311,36 @@
     };
 
     window.updatePortalUI = function(active) {
-      const toggle = document.getElementById('portalStatusToggle');
-      const badge = document.getElementById('portalStatusBadge');
+      const btnOn = document.getElementById('btnStatusOn');
+      const btnOff = document.getElementById('btnStatusOff');
       const label = document.getElementById('portalStatusLabel');
-      const dot = badge ? badge.querySelector('.status-dot') : null;
-      const slider = document.getElementById('portalSwitchSlider');
-      const knob = document.getElementById('portalSwitchKnob');
+      const dot = document.getElementById('portalStatusDot');
+      const text = document.getElementById('portalStatusText');
 
-      if (toggle) toggle.checked = active;
-      if (slider) slider.style.backgroundColor = active ? '#16A34A' : '#94A3B8';
-      if (knob) knob.style.left = active ? '23px' : '3px';
-      if (badge) badge.style.color = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
-      if (dot) dot.style.backgroundColor = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
-      if (label) label.textContent = active ? 'Accepting Responses' : 'Responses Stopped';
-    };
-
-    window.triggerPortalToggle = async function(event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
+      if (btnOn) {
+        btnOn.style.backgroundColor = active ? '#16A34A' : 'transparent';
+        btnOn.style.color = active ? '#ffffff' : '#475569';
+        btnOn.style.boxShadow = active ? '0 2px 4px rgba(22, 163, 74, 0.25)' : 'none';
       }
 
-      const toggle = document.getElementById('portalStatusToggle');
-      const btn = document.getElementById('portalToggleBtn');
+      if (btnOff) {
+        btnOff.style.backgroundColor = !active ? '#b71c1c' : 'transparent';
+        btnOff.style.color = !active ? '#ffffff' : '#475569';
+        btnOff.style.boxShadow = !active ? '0 2px 4px rgba(183, 28, 28, 0.25)' : 'none';
+      }
 
-      if (!toggle) return;
-      if (btn && btn.dataset.loading === 'true') return;
-      if (btn) btn.dataset.loading = 'true';
+      if (label) label.style.color = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
+      if (dot) dot.style.backgroundColor = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
+      if (text) text.textContent = active ? 'Accepting Responses' : 'Responses Stopped';
+    };
 
-      const currentStatus = toggle.checked;
-      const targetStatus = !currentStatus;
+    window.setPortalStatus = async function(targetStatus) {
+      const box = document.getElementById('portalStatusBox');
+      if (box && box.dataset.loading === 'true') return;
+      if (box) box.dataset.loading = 'true';
+
+      const btnOn = document.getElementById('btnStatusOn');
+      const prevStatus = btnOn && btnOn.style.backgroundColor === 'rgb(22, 163, 74)';
 
       // Immediate UI update
       window.updatePortalUI(targetStatus);
@@ -359,16 +361,21 @@
           window.updatePortalUI(data.acceptingRegistrations);
           window.showToastNotification(data.message || (data.acceptingRegistrations ? 'Portal is now accepting responses.' : 'Portal responses have been stopped.'));
         } else {
-          window.updatePortalUI(currentStatus);
+          window.updatePortalUI(prevStatus);
           window.showToastNotification(data.error || 'Failed to update portal status.');
         }
       } catch (err) {
-        console.error('Toggle status error:', err);
-        window.updatePortalUI(currentStatus);
+        console.error('Set status error:', err);
+        window.updatePortalUI(prevStatus);
         window.showToastNotification('An error occurred while updating portal status.');
       } finally {
-        if (btn) btn.dataset.loading = 'false';
+        if (box) box.dataset.loading = 'false';
       }
+    };
+    window.triggerPortalToggle = function() {
+      const btnOn = document.getElementById('btnStatusOn');
+      const current = btnOn && btnOn.style.backgroundColor === 'rgb(22, 163, 74)';
+      window.setPortalStatus(!current);
     };
     window.handlePortalStatusToggle = window.triggerPortalToggle;
 
@@ -459,8 +466,8 @@
 
             // Sync portal response status toggle if updated externally
             if (typeof data.acceptingRegistrations === 'boolean') {
-              const btn = document.getElementById('portalToggleBtn');
-              if (btn && btn.dataset.loading !== 'true') {
+              const box = document.getElementById('portalStatusBox');
+              if (box && box.dataset.loading !== 'true') {
                 window.updatePortalUI(data.acceptingRegistrations);
               }
             }
