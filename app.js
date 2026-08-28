@@ -273,6 +273,23 @@ async function autoMigrate(connection) {
       ['admin', adminHash]
     );
   }
+
+  // 5. Ensure portal_settings table
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS portal_settings (
+      id SERIAL,
+      key VARCHAR(50) UNIQUE NOT NULL,
+      value TEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  try {
+    await connection.query(`ALTER TABLE portal_settings ADD COLUMN IF NOT EXISTS id SERIAL;`);
+  } catch (e) {}
+  const [existingSettings] = await connection.query("SELECT value FROM portal_settings WHERE key = 'accepting_registrations' LIMIT 1");
+  if (!existingSettings || existingSettings.length === 0) {
+    await connection.query("INSERT INTO portal_settings (key, value) VALUES ('accepting_registrations', 'true')");
+  }
 }
 
 // Database Auto-Initialization
