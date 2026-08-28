@@ -1,5 +1,6 @@
 const RegistrationModel = require('../models/registrationModel');
 const AdminModel = require('../models/adminModel');
+const SettingsModel = require('../models/settingsModel');
 const bcrypt = require('bcryptjs');
 const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
 
@@ -8,22 +9,20 @@ const { generateRegistrationPDF } = require('../utils/pdfGenerator');
 const { logAudit } = require('../utils/auditLogger');
 const { sendSelectionApprovalEmail } = require('../utils/emailService');
 
-
-
-
-
-
 exports.renderDashboard = async (req, res) => {
   try {
     const data = await RegistrationModel.getDashboardStats();
+    const isAccepting = await SettingsModel.isAcceptingRegistrations();
 
     res.render('admin/dashboard', {
       title: 'Admin Analytics & Dashboard - PU NSS Portal',
       admin: req.session.admin,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
       stats: data.stats || {},
       chartData: data.chartData || {},
       recentRegistrations: data.recentRegistrations || [],
-      selectionStats: data.selectionStats || {}
+      selectionStats: data.selectionStats || {},
+      acceptingRegistrations: isAccepting
     });
   } catch (err) {
     console.error('Dashboard Render Error:', err);
@@ -34,12 +33,14 @@ exports.renderDashboard = async (req, res) => {
 exports.getLiveDashboardStats = async (req, res) => {
   try {
     const data = await RegistrationModel.getDashboardStats();
+    const isAccepting = await SettingsModel.isAcceptingRegistrations();
     res.json({
       success: true,
       stats: data.stats || {},
       chartData: data.chartData || {},
       recentRegistrations: data.recentRegistrations || [],
-      selectionStats: data.selectionStats || {}
+      selectionStats: data.selectionStats || {},
+      acceptingRegistrations: isAccepting
     });
   } catch (err) {
     console.error('Live Stats API Error:', err.message);
@@ -449,5 +450,44 @@ exports.exportSelectedToExcel = async (req, res) => {
     res.status(500).send('Failed to export selected registrations to Excel');
   }
 };
+
+exports.togglePortalStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    let newStatus;
+    if (typeof status !== 'undefined') {
+      newStatus = status === true || status === 'true' || status === '1' || status === 1;
+    } else {
+      const current = await SettingsModel.isAcceptingRegistrations();
+      newStatus = !current;
+    }
+
+    await SettingsModel.setAcceptingRegistrations(newStatus);
+
+    const adminUser = (req.session && req.session.admin && req.session.admin.username) ? req.session.admin.username : 'admin';
+    try {
+      await logAudit(
+        'PORTAL_STATUS_CHANGE',
+        adminUser,
+        `Registration portal status changed to: ${newStatus ? 'OPEN (Accepting Responses)' : 'CLOSED (Responses Paused)'}`
+      );
+    } catch (e) {}
+
+    return res.json({
+      success: true,
+      acceptingRegistrations: newStatus,
+      message: newStatus
+        ? 'Portal is now accepting new volunteer registrations.'
+        : 'Portal registration is now closed. No new responses will be accepted.'
+    });
+  } catch (err) {
+    console.error('Toggle Portal Status Error:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update portal registration status.'
+    });
+  }
+};
+
 
 

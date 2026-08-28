@@ -1,9 +1,11 @@
 const RegistrationModel = require('../models/registrationModel');
+const SettingsModel = require('../models/settingsModel');
 const constants = require('../config/constants');
 const { generateRegistrationId } = require('../utils/helpers');
 const { logAudit } = require('../utils/auditLogger');
 
-exports.renderForm = (req, res) => {
+exports.renderForm = async (req, res) => {
+  const acceptingRegistrations = await SettingsModel.isAcceptingRegistrations();
   res.render('index', {
     title: 'Pondicherry University - NSS Volunteer Registration 2026',
     constants,
@@ -11,11 +13,26 @@ exports.renderForm = (req, res) => {
     errors: [],
     error: null,
     success: null,
-    formData: {}
+    formData: {},
+    acceptingRegistrations
   });
 };
 
 exports.handleRegistration = async (req, res) => {
+  const acceptingRegistrations = await SettingsModel.isAcceptingRegistrations();
+  if (!acceptingRegistrations) {
+    return res.render('index', {
+      title: 'Pondicherry University - NSS Volunteer Registration 2026',
+      constants,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      errors: [{ param: 'form', msg: 'Volunteer registration is currently closed. New responses are not being accepted.' }],
+      error: 'Volunteer registration is currently closed. New responses are not being accepted.',
+      success: null,
+      formData: req.body || {},
+      acceptingRegistrations: false
+    });
+  }
+
   const formData = req.body || {};
   const certificateFile = req.file;
 

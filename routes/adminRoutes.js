@@ -26,8 +26,9 @@ const setNoCache = (req, res, next) => {
 router.use('/admin', setNoCache, isAuthenticated);
 
 // Admin Dashboard & Registrations Management Routes
-router.get('/admin/dashboard', adminController.renderDashboard);
+router.get('/admin/dashboard', csrfProtection, adminController.renderDashboard);
 router.get('/admin/api/live-stats', adminController.getLiveDashboardStats);
+router.post('/admin/api/toggle-portal-status', csrfProtection, adminController.togglePortalStatus);
 router.get('/admin/registrations', csrfProtection, adminController.renderRegistrationsList);
 router.get('/admin/registrations/export/excel', adminController.exportExcel);
 router.get('/admin/registrations/:id', csrfProtection, adminController.renderRegistrationView);

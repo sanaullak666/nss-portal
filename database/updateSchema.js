@@ -38,8 +38,18 @@ async function updateSchema() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS portal_settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      INSERT INTO portal_settings (key, value)
+      VALUES ('accepting_registrations', 'true')
+      ON CONFLICT (key) DO NOTHING;
     `);
-    console.log('✅ PostgreSQL Schema updated successfully!');
+    console.log('PostgreSQL Schema updated successfully (all tables preserved).');
     process.exit(0);
   } catch (err) {
     console.error('❌ Schema update error:', err.message);

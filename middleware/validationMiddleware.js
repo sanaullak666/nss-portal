@@ -1,7 +1,22 @@
 const RegistrationModel = require('../models/registrationModel');
+const SettingsModel = require('../models/settingsModel');
 const constants = require('../config/constants');
 
 exports.validateRegistration = async (req, res, next) => {
+  const isAccepting = await SettingsModel.isAcceptingRegistrations();
+  if (!isAccepting) {
+    return res.render('index', {
+      title: 'Pondicherry University - NSS Volunteer Registration 2026',
+      constants,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
+      errors: [{ param: 'form', msg: 'Volunteer registration is currently closed. New responses are not being accepted.' }],
+      error: 'Volunteer registration is currently closed. New responses are not being accepted.',
+      success: null,
+      formData: req.body || {},
+      acceptingRegistrations: false
+    });
+  }
+
   const body = req.body || {};
   const file = req.file;
   const errors = [];
@@ -175,7 +190,8 @@ exports.validateRegistration = async (req, res, next) => {
       errors,
       error: null,
       success: null,
-      formData: body
+      formData: body,
+      acceptingRegistrations: true
     });
   }
 

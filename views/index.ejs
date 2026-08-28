@@ -71,6 +71,28 @@
           </div>
         <% } %>
 
+        <% if (typeof acceptingRegistrations !== 'undefined' && !acceptingRegistrations) { %>
+          <div class="closed-notice-card" style="background: rgba(255, 255, 255, 0.98); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 40px 24px; text-align: center; margin-top: 10px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+            <div style="width: 58px; height: 58px; margin: 0 auto 16px; border-radius: 50%; background: #fee2e2; color: var(--color-nss-red); display: flex; align-items: center; justify-content: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--color-navy); margin-bottom: 8px;">Volunteer Registrations Are Currently Closed</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.6; max-width: 520px; margin: 0 auto 24px;">
+              The NSS Volunteer Registration Portal is currently not accepting new applications. For any queries, please contact your respective NSS Programme Officer.
+            </p>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+              <a href="/track-registration" class="btn btn-secondary" style="padding: 10px 24px; font-weight: 700; font-size: 0.92rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:6px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                Track Existing Application
+              </a>
+              <span style="font-size: 0.82rem; color: var(--color-text-muted);">Already registered? You can search and view your registration slip.</span>
+            </div>
+          </div>
+        <% } else { %>
         <form id="registrationForm" action="/register" method="POST" enctype="multipart/form-data" novalidate>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
@@ -347,6 +369,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-3px; margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.24a6 6 0 00-2.12 4.13H2.25l.89-1.78a6 6 0 004.13-2.12m0 0a6 6 0 002.12-4.13V2.25l-1.78.89a6 6 0 00-2.12 4.13" /></svg> Submit NSS Volunteer Application
           </button>
         </form>
+        <% } %>
 
       </div>
     </div>

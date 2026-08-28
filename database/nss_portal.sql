@@ -104,3 +104,17 @@ CREATE TABLE `audit_logs` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------------------------
+-- Table 4: portal_settings
+-- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `portal_settings`;
+CREATE TABLE `portal_settings` (
+  `key` VARCHAR(50) NOT NULL,
+  `value` TEXT NOT NULL,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `portal_settings` (`key`, `value`) VALUES ('accepting_registrations', 'true')
+ON DUPLICATE KEY UPDATE `value`=`value`;
