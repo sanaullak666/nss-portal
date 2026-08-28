@@ -21,6 +21,9 @@ exports.attachSessionLocals = (req, res, next) => {
  */
 exports.isAuthenticated = (req, res, next) => {
   if (!req.session || !req.session.admin) {
+    if (req.xhr || (req.path && req.path.includes('/api/')) || (req.headers && req.headers.accept && req.headers.accept.includes('json'))) {
+      return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
+    }
     return res.redirect('/admin/login?error=Logged+out+because+another+device+logged+in+or+session+ended.');
   }
 

@@ -297,6 +297,8 @@
   <%- include('../partials/footer') %>
 
   <script>
+    let currentPortalStatus = <%= acceptingRegistrations ? 'true' : 'false' %>;
+
     window.showToastNotification = function(message) {
       let toast = document.getElementById('liveToastBox');
       if (!toast) {
@@ -311,26 +313,42 @@
     };
 
     window.updatePortalUI = function(active) {
+      currentPortalStatus = !!active;
+      const box = document.getElementById('portalStatusBox');
       const btnOn = document.getElementById('btnStatusOn');
       const btnOff = document.getElementById('btnStatusOff');
       const label = document.getElementById('portalStatusLabel');
       const dot = document.getElementById('portalStatusDot');
       const text = document.getElementById('portalStatusText');
 
+      if (box) box.setAttribute('data-status', active ? 'true' : 'false');
+
       if (btnOn) {
-        btnOn.style.backgroundColor = active ? '#16A34A' : 'transparent';
-        btnOn.style.color = active ? '#ffffff' : '#475569';
-        btnOn.style.boxShadow = active ? '0 2px 4px rgba(22, 163, 74, 0.25)' : 'none';
+        if (active) {
+          btnOn.style.background = '#16A34A';
+          btnOn.style.color = '#ffffff';
+          btnOn.style.boxShadow = '0 2px 4px rgba(22, 163, 74, 0.3)';
+        } else {
+          btnOn.style.background = 'transparent';
+          btnOn.style.color = '#475569';
+          btnOn.style.boxShadow = 'none';
+        }
       }
 
       if (btnOff) {
-        btnOff.style.backgroundColor = !active ? '#b71c1c' : 'transparent';
-        btnOff.style.color = !active ? '#ffffff' : '#475569';
-        btnOff.style.boxShadow = !active ? '0 2px 4px rgba(183, 28, 28, 0.25)' : 'none';
+        if (!active) {
+          btnOff.style.background = '#b71c1c';
+          btnOff.style.color = '#ffffff';
+          btnOff.style.boxShadow = '0 2px 4px rgba(183, 28, 28, 0.3)';
+        } else {
+          btnOff.style.background = 'transparent';
+          btnOff.style.color = '#475569';
+          btnOff.style.boxShadow = 'none';
+        }
       }
 
       if (label) label.style.color = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
-      if (dot) dot.style.backgroundColor = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
+      if (dot) dot.style.background = active ? 'var(--color-emerald)' : 'var(--color-nss-red)';
       if (text) text.textContent = active ? 'Accepting Responses' : 'Responses Stopped';
     };
 
@@ -339,11 +357,11 @@
       if (box && box.dataset.loading === 'true') return;
       if (box) box.dataset.loading = 'true';
 
-      const btnOn = document.getElementById('btnStatusOn');
-      const prevStatus = btnOn && btnOn.style.backgroundColor === 'rgb(22, 163, 74)';
+      const previousStatus = currentPortalStatus;
+      const newStatus = !!targetStatus;
 
-      // Immediate UI update
-      window.updatePortalUI(targetStatus);
+      // Immediate optimistic UI update
+      window.updatePortalUI(newStatus);
 
       try {
         const response = await fetch('/admin/api/toggle-portal-status', {
@@ -352,30 +370,28 @@
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          body: JSON.stringify({ status: targetStatus })
+          body: JSON.stringify({ status: newStatus })
         });
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data && data.success) {
           window.updatePortalUI(data.acceptingRegistrations);
           window.showToastNotification(data.message || (data.acceptingRegistrations ? 'Portal is now accepting responses.' : 'Portal responses have been stopped.'));
         } else {
-          window.updatePortalUI(prevStatus);
-          window.showToastNotification(data.error || 'Failed to update portal status.');
+          window.updatePortalUI(previousStatus);
+          window.showToastNotification((data && data.error) ? data.error : 'Failed to update portal status.');
         }
       } catch (err) {
         console.error('Set status error:', err);
-        window.updatePortalUI(prevStatus);
+        window.updatePortalUI(previousStatus);
         window.showToastNotification('An error occurred while updating portal status.');
       } finally {
         if (box) box.dataset.loading = 'false';
       }
     };
     window.triggerPortalToggle = function() {
-      const btnOn = document.getElementById('btnStatusOn');
-      const current = btnOn && btnOn.style.backgroundColor === 'rgb(22, 163, 74)';
-      window.setPortalStatus(!current);
+      window.setPortalStatus(!currentPortalStatus);
     };
     window.handlePortalStatusToggle = window.triggerPortalToggle;
 
