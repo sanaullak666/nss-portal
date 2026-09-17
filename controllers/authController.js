@@ -53,11 +53,29 @@ exports.handleLogin = async (req, res) => {
       });
     }
 
-    // Check if this device is trusted for 24 hours
-    const deviceToken = req.cookies ? req.cookies.nss_trusted_device : null;
-    const isTrusted = await AdminModel.isDeviceTrusted(admin.id, deviceToken);
+    // 1. Extract Client IP
+    const rawIp = (
+      (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : null) ||
+      req.ip ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      ''
+    );
+    const cleanIp = rawIp.replace(/^::ffff:/i, '').trim();
 
-    if (isTrusted) {
+    // Trusted device IPs (Localhost, Laptop Wi-Fi IP 10.10.56.73, Public Gateway IP, or .env BYPASS_OTP_IPS)
+    const envBypassIps = process.env.BYPASS_OTP_IPS
+      ? process.env.BYPASS_OTP_IPS.split(',').map((s) => s.trim())
+      : [];
+    const trustedIps = ['127.0.0.1', '::1', '10.10.56.73', '14.139.183.121', ...envBypassIps];
+    const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const isIpTrusted = isLocalhost || trustedIps.includes(cleanIp);
+
+    // 2. Check if this device is trusted via cookie
+    const deviceToken = req.cookies ? req.cookies.nss_trusted_device : null;
+    const isDeviceTrusted = await AdminModel.isDeviceTrusted(admin.id, deviceToken);
+
+    if (isDeviceTrusted || isIpTrusted) {
       req.session.admin = {
         id: admin.id,
         username: admin.username,
@@ -66,6 +84,19 @@ exports.handleLogin = async (req, res) => {
         role: admin.role || 'admin'
       };
       req.session.lastActivity = Date.now();
+
+      // Automatically issue/renew 1-year trusted device cookie so the laptop remains recognized even if IP shifts
+      try {
+        const newDeviceToken = crypto.randomBytes(32).toString('hex');
+        const deviceExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 Year
+        await AdminModel.saveTrustedDevice(admin.id, newDeviceToken, deviceExpiresAt);
+        res.cookie('nss_trusted_device', newDeviceToken, {
+          maxAge: 365 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.COOKIE_SECURE === 'true'
+        });
+      } catch (dErr) {}
 
       return req.session.save(async (err) => {
         if (err) {
@@ -79,7 +110,8 @@ exports.handleLogin = async (req, res) => {
         try {
           await AdminModel.updateLastLogin(admin.id);
           await AdminModel.invalidateOtherSessions(req.sessionID, admin.username);
-          await logAudit('LOGIN_TRUSTED_DEVICE', admin.username, 'Admin logged in via 24-hour trusted device (OTP bypassed)');
+          const reason = isIpTrusted ? `trusted device IP (${cleanIp || 'localhost'})` : 'trusted device cookie';
+          await logAudit('LOGIN_TRUSTED_DEVICE', admin.username, `Admin logged in via ${reason} (OTP bypassed)`);
         } catch (e) {}
 
         res.redirect('/admin/dashboard');
@@ -184,13 +216,13 @@ exports.handleVerifyLoginOTP = async (req, res) => {
     req.session.lastActivity = Date.now();
     delete req.session.pendingLogin;
 
-    // Issue 24-hour trusted device token cookie for this device
+    // Issue 1-year trusted device token cookie for this device
     const newDeviceToken = crypto.randomBytes(32).toString('hex');
-    const deviceExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours
+    const deviceExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 Year
     try {
       await AdminModel.saveTrustedDevice(pending.adminId, newDeviceToken, deviceExpiresAt);
       res.cookie('nss_trusted_device', newDeviceToken, {
-        maxAge: 24 * 60 * 60 * 1000, // 24 Hours
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 Year
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.COOKIE_SECURE === 'true'
