@@ -7,6 +7,7 @@ async function exportRegistrationsToExcel(registrations, res) {
   worksheet.columns = [
     { header: 'S.No', key: 'sno', width: 8 },
     { header: 'Registration ID', key: 'registration_id', width: 25 },
+    { header: 'Status', key: 'status', width: 16 },
     { header: 'NSS Unit', key: 'unit_number', width: 12 },
     { header: 'Full Name', key: 'applicant_name', width: 28 },
     { header: 'Univ Reg / App No', key: 'univ_reg_no', width: 22 },
@@ -78,6 +79,7 @@ async function exportRegistrationsToExcel(registrations, res) {
     worksheet.addRow({
       sno: index + 1,
       registration_id: reg.registration_id,
+      status: reg.status || 'Active',
       unit_number: reg.unit_number,
       applicant_name: reg.applicant_name,
       univ_reg_no: reg.univ_reg_no,
