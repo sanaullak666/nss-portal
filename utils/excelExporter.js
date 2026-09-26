@@ -114,14 +114,32 @@ async function exportRegistrationsToExcel(registrations, res) {
   res.end();
 }
 
-async function exportSelectedRegistrationsToExcel(registrations, res) {
+async function exportStatusRegistrationsToExcel(registrations, status, res, unit = null) {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Selected NSS Volunteers 2026');
+  let sheetName = 'Volunteers 2026';
+  let headerColor = '0F2042';
+  let filename = 'NSS_Volunteers_2026.xlsx';
+
+  if (status === 'Selected') {
+    sheetName = 'Selected NSS Volunteers 2026';
+    headerColor = '16A34A';
+    filename = unit ? `Selected_NSS_Volunteers_${unit.replace(/[^a-zA-Z0-9_-]/g, '_')}_2026.xlsx` : 'Selected_NSS_Volunteers_2026.xlsx';
+  } else if (status === 'Rejected') {
+    sheetName = 'Rejected NSS Applicants 2026';
+    headerColor = 'DC2626';
+    filename = unit ? `Rejected_NSS_Volunteers_${unit.replace(/[^a-zA-Z0-9_-]/g, '_')}_2026.xlsx` : 'Rejected_NSS_Volunteers_2026.xlsx';
+  } else if (status === 'Active') {
+    sheetName = 'Active Under Review NSS 2026';
+    headerColor = '0284C7';
+    filename = unit ? `Active_Under_Review_NSS_Volunteers_${unit.replace(/[^a-zA-Z0-9_-]/g, '_')}_2026.xlsx` : 'Active_Under_Review_NSS_Volunteers_2026.xlsx';
+  }
+
+  const worksheet = workbook.addWorksheet(sheetName);
 
   worksheet.columns = [
     { header: 'S.No', key: 'sno', width: 8 },
     { header: 'Registration ID', key: 'registration_id', width: 25 },
-    { header: 'Selection Status', key: 'status', width: 16 },
+    { header: 'Selection Status', key: 'status', width: 18 },
     { header: 'NSS Unit', key: 'unit_number', width: 12 },
     { header: 'Full Name', key: 'applicant_name', width: 28 },
     { header: 'Univ Reg / App No', key: 'univ_reg_no', width: 22 },
@@ -148,12 +166,12 @@ async function exportSelectedRegistrationsToExcel(registrations, res) {
     { header: 'Submission Date', key: 'created_at', width: 20 }
   ];
 
-  // Green Header Styling for Selected Students
+  // Header Styling
   worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
   worksheet.getRow(1).fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: '16A34A' }
+    fgColor: { argb: headerColor }
   };
   worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
@@ -220,10 +238,28 @@ async function exportSelectedRegistrationsToExcel(registrations, res) {
   });
 
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename="Selected_NSS_Volunteers_2026.xlsx"');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
   await workbook.xlsx.write(res);
   res.end();
 }
 
-module.exports = { exportRegistrationsToExcel, exportSelectedRegistrationsToExcel };
+async function exportSelectedRegistrationsToExcel(registrations, res, unit = null) {
+  return exportStatusRegistrationsToExcel(registrations, 'Selected', res, unit);
+}
+
+async function exportRejectedRegistrationsToExcel(registrations, res, unit = null) {
+  return exportStatusRegistrationsToExcel(registrations, 'Rejected', res, unit);
+}
+
+async function exportActiveRegistrationsToExcel(registrations, res, unit = null) {
+  return exportStatusRegistrationsToExcel(registrations, 'Active', res, unit);
+}
+
+module.exports = { 
+  exportRegistrationsToExcel, 
+  exportSelectedRegistrationsToExcel,
+  exportRejectedRegistrationsToExcel,
+  exportActiveRegistrationsToExcel,
+  exportStatusRegistrationsToExcel
+};

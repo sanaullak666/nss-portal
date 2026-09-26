@@ -45,6 +45,9 @@ router.post('/admin/change-password', csrfProtection, adminController.handleChan
 router.get('/admin/selection', csrfProtection, adminController.renderSelectionPage);
 router.post('/admin/selection/:id/status', csrfProtection, adminController.updateVolunteerStatus);
 router.get('/admin/selection/export-excel', adminController.exportSelectedToExcel);
+router.get('/admin/selection/export-selected-excel', adminController.exportSelectedToExcel);
+router.get('/admin/selection/export-rejected-excel', adminController.exportRejectedToExcel);
+router.get('/admin/selection/export-active-excel', adminController.exportActiveToExcel);
 
 module.exports = router;
 

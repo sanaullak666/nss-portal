@@ -89,6 +89,71 @@
       color: white;
       border-color: var(--color-nss-red);
     }
+    .selection-status-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .status-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-navy);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .status-tab-btn:hover {
+      border-color: var(--color-nss-red);
+      transform: translateY(-1px);
+    }
+    .status-tab-btn.active-status-tab {
+      background: var(--color-navy);
+      color: #ffffff !important;
+      border-color: var(--color-navy);
+      box-shadow: 0 4px 12px rgba(15, 32, 66, 0.2);
+    }
+    .status-tab-btn.active-status-tab .tab-badge {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
+    }
+    .selection-export-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-left: auto;
+    }
+    @media (max-width: 768px) {
+      .selection-export-actions {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 10px;
+      }
+      .selection-export-actions a {
+        flex: 1 1 calc(50% - 6px);
+        justify-content: center;
+        text-align: center;
+      }
+      .selection-status-tabs {
+        gap: 6px;
+      }
+      .status-tab-btn {
+        flex: 1 1 calc(50% - 6px);
+        justify-content: space-between;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-body" style="display: flex; flex-direction: column; min-height: 100vh;">
@@ -177,8 +242,85 @@
 
       <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
       <a href="/admin/selection" class="btn btn-ghost btn-sm">Reset</a>
-      <a href="/admin/selection/export-excel" class="btn btn-success btn-sm" style="background: #16a34a; border-color: #15803d; color: white; margin-left: auto;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> Export Selected Excel</a>
+      
+      <!-- Export Excel List Options -->
+      <div class="selection-export-actions">
+        <a href="/admin/selection/export-excel<%= filters.unit ? '?unit=' + encodeURIComponent(filters.unit) : '' %>" 
+           id="exportSelectedBtn" 
+           class="btn btn-sm" 
+           style="background: #16a34a; border-color: #15803d; color: white; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: var(--shadow-sm);" 
+           title="Download Selected Students Excel List">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> 
+          Selected Excel
+        </a>
+
+        <a href="/admin/selection/export-rejected-excel<%= filters.unit ? '?unit=' + encodeURIComponent(filters.unit) : '' %>" 
+           id="exportRejectedBtn" 
+           class="btn btn-sm" 
+           style="background: #dc2626; border-color: #b91c1c; color: white; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: var(--shadow-sm);" 
+           title="Download Rejected Students Excel List">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> 
+          Rejected Excel
+        </a>
+
+        <a href="/admin/selection/export-active-excel<%= filters.unit ? '?unit=' + encodeURIComponent(filters.unit) : '' %>" 
+           id="exportActiveBtn" 
+           class="btn btn-sm" 
+           style="background: #0284c7; border-color: #0369a1; color: white; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: var(--shadow-sm);" 
+           title="Download Active / Under Review Students Excel List">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> 
+          Active / Under Review Excel
+        </a>
+      </div>
     </form>
+
+    <!-- Quick Status Selection Tabs -->
+    <div class="selection-status-tabs">
+      <a href="javascript:void(0)" onclick="selectStatusTab('All')" 
+         class="status-tab-btn <%= (!filters.selectionStatus || filters.selectionStatus === 'All') ? 'active-status-tab' : '' %>"
+         data-status="All">
+        <span>All Applicants</span>
+        <span class="tab-badge" style="background: rgba(0,0,0,0.08); font-size: 0.78rem; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
+          <%= (selectionStats.totalActive || 0) + (selectionStats.totalSelected || 0) + (selectionStats.totalRejected || 0) %>
+        </span>
+      </a>
+
+      <a href="javascript:void(0)" onclick="selectStatusTab('Active')" 
+         class="status-tab-btn <%= filters.selectionStatus === 'Active' ? 'active-status-tab' : '' %>"
+         data-status="Active">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #0284c7; display: inline-block;"></span>
+          Active / Under Review
+        </span>
+        <span class="tab-badge" style="background: #e0f2fe; color: #0369a1; font-size: 0.78rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">
+          <%= selectionStats.totalActive || 0 %>
+        </span>
+      </a>
+
+      <a href="javascript:void(0)" onclick="selectStatusTab('Selected')" 
+         class="status-tab-btn <%= filters.selectionStatus === 'Selected' ? 'active-status-tab' : '' %>"
+         data-status="Selected">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #16a34a; display: inline-block;"></span>
+          Selected Volunteers
+        </span>
+        <span class="tab-badge" style="background: #dcfce7; color: #15803d; font-size: 0.78rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">
+          <%= selectionStats.totalSelected || 0 %>
+        </span>
+      </a>
+
+      <a href="javascript:void(0)" onclick="selectStatusTab('Rejected')" 
+         class="status-tab-btn <%= filters.selectionStatus === 'Rejected' ? 'active-status-tab' : '' %>"
+         data-status="Rejected">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: #dc2626; display: inline-block;"></span>
+          Rejected Applicants
+        </span>
+        <span class="tab-badge" style="background: #fee2e2; color: #b91c1c; font-size: 0.78rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">
+          <%= selectionStats.totalRejected || 0 %>
+        </span>
+      </a>
+    </div>
 
 
 
@@ -240,6 +382,17 @@
                           </button>
                         </form>
                       <% } %>
+
+                      <% if (reg.status !== 'Active') { %>
+                        <!-- Reset to Active / Under Review Form -->
+                        <form action="/admin/selection/<%= reg.id %>/status" method="POST" style="margin: 0;" onsubmit="return confirm('Reset <%= reg.applicant_name %> status back to Active / Under Review?');">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="status" value="Active">
+                          <button type="submit" class="btn btn-ghost btn-sm" style="padding: 5px 10px; font-weight: 600; font-size: 0.8rem; border: 1px solid var(--color-border);" title="Reset to Active / Under Review">
+                            Reset
+                          </button>
+                        </form>
+                      <% } %>
                     </div>
                   </td>
                 </tr>
@@ -279,9 +432,42 @@
 
       const searchInput = filterForm.querySelector('input[name="search"]');
       const selectInputs = filterForm.querySelectorAll('select');
+      const statusSelect = filterForm.querySelector('select[name="selectionStatus"]');
+      const unitSelect = filterForm.querySelector('select[name="unit"]');
       const tableCard = document.querySelector('.dash-table-card');
 
       let debounceTimer = null;
+
+      window.selectStatusTab = function(status) {
+        if (statusSelect) {
+          statusSelect.value = status;
+          syncStatusTabs(status);
+          performFilter();
+        }
+      };
+
+      function updateExportLinks(unitValue) {
+        const selectedBtn = document.getElementById('exportSelectedBtn');
+        const rejectedBtn = document.getElementById('exportRejectedBtn');
+        const activeBtn = document.getElementById('exportActiveBtn');
+        const unitParam = unitValue ? `?unit=${encodeURIComponent(unitValue)}` : '';
+
+        if (selectedBtn) selectedBtn.href = `/admin/selection/export-excel${unitParam}`;
+        if (rejectedBtn) rejectedBtn.href = `/admin/selection/export-rejected-excel${unitParam}`;
+        if (activeBtn) activeBtn.href = `/admin/selection/export-active-excel${unitParam}`;
+      }
+
+      function syncStatusTabs(currentStatus) {
+        const statusVal = currentStatus || 'All';
+        const tabBtns = document.querySelectorAll('.status-tab-btn');
+        tabBtns.forEach(btn => {
+          if (btn.getAttribute('data-status') === statusVal) {
+            btn.classList.add('active-status-tab');
+          } else {
+            btn.classList.remove('active-status-tab');
+          }
+        });
+      }
 
       function performFilter(targetUrl) {
         let url = targetUrl;
@@ -311,10 +497,16 @@
           const newTableCard = doc.querySelector('.dash-table-card');
           const newPagination = doc.querySelector('.pagination-custom');
           const currentPagination = document.querySelector('.pagination-custom');
+          const newStatusTabs = doc.querySelector('.selection-status-tabs');
+          const currentStatusTabs = document.querySelector('.selection-status-tabs');
 
           if (newTableCard && tableCard) {
             tableCard.innerHTML = newTableCard.innerHTML;
             tableCard.style.opacity = '1';
+          }
+
+          if (newStatusTabs && currentStatusTabs) {
+            currentStatusTabs.innerHTML = newStatusTabs.innerHTML;
           }
 
           if (currentPagination && newPagination) {
@@ -325,6 +517,12 @@
             const mainContainer = document.querySelector('main.container');
             if (mainContainer) mainContainer.appendChild(newPagination);
           }
+
+          const currentUnit = unitSelect ? unitSelect.value : '';
+          updateExportLinks(currentUnit);
+
+          const currentStatus = statusSelect ? statusSelect.value : 'All';
+          syncStatusTabs(currentStatus);
 
           window.history.pushState({}, '', url);
           attachPaginationEvents();
@@ -362,11 +560,19 @@
 
       selectInputs.forEach(select => {
         select.addEventListener('change', function() {
+          if (this.name === 'unit') {
+            updateExportLinks(this.value);
+          }
+          if (this.name === 'selectionStatus') {
+            syncStatusTabs(this.value);
+          }
           performFilter();
         });
       });
 
       attachPaginationEvents();
+      updateExportLinks(unitSelect ? unitSelect.value : '');
+      syncStatusTabs(statusSelect ? statusSelect.value : 'All');
     });
 
     function toggleAdminProfileMenu(event) {

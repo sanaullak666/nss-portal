@@ -4,7 +4,12 @@ const SettingsModel = require('../models/settingsModel');
 const bcrypt = require('bcryptjs');
 const { UNITS, DEPARTMENTS, DEPARTMENT_UNIT_MAP, COURSES, YEAR_OF_STUDY, BLOOD_GROUPS, NATIVE_STATES, INDIAN_LANGUAGES, MEDIA_ROLES } = require('../config/constants');
 
-const { exportRegistrationsToExcel, exportSelectedRegistrationsToExcel } = require('../utils/excelExporter');
+const { 
+  exportRegistrationsToExcel, 
+  exportSelectedRegistrationsToExcel,
+  exportRejectedRegistrationsToExcel,
+  exportActiveRegistrationsToExcel
+} = require('../utils/excelExporter');
 const { generateRegistrationPDF } = require('../utils/pdfGenerator');
 const { logAudit } = require('../utils/auditLogger');
 const { sendSelectionApprovalEmail } = require('../utils/emailService');
@@ -443,15 +448,52 @@ exports.updateVolunteerStatus = async (req, res) => {
 
 exports.exportSelectedToExcel = async (req, res) => {
   try {
-    const selectedStudents = await RegistrationModel.getSelectedForExport();
-    await exportSelectedRegistrationsToExcel(selectedStudents, res);
+    const { unit, status } = req.query;
+    if (status === 'Rejected') {
+      return exports.exportRejectedToExcel(req, res);
+    }
+    if (status === 'Active') {
+      return exports.exportActiveToExcel(req, res);
+    }
+    const selectedStudents = await RegistrationModel.getSelectedForExport(unit);
+    await exportSelectedRegistrationsToExcel(selectedStudents, res, unit);
 
     try {
-      await logAudit('EXCEL_EXPORT_SELECTED', req.session.admin ? req.session.admin.username : 'admin', `Exported ${selectedStudents.length} selected volunteers to Excel`);
+      await logAudit('EXCEL_EXPORT_SELECTED', req.session.admin ? req.session.admin.username : 'admin', `Exported ${selectedStudents.length} selected volunteers to Excel${unit ? ` (${unit})` : ''}`);
     } catch (e) {}
   } catch (err) {
     console.error('Export Selected Excel Error:', err);
     res.status(500).send('Failed to export selected registrations to Excel');
+  }
+};
+
+exports.exportRejectedToExcel = async (req, res) => {
+  try {
+    const { unit } = req.query;
+    const rejectedStudents = await RegistrationModel.getRejectedForExport(unit);
+    await exportRejectedRegistrationsToExcel(rejectedStudents, res, unit);
+
+    try {
+      await logAudit('EXCEL_EXPORT_REJECTED', req.session.admin ? req.session.admin.username : 'admin', `Exported ${rejectedStudents.length} rejected applicants to Excel${unit ? ` (${unit})` : ''}`);
+    } catch (e) {}
+  } catch (err) {
+    console.error('Export Rejected Excel Error:', err);
+    res.status(500).send('Failed to export rejected registrations to Excel');
+  }
+};
+
+exports.exportActiveToExcel = async (req, res) => {
+  try {
+    const { unit } = req.query;
+    const activeStudents = await RegistrationModel.getActiveForExport(unit);
+    await exportActiveRegistrationsToExcel(activeStudents, res, unit);
+
+    try {
+      await logAudit('EXCEL_EXPORT_ACTIVE', req.session.admin ? req.session.admin.username : 'admin', `Exported ${activeStudents.length} active/under-review volunteers to Excel${unit ? ` (${unit})` : ''}`);
+    } catch (e) {}
+  } catch (err) {
+    console.error('Export Active Excel Error:', err);
+    res.status(500).send('Failed to export active registrations to Excel');
   }
 };
 

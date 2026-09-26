@@ -278,9 +278,9 @@ class RegistrationModel {
     const totalCount = parseInt(countRows[0]?.totalCount || countRows[0]?.totalcount || 0, 10);
     const [registrations] = await db.query(`SELECT * FROM registrations ${whereSQL} ORDER BY created_at ASC, id ASC LIMIT ? OFFSET ?`, [...queryParams, limitNum, offset]);
 
-    const [selectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected'");
-    const [rejectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Rejected'");
-    const [activeRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'");
+    const [selectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Selected'" + (unit ? " AND unit_number = ?" : ""), unit ? [unit] : []);
+    const [rejectedRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Rejected'" + (unit ? " AND unit_number = ?" : ""), unit ? [unit] : []);
+    const [activeRows] = await db.query("SELECT COUNT(*) as count FROM registrations WHERE status = 'Active'" + (unit ? " AND unit_number = ?" : ""), unit ? [unit] : []);
 
     return {
       registrations,
@@ -300,8 +300,39 @@ class RegistrationModel {
     return registrations;
   }
 
-  static async getSelectedForExport() {
-    const [registrations] = await db.query("SELECT * FROM registrations WHERE status = 'Selected' ORDER BY created_at ASC, id ASC");
+  static async getSelectedForExport(unit = null) {
+    let sql = "SELECT * FROM registrations WHERE status = 'Selected'";
+    const params = [];
+    if (unit) {
+      sql += " AND unit_number = ?";
+      params.push(unit);
+    }
+    sql += " ORDER BY created_at ASC, id ASC";
+    const [registrations] = await db.query(sql, params);
+    return registrations;
+  }
+
+  static async getRejectedForExport(unit = null) {
+    let sql = "SELECT * FROM registrations WHERE status = 'Rejected'";
+    const params = [];
+    if (unit) {
+      sql += " AND unit_number = ?";
+      params.push(unit);
+    }
+    sql += " ORDER BY created_at ASC, id ASC";
+    const [registrations] = await db.query(sql, params);
+    return registrations;
+  }
+
+  static async getActiveForExport(unit = null) {
+    let sql = "SELECT * FROM registrations WHERE status = 'Active'";
+    const params = [];
+    if (unit) {
+      sql += " AND unit_number = ?";
+      params.push(unit);
+    }
+    sql += " ORDER BY created_at ASC, id ASC";
+    const [registrations] = await db.query(sql, params);
     return registrations;
   }
 
