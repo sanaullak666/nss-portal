@@ -10,7 +10,7 @@ async function reseedAdmin() {
     await db.query(
       `INSERT INTO admins (username, password_hash, full_name, email, role) 
        VALUES (?, ?, ?, ?, ?)`,
-      ['admin', hashedPassword, 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin']
+      ['admin', hashedPassword, 'PU NSS Super Administrator', 'sanaullak294@gmail.com', 'superadmin']
     );
 
     console.log('✅ Admin credentials successfully reset!');

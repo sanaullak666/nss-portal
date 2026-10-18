@@ -62,7 +62,7 @@ exports.handleLogin = async (req, res) => {
         id: admin.id,
         username: admin.username,
         fullName: admin.full_name || admin.username,
-        email: admin.email || 'nsspondiuni2409@gmail.com',
+        email: admin.email || 'sanaullak294@gmail.com',
         role: admin.role || 'admin'
       };
       req.session.lastActivity = Date.now();
@@ -89,7 +89,7 @@ exports.handleLogin = async (req, res) => {
     // Generate 6-digit OTP for 2FA Login Verification
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Valid for 10 minutes
-    const targetEmail = 'nsspondiuni2409@gmail.com';
+    const targetEmail = admin.email || 'sanaullak294@gmail.com';
 
     // Save OTP to DB
     await AdminModel.saveOTP(admin.id, targetEmail, otpCode, expiresAt);
@@ -147,7 +147,7 @@ exports.handleVerifyLoginOTP = async (req, res) => {
 
   const { otp_code } = req.body || {};
   const pending = req.session.pendingLogin;
-  const targetEmail = pending.targetEmail || 'nsspondiuni2409@gmail.com';
+  const targetEmail = pending.targetEmail || 'sanaullak294@gmail.com';
 
   if (!otp_code || otp_code.trim().length !== 6) {
     return res.render('admin/verify-login-otp', {
@@ -235,7 +235,7 @@ exports.handleResendLoginOTP = async (req, res) => {
   }
 
   const pending = req.session.pendingLogin;
-  const targetEmail = pending.targetEmail || 'nsspondiuni2409@gmail.com';
+  const targetEmail = pending.targetEmail || 'sanaullak294@gmail.com';
 
   try {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -295,7 +295,7 @@ exports.renderForgotPassword = (req, res) => {
   res.render('admin/forgot-password', {
     title: 'Admin Password Reset - PU NSS Portal',
     csrfToken: req.csrfToken ? req.csrfToken() : '',
-    defaultEmail: '',
+    defaultEmail: 'sanaullak294@gmail.com',
     error: null,
     success: null
   });

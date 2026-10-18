@@ -268,7 +268,7 @@ async function autoMigrate(connection) {
     const adminHash = await bcrypt.hash(defaultPassword, 10);
     await connection.query(
       `INSERT INTO admins (username, password_hash, full_name, email, role) 
-       VALUES (?, ?, 'PU NSS Super Administrator', 'nsspondiuni2409@gmail.com', 'superadmin') 
+       VALUES (?, ?, 'PU NSS Super Administrator', 'sanaullak294@gmail.com', 'superadmin') 
        ON CONFLICT (username) DO NOTHING`,
       ['admin', adminHash]
     );
