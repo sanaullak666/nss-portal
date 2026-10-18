@@ -1,31 +1,53 @@
-
-<div class="nss-motto-banner" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 20px; font-size: 0.8rem;">
-  <span>NATIONAL SERVICE SCHEME • "NOT ME BUT YOU"</span>
-  <span><svg style="display:inline-block; vertical-align:-2px; margin-right:4px;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 4.5a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15Zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v.428l9.75 6.093 9.75-6.093V4.5a1.5 1.5 0 0 0-1.5-1.5h-15Zm18 3.428-9.289 5.806a.75.75 0 0 1-.822 0L3 6.428V19.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V6.428Z"/></svg> Contact Us: <a href="mailto:nsspondiuni2409@gmail.com" style="color: white; font-weight: 700; text-decoration: underline;">nsspondiuni2409@gmail.com</a></span>
+<div class="nss-motto-banner no-print">
+  <div class="container motto-inner">
+    <span class="motto-text">NATIONAL SERVICE SCHEME • &ldquo;NOT ME BUT YOU&rdquo;</span>
+    <span class="contact-text">
+      <svg class="motto-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M1.5 4.5a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15Zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v.428l9.75 6.093 9.75-6.093V4.5a1.5 1.5 0 0 0-1.5-1.5h-15Zm18 3.428-9.289 5.806a.75.75 0 0 1-.822 0L3 6.428V19.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V6.428Z"/>
+      </svg>
+      <span>Contact Us:</span>
+      <a href="mailto:nsspondiuni2409@gmail.com" class="motto-email-link">nsspondiuni2409@gmail.com</a>
+    </span>
+  </div>
 </div>
-<header class="site-header">
+
+<header class="site-header no-print">
   <div class="container header-inner">
-    <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
-      <div class="header-logo-group" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.9); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
-        <img src="/images/pondilogo.png" alt="Pondicherry University Logo" style="height: 42px; width: auto; object-fit: contain;" title="Pondicherry University">
-        <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" style="height: 42px; width: auto; object-fit: contain; border-radius: 4px;" title="40 Years of Excellence">
-        <img src="/images/nsslogo.jpg" alt="NSS Logo" style="height: 42px; width: auto; object-fit: contain; border-radius: 50%;" title="National Service Scheme">
-      </div>
+    <div class="logo-area">
+      <a href="/" class="header-logo-group" title="Pondicherry University NSS Portal">
+        <img src="/images/pondilogo.png" alt="Pondicherry University Logo" class="brand-logo" title="Pondicherry University">
+        <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" class="brand-logo celebration-logo" title="40 Years of Excellence">
+        <img src="/images/nsslogo.jpg" alt="NSS Logo" class="brand-logo nss-logo" title="National Service Scheme">
+      </a>
       <div class="logo-text">
-        Pondicherry University
-        <small style="display: block;">NSS Volunteer Registration Portal 2026</small>
+        <span class="logo-title">Pondicherry University</span>
+        <small class="logo-subtitle">NSS Volunteer Registration Portal 2026</small>
       </div>
     </div>
+
     <span class="nss-tagline-header">PU NSS Wing</span>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
-    <nav class="main-nav">
-      <a href="/">Register Form</a>
-      <a href="/track-registration">Track Status</a>
+
+    <!-- Mobile Hamburger Toggle -->
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="mainNav">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
+
+    <!-- Navigation Menu -->
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Register Form</a>
+      <a href="/track-registration" class="nav-link">Track Status</a>
       <% if (typeof admin !== 'undefined' && admin) { %>
-        <a href="/admin/dashboard">Dashboard</a>
-        <a href="/admin/logout" class="btn btn-logout" style="padding: 4px 12px; font-size: 0.82rem; margin-left: 6px;"><svg style="display:inline-block; vertical-align:-2px; margin-right:4px;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25"/></svg> Logout</a>
+        <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+        <a href="/admin/logout" class="btn btn-logout nav-btn-logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25"/>
+          </svg>
+          <span>Logout</span>
+        </a>
       <% } else { %>
-        <a href="/admin/login">Admin Portal</a>
+        <a href="/admin/login" class="nav-link nav-link-admin">Admin Portal</a>
       <% } %>
     </nav>
   </div>

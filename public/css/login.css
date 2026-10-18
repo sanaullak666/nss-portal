@@ -528,5 +528,20 @@ body.login-page-body::before {
 @media (max-width: 480px) {
   .login-card {
     padding: var(--space-6) var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+
+  .login-brand h1 {
+    font-size: clamp(1.2rem, 5vw, 1.45rem);
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: var(--space-5) 0.85rem;
+  }
+
+  .login-logo-group img {
+    height: 38px !important;
   }
 }

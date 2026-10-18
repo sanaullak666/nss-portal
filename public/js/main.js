@@ -19,15 +19,94 @@ document.addEventListener('DOMContentLoaded', function () {
   const regForm = document.getElementById('registrationForm');
   const submitBtn = document.getElementById('submitBtn');
   const navToggle = document.getElementById('navToggle');
-  const mainNav = document.querySelector('.main-nav');
+  const mainNav = document.getElementById('mainNav') || document.querySelector('.main-nav');
+  const adminNavToggle = document.getElementById('adminNavToggle');
+  const adminMainNav = document.getElementById('adminMainNav');
+  const adminProfileBtn = document.getElementById('adminProfileBtn');
+  const adminProfileMenu = document.getElementById('adminProfileMenu');
   const univRegNoInput = document.getElementById('univ_reg_no');
 
-  // 1. Mobile Navigation Toggle
+  // 1. Public Mobile Navigation Toggle
   if (navToggle && mainNav) {
-    navToggle.addEventListener('click', function () {
-      mainNav.classList.toggle('open');
+    navToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = mainNav.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
   }
+
+  // 1b. Admin Mobile Drawer Toggle
+  if (adminNavToggle && adminMainNav) {
+    adminNavToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = adminMainNav.classList.toggle('open');
+      adminNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (adminProfileMenu) {
+        adminProfileMenu.classList.remove('show');
+        if (adminProfileBtn) adminProfileBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // 1c. Admin Profile Dropdown Menu Toggle
+  if (adminProfileBtn && adminProfileMenu) {
+    adminProfileBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = adminProfileMenu.classList.toggle('show');
+      adminProfileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  }
+
+  // Close open drawers and dropdowns on outside click
+  document.addEventListener('click', function (e) {
+    if (adminProfileMenu && adminProfileMenu.classList.contains('show')) {
+      if (!adminProfileMenu.contains(e.target) && !adminProfileBtn.contains(e.target)) {
+        adminProfileMenu.classList.remove('show');
+        if (adminProfileBtn) adminProfileBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (adminMainNav && adminMainNav.classList.contains('open')) {
+      if (!adminMainNav.contains(e.target) && !adminNavToggle.contains(e.target)) {
+        adminMainNav.classList.remove('open');
+        if (adminNavToggle) adminNavToggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (mainNav && mainNav.classList.contains('open')) {
+      if (!mainNav.contains(e.target) && !navToggle.contains(e.target)) {
+        mainNav.classList.remove('open');
+        if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  // Close open drawers and dropdowns on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (adminProfileMenu && adminProfileMenu.classList.contains('show')) {
+        adminProfileMenu.classList.remove('show');
+        if (adminProfileBtn) {
+          adminProfileBtn.setAttribute('aria-expanded', 'false');
+          adminProfileBtn.focus();
+        }
+      }
+      if (adminMainNav && adminMainNav.classList.contains('open')) {
+        adminMainNav.classList.remove('open');
+        if (adminNavToggle) {
+          adminNavToggle.setAttribute('aria-expanded', 'false');
+          adminNavToggle.focus();
+        }
+      }
+      if (mainNav && mainNav.classList.contains('open')) {
+        mainNav.classList.remove('open');
+        if (navToggle) {
+          navToggle.setAttribute('aria-expanded', 'false');
+          navToggle.focus();
+        }
+      }
+    }
+  });
 
   // Auto-uppercase University Register / Application Number as typed
   if (univRegNoInput) {

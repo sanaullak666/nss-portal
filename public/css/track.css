@@ -408,15 +408,73 @@ body.track-page-body::before {
   box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
+/* Registration ID Display (Safe Fluid Typography) */
+.registration-id-display,
+.official-reg-id {
+  font-size: clamp(1.2rem, 5.5vw, 2.3rem);
+  font-weight: 800;
+  color: var(--color-nss-red);
+  letter-spacing: 0.5px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+
 /* Responsive */
+@media (max-width: 768px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .status-tag {
+    align-self: flex-start;
+  }
+}
+
 @media (max-width: 600px) {
   .track-card {
-    padding: var(--space-6) var(--space-4);
+    padding: var(--space-5) var(--space-4) !important;
   }
+
+  .track-header h1 {
+    font-size: clamp(1.25rem, 5vw, 1.6rem);
+  }
+
   .search-box-group {
     flex-direction: column;
+    gap: 10px;
   }
+
+  .search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
   .search-btn {
     width: 100%;
+  }
+
+  .pdf-download-btn,
+  .whatsapp-link-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .track-logo-group img {
+    height: 36px !important;
+  }
+
+  .track-card {
+    padding: 1rem 0.75rem !important;
   }
 }

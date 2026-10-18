@@ -130,11 +130,11 @@ body.dashboard-body::before {
   font-size: 0.92rem;
 }
 
-/* ---------- Stat Cards Grid ---------- */
+/* ---------- Stat Cards Grid (Mobile 2 cols, Tablet 3 cols, Desktop 6 cols) ---------- */
 .dash-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
   margin-bottom: 30px;
 }
 
@@ -144,7 +144,7 @@ body.dashboard-body::before {
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  padding: 22px 18px;
+  padding: 18px 14px;
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-bounce);
   position: relative;
@@ -177,27 +177,27 @@ body.dashboard-body::before {
 }
 
 .dash-stat-icon {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-md);
   background: rgba(15, 32, 66, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
 .dash-stat-number {
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
   letter-spacing: -0.5px;
   margin-bottom: 4px;
 }
 
 .dash-stat-label {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -210,9 +210,12 @@ body.dashboard-body::before {
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
-  padding: 24px;
+  padding: 20px;
   box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
+  width: 100%;
+  min-width: 0; /* Prevents canvas from overflowing grid cells */
+  position: relative;
 }
 
 .dash-chart-card:hover {
@@ -222,12 +225,92 @@ body.dashboard-body::before {
 .dash-chart-card h3 {
   color: var(--color-navy);
   text-align: center;
-  margin-bottom: 18px;
-  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-size: 1.05rem;
   font-weight: 800;
 }
 
-/* ---------- Data Table Card ---------- */
+.dash-chart-card canvas {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+/* ---------- Filter Bar Custom ---------- */
+.filter-bar-custom {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  padding: 16px 20px;
+  border-radius: var(--radius-xl);
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+}
+
+.filter-bar-custom input,
+.filter-bar-custom select {
+  padding: 10px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  background: var(--color-surface);
+  color: var(--color-navy);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  min-height: 44px;
+}
+
+.filter-bar-custom input:focus,
+.filter-bar-custom select:focus {
+  border-color: var(--color-nss-red);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  border-radius: var(--radius-md);
+  min-height: 40px;
+}
+
+.pagination-custom {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.pagination-custom a,
+.pagination-custom span {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-navy);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pagination-custom a:hover {
+  border-color: var(--color-nss-red);
+  color: var(--color-nss-red);
+}
+
+.pagination-custom .active {
+  background: var(--color-nss-red);
+  color: white;
+  border-color: var(--color-nss-red);
+}
+
+/* ---------- Data Table Card & Responsive Table ---------- */
 .dash-table-card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -237,16 +320,21 @@ body.dashboard-body::before {
   padding: 24px;
   box-shadow: var(--shadow-md);
   margin-bottom: 30px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .table-responsive {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  min-width: 650px;
 }
 
 .data-table th {
@@ -259,13 +347,15 @@ body.dashboard-body::before {
   padding: 12px 14px;
   text-align: left;
   border-bottom: 3px solid var(--color-nss-red) !important;
+  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--color-border);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--color-text-secondary);
+  vertical-align: middle;
 }
 
 .data-table tbody tr {
@@ -273,13 +363,69 @@ body.dashboard-body::before {
 }
 
 .data-table tbody tr:hover {
-  background: rgba(15, 32, 66, 0.02);
+  background: rgba(15, 32, 66, 0.03);
 }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE (DASHBOARD)
+   ======================================== */
+@media (max-width: 1200px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-title-box {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .dashboard-title-box h1 {
+    font-size: 1.45rem;
+  }
+
+  .dash-table-card {
+    padding: 16px 12px;
+    border-radius: var(--radius-lg);
+  }
+
+  .filter-bar-custom {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+
+  .filter-bar-custom input,
+  .filter-bar-custom select,
+  .filter-bar-custom button,
+  .filter-bar-custom a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .dash-stat-card {
+    padding: 14px 10px;
+  }
+
+  .dash-stat-number {
+    font-size: 1.6rem;
+  }
+
+  .dash-stat-label {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .dash-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

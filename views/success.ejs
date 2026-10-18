@@ -43,7 +43,7 @@
 
         <div style="background: rgba(255, 255, 255, 0.9); border: 2px dashed var(--color-navy); padding: 24px; border-radius: var(--radius-lg); margin-bottom: 28px; box-shadow: var(--shadow-sm);">
           <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Your Official Registration ID</span>
-          <div style="font-size: 2.3rem; font-weight: 800; color: var(--color-nss-red); letter-spacing: 1px; margin-top: 6px;">
+          <div class="registration-id-display">
             <%= registration.registration_id %>
           </div>
           <div style="margin-top: 10px; font-size: 0.98rem; color: var(--color-navy); font-weight: 600;">
@@ -74,9 +74,9 @@
           </a>
         </div>
 
-        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
-          <a href="/track-registration" class="btn btn-secondary" style="padding: 10px 24px; font-size: 0.95rem;">Track Status</a>
-          <a href="/" class="btn btn-ghost" style="padding: 10px 24px; font-size: 0.95rem;">Back to Home</a>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+          <a href="/track-registration" class="btn btn-secondary" style="padding: 10px 24px; font-size: 0.95rem; min-width: 140px;">Track Status</a>
+          <a href="/" class="btn btn-ghost" style="padding: 10px 24px; font-size: 0.95rem; min-width: 140px;">Back to Home</a>
         </div>
 
       </div>

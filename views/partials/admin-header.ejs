@@ -1,0 +1,150 @@
+<header class="site-header admin-site-header no-print">
+  <div class="container header-inner">
+    <div class="logo-area">
+      <a href="/admin/dashboard" class="header-logo-group" title="Pondicherry University NSS Portal">
+        <img src="/images/pondilogo.png" alt="Pondicherry University Logo" class="brand-logo" title="Pondicherry University">
+        <img src="/images/40yearslogo.jpg" alt="40 Years Celebration Logo" class="brand-logo celebration-logo" title="40 Years of Excellence">
+        <img src="/images/nsslogo.jpg" alt="NSS Logo" class="brand-logo nss-logo" title="National Service Scheme">
+      </a>
+      <div class="logo-text">
+        <span class="logo-title"><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Admin Control Center' %></span>
+        <small class="logo-subtitle">Pondicherry University • NSS Wing</small>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Hamburger Toggle -->
+    <button class="nav-toggle admin-nav-toggle" id="adminNavToggle" type="button" aria-label="Toggle admin navigation" aria-expanded="false" aria-controls="adminMainNav">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
+
+    <!-- Desktop Navigation Links & Profile Dropdown -->
+    <nav class="admin-desktop-nav" aria-label="Admin desktop navigation">
+      <% if (typeof backUrl !== 'undefined' && backUrl) { %>
+        <a href="<%= backUrl %>" class="btn btn-secondary btn-sm admin-back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          <span><%= typeof backText !== 'undefined' && backText ? backText : 'Back' %></span>
+        </a>
+      <% } %>
+
+      <a href="/admin/dashboard" class="admin-nav-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="/admin/registrations" class="admin-nav-link <%= typeof activePage !== 'undefined' && activePage === 'registrations' ? 'active' : '' %>">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span>Registrations</span>
+      </a>
+
+      <a href="/admin/selection" class="admin-nav-link <%= typeof activePage !== 'undefined' && activePage === 'selection' ? 'active' : '' %>">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Selection</span>
+      </a>
+
+      <!-- Admin Profile Avatar Dropdown -->
+      <div class="admin-profile-wrapper">
+        <button id="adminProfileBtn" class="admin-profile-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Admin Account Menu">
+          <div class="admin-avatar-icon">A</div>
+          <span class="admin-avatar-text">Admin</span>
+          <svg class="admin-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+
+        <div id="adminProfileMenu" class="admin-profile-menu-box" role="menu">
+          <div class="admin-profile-header-info">
+            <div class="admin-profile-name">PU NSS Administrator</div>
+            <div class="admin-profile-email"><%= typeof admin !== 'undefined' && admin && admin.email ? admin.email : 'sanaullak294@gmail.com' %></div>
+          </div>
+          <a href="/admin/change-password" class="admin-dropdown-item" role="menuitem">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            </svg>
+            <span>Change Password</span>
+          </a>
+          <a href="/admin/logout" class="admin-dropdown-item admin-dropdown-logout" role="menuitem">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
+            </svg>
+            <span>Sign Out</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Mobile Collapsible Navigation Drawer -->
+  <div class="admin-mobile-drawer" id="adminMainNav" aria-label="Admin mobile navigation">
+    <div class="admin-mobile-drawer-inner container">
+      <div class="admin-mobile-user-card">
+        <div class="admin-avatar-icon">A</div>
+        <div>
+          <div class="admin-mobile-name">PU NSS Administrator</div>
+          <div class="admin-mobile-email"><%= typeof admin !== 'undefined' && admin && admin.email ? admin.email : 'sanaullak294@gmail.com' %></div>
+        </div>
+      </div>
+      <div class="admin-mobile-links">
+        <% if (typeof backUrl !== 'undefined' && backUrl) { %>
+          <a href="<%= backUrl %>" class="admin-mobile-link admin-mobile-back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <span><%= typeof backText !== 'undefined' && backText ? backText : 'Back' %></span>
+          </a>
+        <% } %>
+        <a href="/admin/dashboard" class="admin-mobile-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="/admin/registrations" class="admin-mobile-link <%= typeof activePage !== 'undefined' && activePage === 'registrations' ? 'active' : '' %>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Manage Registrations</span>
+        </a>
+        <a href="/admin/selection" class="admin-mobile-link <%= typeof activePage !== 'undefined' && activePage === 'selection' ? 'active' : '' %>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Selection Process</span>
+        </a>
+        <a href="/admin/registrations/export/excel" class="admin-mobile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span>Export All Excel (.xlsx)</span>
+        </a>
+        <a href="/admin/change-password" class="admin-mobile-link <%= typeof activePage !== 'undefined' && activePage === 'change-password' ? 'active' : '' %>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
+          <span>Change Password</span>
+        </a>
+        <a href="/" target="_blank" rel="noopener noreferrer" class="admin-mobile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          <span>Open Public Portal</span>
+        </a>
+        <a href="/admin/logout" class="admin-mobile-link admin-mobile-logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
+          </svg>
+          <span>Sign Out</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
