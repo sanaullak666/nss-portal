@@ -1,6 +1,9 @@
 /* public/js/main.js - Client-Side Interactive Logic for PU NSS Portal */
 
 document.addEventListener('DOMContentLoaded', function () {
+  if (window.__nssMainJsInitialized) return;
+  window.__nssMainJsInitialized = true;
+
   // Elements
   const deptSelect = document.getElementById('department');
   const unitDisplay = document.getElementById('unit_number_display');
