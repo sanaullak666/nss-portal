@@ -128,6 +128,16 @@ class AdminModel {
       return false;
     }
   }
+
+  static async revokeTrustedDevice(deviceToken) {
+    if (!deviceToken) return;
+    try {
+      await db.query('DELETE FROM trusted_devices WHERE device_token = ?', [deviceToken]);
+    } catch (e) {
+      console.error('Error revoking trusted device token:', e);
+    }
+  }
+
 }
 
 module.exports = AdminModel;

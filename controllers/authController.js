@@ -53,7 +53,7 @@ exports.handleLogin = async (req, res) => {
       });
     }
 
-    // Check if this device is trusted for 24 hours
+    // Check if this device is trusted for 5 minutes
     const deviceToken = req.cookies ? req.cookies.nss_trusted_device : null;
     const isTrusted = await AdminModel.isDeviceTrusted(admin.id, deviceToken);
 
@@ -79,7 +79,7 @@ exports.handleLogin = async (req, res) => {
         try {
           await AdminModel.updateLastLogin(admin.id);
           await AdminModel.invalidateOtherSessions(req.sessionID, admin.username);
-          await logAudit('LOGIN_TRUSTED_DEVICE', admin.username, 'Admin logged in via 24-hour trusted device (OTP bypassed)');
+          await logAudit('LOGIN_TRUSTED_DEVICE', admin.username, 'Admin logged in via 5-minute trusted device (OTP bypassed)');
         } catch (e) {}
 
         res.redirect('/admin/dashboard');
@@ -184,13 +184,13 @@ exports.handleVerifyLoginOTP = async (req, res) => {
     req.session.lastActivity = Date.now();
     delete req.session.pendingLogin;
 
-    // Issue 24-hour trusted device token cookie for this device
+    // Issue 5-minute trusted device token cookie for this device
     const newDeviceToken = crypto.randomBytes(32).toString('hex');
-    const deviceExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours
+    const deviceExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 Minutes
     try {
       await AdminModel.saveTrustedDevice(pending.adminId, newDeviceToken, deviceExpiresAt);
       res.cookie('nss_trusted_device', newDeviceToken, {
-        maxAge: 24 * 60 * 60 * 1000, // 24 Hours
+        maxAge: 5 * 60 * 1000, // 5 Minutes
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.COOKIE_SECURE === 'true'
@@ -251,8 +251,9 @@ exports.handleResendLoginOTP = async (req, res) => {
   }
 };
 
-exports.handleLogout = (req, res) => {
+exports.handleLogout = async (req, res) => {
   const username = req.session && req.session.admin ? req.session.admin.username : 'Unknown';
+  const deviceToken = req.cookies ? req.cookies.nss_trusted_device : null;
   const cookieOptions = {
     path: '/',
     httpOnly: true,
@@ -260,15 +261,23 @@ exports.handleLogout = (req, res) => {
     sameSite: 'lax'
   };
 
+  if (deviceToken) {
+    try {
+      await AdminModel.revokeTrustedDevice(deviceToken);
+    } catch (dErr) {}
+  }
+
   const doClearAndRedirect = async () => {
     try {
-      await logAudit('LOGOUT', username, 'Admin logged out');
+      await logAudit('LOGOUT', username, 'Admin logged out (trusted device revoked)');
     } catch (aErr) {}
 
     res.clearCookie('nss_session_id', cookieOptions);
     res.clearCookie('nss_session_id', { path: '/' });
     res.clearCookie('connect.sid', cookieOptions);
     res.clearCookie('connect.sid', { path: '/' });
+    res.clearCookie('nss_trusted_device', cookieOptions);
+    res.clearCookie('nss_trusted_device', { path: '/' });
 
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');

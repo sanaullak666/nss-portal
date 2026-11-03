@@ -148,3 +148,22 @@
     </div>
   </div>
 </header>
+
+
+<!-- Client-Side 5-Minute Inactivity Auto-Logout -->
+<script>
+  (function() {
+    var IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 Minutes
+    var idleTimer;
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function() {
+        window.location.href = '/admin/logout';
+      }, IDLE_TIMEOUT_MS);
+    }
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(function(evt) {
+      window.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+    resetIdleTimer();
+  })();
+</script>

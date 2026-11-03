@@ -4,7 +4,7 @@
  * and view locals injection for the PU NSS Portal.
  */
 
-const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 Hours Inactivity Timeout
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 Minutes Inactivity Timeout
 
 /**
  * Attaches session information to response locals for view templates
@@ -31,7 +31,7 @@ exports.isAuthenticated = (req, res, next) => {
   const now = Date.now();
   const lastActivity = req.session.lastActivity || now;
 
-  // Inactivity session expiration check (2 hours)
+  // Inactivity session expiration check (5 minutes)
   if (now - lastActivity > IDLE_TIMEOUT_MS) {
     delete req.session.admin;
     delete req.session.pendingLogin;
@@ -41,12 +41,19 @@ exports.isAuthenticated = (req, res, next) => {
       res.clearCookie('nss_session_id', { path: '/' });
       res.clearCookie('connect.sid', cookieOptions);
       res.clearCookie('connect.sid', { path: '/' });
+      res.clearCookie('nss_trusted_device', cookieOptions);
+      res.clearCookie('nss_trusted_device', { path: '/' });
+      if (req.xhr || (req.path && req.path.includes('/api/')) || (req.headers && req.headers.accept && req.headers.accept.includes('json'))) {
+        return res.status(401).json({ success: false, error: 'Session expired due to inactivity. Please log in again.' });
+      }
       res.redirect('/admin/login?error=Session+expired+due+to+inactivity.+Please+log+in+again.');
     });
   }
 
-  // Update last activity timestamp
-  req.session.lastActivity = now;
+  // Update last activity timestamp (exclude automated background dashboard polling)
+  if (req.path !== '/admin/api/live-stats') {
+    req.session.lastActivity = now;
+  }
   res.locals.admin = req.session.admin;
   res.locals.isAuthenticated = true;
 
