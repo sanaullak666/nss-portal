@@ -741,3 +741,85 @@ input[type="file"].form-control {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* MODERN STUDENT REGISTRATION VISUAL LAYER */
+body.register-page-body {
+  background: #f3f6fa;
+}
+.register-wrapper {
+  max-width: 900px;
+}
+.register-card {
+  background: #fff;
+  border: 1px solid #e5ebf2;
+  border-radius: 22px;
+  box-shadow: 0 18px 52px rgba(20,39,61,.075);
+  padding: clamp(22px, 4vw, 42px);
+}
+.register-card::before {
+  height: 4px;
+  background: linear-gradient(90deg,#17324d 0%,#c93636 52%,#e6b75d 100%);
+}
+.register-card:hover {
+  transform: none;
+  box-shadow: 0 22px 58px rgba(20,39,61,.1);
+}
+.register-header h1 {
+  color: #17324d;
+  letter-spacing: -.035em;
+}
+.register-header .subtitle {
+  color: #748397;
+}
+.register-header .motto {
+  color: #9b6b18;
+  background: #fff8e8;
+  border-color: #f1dfb8;
+  animation: none;
+}
+.register-header .logo-wrapper {
+  border: 1px solid #e6ebf1;
+  box-shadow: 0 5px 18px rgba(20,39,61,.06);
+}
+.step-tracker {
+  margin-bottom: 28px;
+}
+.step-number {
+  box-shadow: none;
+}
+.form-step {
+  border-top: 1px solid #edf0f4;
+  padding-top: 24px;
+}
+.section-header {
+  color: #17324d;
+  border-bottom: 1px solid #e4e8ef;
+  font-size: 1.05rem;
+  letter-spacing: -.015em;
+}
+.form-control {
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  background: #fbfcfe;
+  box-shadow: none;
+}
+.form-control:focus {
+  border-color: #315c7d;
+  box-shadow: 0 0 0 3px rgba(49,92,125,.12);
+}
+.languages-grid,
+.media-roles-grid {
+  background: #f8fafc;
+  border: 1px solid #e7ecf2;
+  border-radius: 12px;
+}
+.custom-check {
+  border-radius: 9px;
+}
+.custom-check:hover {
+  background: #f0f4f8;
+}
+.form-nav-buttons {
+  border-top: 1px solid #e7ecf2;
+}

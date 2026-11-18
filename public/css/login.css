@@ -545,3 +545,56 @@ body.login-page-body::before {
     height: 38px !important;
   }
 }
+
+
+/* MODERN ADMIN AUTHENTICATION VISUAL LAYER */
+body.login-page-body {
+  background: #f3f6fa;
+}
+.login-wrapper {
+  max-width: 470px;
+}
+.login-card {
+  background: #fff;
+  border: 1px solid #e5ebf2;
+  border-radius: 22px;
+  box-shadow: 0 22px 60px rgba(20,39,61,.1);
+  padding: clamp(26px, 5vw, 42px);
+}
+.login-card::before {
+  height: 4px;
+  background: linear-gradient(90deg,#17324d,#c93636);
+}
+.login-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 64px rgba(20,39,61,.13);
+}
+.login-brand h1 {
+  color: #17324d;
+  letter-spacing: -.035em;
+}
+.login-brand .subtitle {
+  color: #748397;
+}
+.form-control-custom {
+  border: 1px solid #dce3eb;
+  border-radius: 11px;
+  background: #fbfcfe;
+  box-shadow: none;
+}
+.form-control-custom:focus {
+  border-color: #315c7d;
+  box-shadow: 0 0 0 3px rgba(49,92,125,.12);
+}
+.login-btn {
+  border-radius: 11px;
+  background: #c93636;
+  box-shadow: 0 7px 18px rgba(201,54,54,.18);
+}
+.login-btn:hover {
+  background: #a9272c;
+  box-shadow: 0 10px 22px rgba(201,54,54,.22);
+}
+.login-footer {
+  color: #748397;
+}
