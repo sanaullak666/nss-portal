@@ -161,6 +161,26 @@ app.get('/admin', (req, res) => {
   res.redirect('/admin/login');
 });
 
+// Vercel Cron & Supabase Keep-Alive Health Endpoint
+app.get('/api/ping', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT 1 AS alive');
+    return res.status(200).json({
+      status: 'ok',
+      message: 'Supabase database is active',
+      result: rows,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Supabase Keep-Alive Ping Failed:', error.message);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to query Supabase database',
+      error: error.message
+    });
+  }
+});
+
 // 404 Page Not Found Handler
 app.use((req, res) => {
   res.status(404).render('404', { title: '404 - Page Not Found | PU NSS Portal' });
