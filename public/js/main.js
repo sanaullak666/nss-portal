@@ -305,3 +305,85 @@ window.addEventListener('pageshow', function (event) {
   }
 });
 
+
+/* ==========================================================================
+   UI enhancements (theme.css companion) — purely additive, no data logic
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', function () {
+  // 1. Accessibility: skip link + landmark id
+  var main = document.querySelector('main');
+  if (main) {
+    if (!main.id) main.id = 'main-content';
+    if (!document.querySelector('.skip-link')) {
+      var skip = document.createElement('a');
+      skip.className = 'skip-link no-print';
+      skip.href = '#' + main.id;
+      skip.textContent = 'Skip to main content';
+      document.body.insertBefore(skip, document.body.firstChild);
+    }
+  }
+
+  // 2. Highlight the current page in the public navigation
+  var path = location.pathname.replace(/\/+$/, '') || '/';
+  document.querySelectorAll('.main-nav a.nav-link').forEach(function (a) {
+    var href = (a.getAttribute('href') || '').replace(/\/+$/, '') || '/';
+    if (href === path) { a.classList.add('active'); a.setAttribute('aria-current', 'page'); }
+  });
+
+  // 3. Header shadow once the page is scrolled
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  // 4. Close mobile nav when a link is tapped or Escape is pressed
+  var nav = document.getElementById('mainNav');
+  var toggle = document.getElementById('navToggle');
+  if (nav && toggle) {
+    nav.addEventListener('click', function (e) {
+      if (e.target.closest('a')) { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('open')) {
+        nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.focus();
+      }
+    });
+  }
+
+  // 5. Registration form: live completion progress bar
+  var form = document.getElementById('registrationForm');
+  if (form && form.getAttribute('action') === '/register') {
+    var bar = document.createElement('div');
+    bar.className = 'form-progress no-print';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', '100');
+    bar.innerHTML = '<span>Form progress</span><div class="form-progress-track"><div class="form-progress-fill"></div></div><span class="form-progress-pct">0%</span>';
+    var firstSection = form.querySelector('.section-header');
+    if (firstSection) form.insertBefore(bar, firstSection); else form.appendChild(bar);
+    var fill = bar.querySelector('.form-progress-fill');
+    var pct = bar.querySelector('.form-progress-pct');
+
+    var update = function () {
+      var fields = Array.prototype.filter.call(form.querySelectorAll('input[required], select[required], textarea[required]'), function (el) {
+        return el.type !== 'hidden' && el.type !== 'checkbox' && el.offsetParent !== null;
+      });
+      var done = fields.filter(function (el) { return (el.value || '').trim() !== ''; }).length;
+      var total = fields.length;
+      // languages: at least one ticked counts as one item
+      var langs = form.querySelectorAll('input[name="languages_spoken[]"]');
+      if (langs.length) { total += 1; if (Array.prototype.some.call(langs, function (c) { return c.checked; })) done += 1; }
+      var decl = form.querySelector('input[type="checkbox"][required]');
+      if (decl) { total += 1; if (decl.checked) done += 1; }
+      var p = total ? Math.round((done / total) * 100) : 0;
+      fill.style.width = p + '%';
+      pct.textContent = p + '%';
+      bar.setAttribute('aria-valuenow', String(p));
+    };
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+  }
+});

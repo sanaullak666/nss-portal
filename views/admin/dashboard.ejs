@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1f5c">
   <title><%= title %></title>
   <link rel="icon" type="image/jpeg" href="/images/nsslogo.jpg">
   <link rel="shortcut icon" href="/images/nsslogo.jpg">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/theme.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dashboard-body" style="display: flex; flex-direction: column; min-height: 100vh;">
@@ -51,7 +53,7 @@
 
       <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <!-- Option 2: Portal Registration Controls Form (Dropdown + Save Button) -->
-        <form action="/admin/portal-status" method="POST" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm); flex-wrap: wrap; margin: 0;">
+        <form action="/admin/portal-status" method="POST" class="portal-status-form" style="background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm); flex-wrap: wrap; margin: 0;">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           
           <div style="display: flex; flex-direction: column; user-select: none;">
@@ -198,16 +200,16 @@
             <% } else { %>
               <% recentRegistrations.forEach(function(reg) { %>
                 <tr>
-                  <td><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
-                  <td><strong><%= reg.applicant_name %></strong></td>
-                  <td><%= reg.univ_reg_no %></td>
-                  <td><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
-                  <td><%= reg.course %></td>
-                  <td><%= reg.department %></td>
-                  <td>
+                  <td data-label="Registration ID"><strong style="color: var(--color-nss-red);"><%= reg.registration_id %></strong></td>
+                  <td data-label="Applicant Name"><strong><%= reg.applicant_name %></strong></td>
+                  <td data-label="Univ Reg No"><%= reg.univ_reg_no %></td>
+                  <td data-label="Unit"><span class="badge badge-submitted"><%= reg.unit_number %></span></td>
+                  <td data-label="Course"><%= reg.course %></td>
+                  <td data-label="Department"><%= reg.department %></td>
+                  <td data-label="Leadership?">
                     <span class="badge <%= reg.interested_in_leadership === 'Yes' ? 'badge-active' : 'badge-deleted' %>"><%= reg.interested_in_leadership || 'No' %></span>
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <a href="/admin/registrations/<%= reg.id %>" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.8rem;">Profile</a>
                   </td>
                 </tr>
@@ -341,14 +343,14 @@
           registrations.forEach(function(reg) {
             html += `
               <tr style="background: rgba(220, 252, 231, 0.4); transition: background 1s;">
-                <td><strong style="color: var(--color-nss-red);">${reg.registration_id}</strong></td>
-                <td><strong>${reg.applicant_name}</strong></td>
-                <td>${reg.univ_reg_no}</td>
-                <td><span class="badge badge-submitted">${reg.unit_number}</span></td>
-                <td>${reg.course}</td>
-                <td>${reg.department}</td>
-                <td><span class="badge ${reg.interested_in_leadership === 'Yes' ? 'badge-active' : 'badge-deleted'}">${reg.interested_in_leadership || 'No'}</span></td>
-                <td><a href="/admin/registrations/${reg.id}" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.8rem;">Profile</a></td>
+                <td data-label="Registration ID"><strong style="color: var(--color-nss-red);">${reg.registration_id}</strong></td>
+                <td data-label="Applicant Name"><strong>${reg.applicant_name}</strong></td>
+                <td data-label="Univ Reg No">${reg.univ_reg_no}</td>
+                <td data-label="Unit"><span class="badge badge-submitted">${reg.unit_number}</span></td>
+                <td data-label="Course">${reg.course}</td>
+                <td data-label="Department">${reg.department}</td>
+                <td data-label="Leadership?"><span class="badge ${reg.interested_in_leadership === 'Yes' ? 'badge-active' : 'badge-deleted'}">${reg.interested_in_leadership || 'No'}</span></td>
+                <td data-label="Actions"><a href="/admin/registrations/${reg.id}" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.8rem;">Profile</a></td>
               </tr>
             `;
           });
