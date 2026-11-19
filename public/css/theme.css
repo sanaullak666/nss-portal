@@ -48,11 +48,14 @@
   --nss-secondary: var(--accent);
   --color-navy: var(--brand-900);
   --color-navy-dark: var(--ink-900);
+  --color-nss-navy: var(--brand-900);
   --color-nss-red: var(--accent);
-  --color-emerald: var(--teal);
-  --color-gold: var(--saffron);
+  --color-emerald: #15803d;
+  --color-gold: #b45309;
   --color-bg: var(--bg);
+  --color-bg-light: var(--bg);
   --color-border: var(--line);
+  --color-text: var(--ink-700);
   --color-text-primary: var(--ink-900);
   --color-text-secondary: var(--ink-500);
   --color-text-muted: var(--ink-400);
@@ -158,11 +161,13 @@ body .main-nav a.nav-btn-logout:hover, body .main-nav a.btn-logout:hover { backg
 
 /* admin mobile drawer */
 .admin-mobile-drawer { background: #fff; border-top: 1px solid var(--line); box-shadow: var(--sh-3); }
-.admin-mobile-link { color: var(--ink-700); border-radius: 12px; min-height: 48px; }
-.admin-mobile-link.active { background: var(--brand-100); color: var(--brand-700); }
+.admin-mobile-link { color: var(--ink-700) !important; border-radius: 12px; min-height: 48px; }
+.admin-mobile-link svg { color: var(--brand-600) !important; }
+.admin-mobile-link:hover, .admin-mobile-link.active { background: var(--brand-100) !important; color: var(--brand-700) !important; }
 .admin-mobile-user-card { background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-md); }
 .admin-mobile-name { color: var(--ink-900); } .admin-mobile-email { color: var(--ink-400); }
-.admin-mobile-logout { color: var(--accent-600); }
+.admin-mobile-logout { color: var(--accent-600) !important; }
+.admin-mobile-logout svg { color: var(--accent-600) !important; }
 
 /* ---------- 4. Buttons ---------- */
 body .btn {
@@ -176,17 +181,22 @@ body .btn-primary {
   box-shadow: 0 6px 16px rgba(30,58,158,.28);
 }
 body .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(30,58,158,.34); filter: brightness(1.05); }
-body .btn-secondary { background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-100); }
-body .btn-secondary:hover { background: var(--brand-100); }
-body .btn-outline { background: #fff; color: var(--ink-700); border: 1px solid var(--line); }
-body .btn-outline:hover { border-color: var(--brand-600); color: var(--brand-700); background: var(--brand-50); }
-body .btn-ghost { background: transparent; color: var(--ink-500); border: 1px solid transparent; box-shadow: none; }
-body .btn-ghost:hover { background: var(--brand-50); color: var(--brand-700); }
+body .btn-secondary, body a.btn-secondary, body button.btn-secondary {
+  background: var(--brand-50) !important; color: var(--brand-700) !important; border: 1.5px solid var(--brand-100) !important;
+}
+body .btn-secondary:hover, body a.btn-secondary:hover, body button.btn-secondary:hover {
+  background: var(--brand-100) !important; color: var(--brand-900) !important; border-color: var(--brand-600) !important;
+}
+body .btn-outline { background: #fff !important; color: var(--ink-700) !important; border: 1.5px solid var(--line) !important; }
+body .btn-outline:hover { border-color: var(--brand-600) !important; color: var(--brand-700) !important; background: var(--brand-50) !important; }
+body .btn-ghost { background: transparent !important; color: var(--ink-700) !important; border: 1.5px solid var(--line) !important; box-shadow: none; }
+body .btn-ghost:hover { background: var(--brand-50) !important; color: var(--brand-700) !important; border-color: var(--brand-600) !important; }
 body .btn.btn-danger, body .data-table .btn-danger {
   background: var(--accent-50) !important; color: var(--accent-600) !important; border: 1px solid #ffd3d6 !important; box-shadow: none !important;
 }
 body .btn.btn-danger:hover, body .data-table .btn-danger:hover { background: var(--accent) !important; color: #fff !important; }
-body .btn-success { background: var(--teal); color: #fff; border: 0; }
+body .btn-success, body .data-table .btn-success { background: #15803d !important; color: #fff !important; border: 0 !important; }
+body .btn-success:hover, body .data-table .btn-success:hover { background: #166534 !important; color: #fff !important; }
 
 /* ---------- 5. Public registration form ---------- */
 .register-page-body main.container { padding-top: 24px !important; }
@@ -246,7 +256,7 @@ body .form-select, body .form-control-custom {
   border: 1.5px solid var(--line); border-radius: 12px; transition: border-color .15s, box-shadow .15s, background .15s;
 }
 body textarea.form-control { min-height: 96px; resize: vertical; }
-body .form-control::placeholder, body .form-control-custom::placeholder { color: var(--ink-300); }
+body .form-control::placeholder, body .form-control-custom::placeholder { color: #64748b !important; }
 body .form-control:hover, body .form-control-custom:hover { border-color: #c9d3ee; background: #fff; }
 body .form-control:focus, body .form-control-custom:focus {
   outline: none !important; background: #fff; border-color: var(--brand-600); box-shadow: var(--ring);
@@ -265,7 +275,15 @@ body .custom-check {
 }
 body .custom-check:hover { border-color: var(--brand-600); background: var(--brand-50); }
 body .custom-check:has(input:checked) { border-color: var(--brand-600); background: var(--brand-100); color: var(--brand-700); font-weight: 700; }
-body .custom-check input { accent-color: var(--brand-600); width: 18px; height: 18px; flex: none; }
+body .custom-check input, body .remember-me input {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  accent-color: var(--brand-600);
+  width: 18px;
+  height: 18px;
+  flex: none;
+  cursor: pointer;
+}
 
 /* declaration: the checkbox sits inside an existing tinted box, so drop its own chip border */
 body .custom-check[style*="align-items: flex-start"] { background: transparent; border: 0; padding: 0; min-height: 0; }
@@ -295,12 +313,16 @@ body .login-card {
 body .login-card::before { height: 6px; background: linear-gradient(90deg, var(--brand-700), var(--accent) 55%, var(--saffron)); }
 body .login-card:hover { transform: none; }
 .login-brand h1 { color: var(--ink-900); font-weight: 800; }
+.login-brand .motto {
+  background: var(--saffron-50); color: #9a6400; border: 1px solid #ffe2a8; font-weight: 700; border-radius: 999px;
+  display: inline-block; padding: 4px 14px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 8px;
+}
 body .login-btn {
   min-height: 52px; border-radius: 12px; font-weight: 800;
   background: linear-gradient(135deg, var(--brand-600), var(--brand-700)); box-shadow: 0 8px 20px rgba(30,58,158,.3);
 }
 body .form-control-custom { padding-left: 46px; }
-.input-icon { color: var(--ink-300); }
+.input-icon { color: #64748b; }
 .form-control-custom:focus + .input-icon { color: var(--brand-600); }
 
 /* ---------- 7. Track / success / error pages ---------- */
@@ -371,6 +393,14 @@ body .filter-bar-custom input, body .filter-bar-custom select {
 }
 body .filter-bar-custom input:focus, body .filter-bar-custom select:focus { border-color: var(--brand-600); box-shadow: var(--ring); outline: none !important; }
 .filter-bar-custom > .btn { width: 100%; }
+body .filter-bar-custom .selection-export-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+}
 
 /* ---------- 9. Tables ---------- */
 body .table-responsive, body .table-wrapper { -webkit-overflow-scrolling: touch; }
